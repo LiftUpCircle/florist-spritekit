@@ -13,25 +13,31 @@ class GameViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+    }
+
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+
         if let view = self.view as! SKView? {
-            // Create the game scene programmatically
-            let scene = GameScene(size: view.bounds.size)
-            scene.scaleMode = .aspectFill
-            
-            // Present the scene
-            view.presentScene(scene)
-            
-            view.ignoresSiblingOrder = true
-            
-            view.showsFPS = true
-            view.showsNodeCount = true
+            if view.scene == nil {
+                // Create the game scene with the correct size after layout
+                let scene = GameScene(size: view.bounds.size)
+                scene.scaleMode = .resizeFill
+
+                // Present the scene
+                view.presentScene(scene)
+
+                view.ignoresSiblingOrder = true
+
+                view.showsFPS = true
+                view.showsNodeCount = true
+            }
         }
     }
 
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         // Force landscape orientation
-        return .portrait
+        return .landscape
     }
 
     override var prefersStatusBarHidden: Bool {
