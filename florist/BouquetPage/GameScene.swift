@@ -33,14 +33,18 @@ class GameScene: SKScene {
     private var inventoryArea: SKShapeNode!
     private var bouquetArea: SKShapeNode!
     private var backgroundNode: SKShapeNode!
-    
+
     // Flowers
     private var flowers: [FlowerNode] = []
     private var selectedFlower: FlowerNode?
-    
+
     // Layout properties
     private var inventoryRect: CGRect!
     private var bouquetRect: CGRect!
+
+    // Animation properties
+    private var inventoryOffscreenPosition: CGPoint!
+    private var inventoryOnscreenPosition: CGPoint!
     
     // MARK: - Scene Setup
     override func didMove(to view: SKView) {
@@ -49,6 +53,9 @@ class GameScene: SKScene {
         setupUI()
         setupFlowers()
         addInstructions()
+
+        // Animate inventory sliding in from the left
+        animateInventoryIn()
     }
     
     private func setupBackground() {
@@ -89,25 +96,31 @@ class GameScene: SKScene {
     }
     
     private func setupUI() {
-        // Inventory Panel
-        inventoryArea = SKShapeNode(rect: inventoryRect, cornerRadius: 20)
+        // Calculate positions for animation
+        inventoryOnscreenPosition = CGPoint(x: inventoryRect.midX, y: inventoryRect.midY)
+        inventoryOffscreenPosition = CGPoint(x: -inventoryRect.width, y: inventoryRect.midY)
+
+        // Inventory Panel - Start off-screen
+        inventoryArea = SKShapeNode(rect: CGRect(origin: CGPoint(x: -inventoryRect.width / 2, y: -inventoryRect.height / 2),
+                                                  size: CGSize(width: inventoryRect.width, height: inventoryRect.height)),
+                                     cornerRadius: 20)
         inventoryArea.fillColor = UIColor(red: 0.9, green: 0.95, blue: 0.9, alpha: 0.8)
         inventoryArea.strokeColor = UIColor(red: 0.6, green: 0.8, blue: 0.6, alpha: 0.8)
         inventoryArea.lineWidth = 3
         inventoryArea.zPosition = 1
+        inventoryArea.position = inventoryOffscreenPosition
+        inventoryArea.alpha = 0.0  // Start invisible
         addChild(inventoryArea)
-        
+
         // Inventory Label
         let inventoryLabel = SKLabelNode(text: "🌸 Flower Inventory")
         inventoryLabel.fontName = "Avenir-Heavy"
         inventoryLabel.fontSize = 24
         inventoryLabel.fontColor = UIColor(red: 0.3, green: 0.5, blue: 0.3, alpha: 1.0)
-        inventoryLabel.position = CGPoint(
-            x: inventoryRect.midX,
-            y: inventoryRect.maxY - 40
-        )
+        inventoryLabel.position = CGPoint(x: 0, y: inventoryRect.height / 2 - 40)
         inventoryLabel.zPosition = 2
-        addChild(inventoryLabel)
+        inventoryLabel.name = "inventoryLabel"
+        inventoryArea.addChild(inventoryLabel)
         
         // Bouquet Area
         bouquetArea = SKShapeNode(rect: bouquetRect, cornerRadius: 25)
@@ -156,23 +169,25 @@ class GameScene: SKScene {
             ("Lily", UIColor(red: 0.95, green: 0.8, blue: 1.0, alpha: 1.0)),
             ("Sunflower", UIColor(red: 1.0, green: 0.8, blue: 0.2, alpha: 1.0)),
         ]
-        
+
         let flowerSize = CGSize(width: 60, height: 80)
         let startY = inventoryRect.maxY - 100
         let spacing: CGFloat = 100
-        
+
         for (index, flowerData) in flowerTypes.enumerated() {
             let flower = FlowerNode(type: flowerData.0, color: flowerData.1, size: flowerSize)
-            
-            // Position in inventory
+
+            // Position in inventory (but start off-screen)
             let yPos = startY - (CGFloat(index) * spacing)
-            flower.position = CGPoint(x: inventoryRect.midX, y: yPos)
-            flower.originalPosition = flower.position
+            let finalPosition = CGPoint(x: inventoryRect.midX, y: yPos)
+            flower.position = CGPoint(x: -inventoryRect.width, y: yPos)  // Start off-screen
+            flower.originalPosition = finalPosition
             flower.zPosition = 5
-            
+            flower.alpha = 0.0  // Start invisible
+
             // Add a simple shape to represent the flower
             addFlowerShape(to: flower)
-            
+
             // Add label
             let label = SKLabelNode(text: flowerData.0)
             label.fontName = "Avenir-Medium"
@@ -181,7 +196,7 @@ class GameScene: SKScene {
             label.position = CGPoint(x: 0, y: -flowerSize.height / 2 - 15)
             label.zPosition = 1
             flower.addChild(label)
-            
+
             addChild(flower)
             flowers.append(flower)
         }
@@ -234,6 +249,40 @@ class GameScene: SKScene {
         instructions.position = CGPoint(x: size.width / 2, y: 40)
         instructions.zPosition = 10
         addChild(instructions)
+    }
+
+    // MARK: - Animations
+    private func animateInventoryIn() {
+        // Animate inventory area sliding in with ease-in effect
+        let slideIn = SKAction.moveTo(x: inventoryOnscreenPosition.x, duration: 0.8)
+        slideIn.timingMode = .easeIn
+        let fadeIn = SKAction.fadeIn(withDuration: 0.6)
+        let inventoryAnimation = SKAction.group([slideIn, fadeIn])
+
+        // Add a slight delay before starting
+        let delayAction = SKAction.wait(forDuration: 0.2)
+        let sequence = SKAction.sequence([delayAction, inventoryAnimation])
+
+        inventoryArea.run(sequence)
+
+        // Animate flowers sliding in with staggered timing
+        for (index, flower) in flowers.enumerated() {
+            let flowerDelay = 0.3 + (Double(index) * 0.1)  // Stagger each flower
+            let flowerSlideIn = SKAction.moveTo(x: flower.originalPosition.x, duration: 0.7)
+            flowerSlideIn.timingMode = .easeIn
+            let flowerFadeIn = SKAction.fadeIn(withDuration: 0.5)
+
+            let flowerAnimation = SKAction.group([flowerSlideIn, flowerFadeIn])
+            let flowerSequence = SKAction.sequence([
+                SKAction.wait(forDuration: flowerDelay),
+                flowerAnimation
+            ])
+
+            flower.run(flowerSequence) {
+                // Update flower position once animation completes
+                flower.position = flower.originalPosition
+            }
+        }
     }
     
     // MARK: - Touch Handling
