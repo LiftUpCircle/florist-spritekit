@@ -16,8 +16,8 @@ struct BouquetView: View {
             SpriteView(scene: controller.createGameScene())
                 .ignoresSafeArea()
         }
-        .navigationBarHidden(false)
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
         .statusBar(hidden: true)
     }
 }

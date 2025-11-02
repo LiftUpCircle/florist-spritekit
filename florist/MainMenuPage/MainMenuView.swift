@@ -13,7 +13,6 @@ struct MainMenuView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Gradient background matching the screenshot
                 LinearGradient(
                     gradient: Gradient(colors: [
                         Color.white,
@@ -27,27 +26,18 @@ struct MainMenuView: View {
                 // Menu panel on the right side
                 HStack {
                     Spacer()
-
-                    VStack(spacing: 0) {
-                        Spacer()
-
-                        // Menu container
-                        VStack(spacing: 40) {
+                        VStack(/*spacing: 40*/) {
                             ForEach(controller.model.menuItems, id: \.self) { item in
                                 MenuButton(title: item.rawValue) {
                                     controller.handleMenuSelection(item)
                                 }
+                                .padding(.vertical,5)
                             }
                         }
-                        .padding(60)
                         .background(
                             RoundedRectangle(cornerRadius: 25)
-                                .fill(Color(red: 0.7, green: 0.7, blue: 0.75).opacity(0.6))
+                                .fill(Color.gray.opacity(0.6))
                         )
-                        .padding(.trailing, 80)
-
-                        Spacer()
-                    }
                 }
 
                 // Navigation links (hidden)
@@ -84,10 +74,11 @@ struct MenuButton: View {
     var body: some View {
         Button(action: action) {
             Text(title)
-                .font(.custom("Arial Rounded MT Bold", size: 48))
+                .font(.custom("Arial Rounded MT Bold", size: 40))
                 .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
                 .padding(.vertical, 8)
+                .padding(.leading, 16)
+                .padding(.trailing, 86)
         }
     }
 }
