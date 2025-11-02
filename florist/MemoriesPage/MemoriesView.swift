@@ -9,66 +9,56 @@ import SwiftUI
 
 struct MemoriesView: View {
     @StateObject private var controller = MemoriesViewController()
-    @Environment(\.presentationMode) var presentationMode
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: Gradient(colors: [
-                    Color.white,
-                    Color(red: 0.85, green: 0.85, blue: 0.87)
-                ]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
-
             if controller.showChapterList {
-                // Chapter list view with detail
                 ChapterListView(controller: controller)
             } else {
-                // Memory folder selection view
                 MemoryFolderSelectionView(controller: controller)
             }
         }
         .navigationBarHidden(false)
+        .navigationBarBackButtonHidden(true)
     }
 }
 
 // MARK: - Memory Folder Selection View
 struct MemoryFolderSelectionView: View {
     @ObservedObject var controller: MemoriesViewController
-    @Environment(\.presentationMode) var presentationMode
-
+    @Environment(\.dismiss) var dismiss
+    
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            // Custom back button
-            CustomBackButton {
-                presentationMode.wrappedValue.dismiss()
-            }
-            .padding(.leading, 40)
-            .padding(.top, 40)
-
-            // Title
-            Text("Memories")
-                .font(.custom("Arial Rounded MT Bold", size: 60))
-                .foregroundColor(.black)
-                .padding(.leading, 100)
-                .padding(.top, 20)
-
-            // 3 Memory Folders
-            HStack(spacing: 30) {
-                ForEach(controller.model.memoryFolders) { folder in
-                    MemoryFolderCard(folder: folder) {
-                        controller.selectMemoryFolder(folder)
+        ZStack(alignment: .topLeading) {
+            // Main content
+            VStack(alignment: .leading, spacing: 20) {
+                Spacer()
+                // Title
+                Text("Memories")
+                    .font(.custom("Arial Rounded MT Bold", size: 40))
+                    .foregroundColor(.black)
+                
+                // Memory cards
+                HStack(spacing: 20) {
+                    ForEach(controller.model.memoryFolders) { folder in
+                        MemoryFolderCard(folder: folder) {
+                            controller.selectMemoryFolder(folder)
+                        }
                     }
                 }
+                Spacer()
             }
-            .padding(.horizontal, 100)
-            .padding(.top, 40)
-
-            Spacer()
+            .padding(.top, 50)
+            .padding(.horizontal, 90)
+            
+            CustomBackButton {
+                dismiss()
+            }
+            .padding(.top, 25)
+            .padding(.leading, 35)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .edgesIgnoringSafeArea(.all)
     }
 }
 
@@ -81,13 +71,11 @@ struct MemoryFolderCard: View {
         Button(action: action) {
             Rectangle()
                 .fill(Color.gray.opacity(0.3))
-                .frame(height: 250)
+                .frame(width:175, height: 87)
                 .overlay(
-                    Text(folder.title)
-                        .font(.custom("Arial Rounded MT Bold", size: 24))
-                        .foregroundColor(.black)
+                    Image("PlaceholderMemories")
+                        .resizable()
                 )
-                .cornerRadius(15)
         }
     }
 }

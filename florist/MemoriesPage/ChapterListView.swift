@@ -9,82 +9,88 @@ import SwiftUI
 
 struct ChapterListView: View {
     @ObservedObject var controller: MemoriesViewController
-
+    
     var body: some View {
-        HStack(alignment: .top, spacing: 0) {
-            // Left side - Chapter list (5 vertical chapters)
-            VStack(alignment: .leading, spacing: 20) {
-                // Custom back button
-                CustomBackButton {
-                    controller.backToFolderSelection()
-                }
-                .padding(.leading, 40)
-                .padding(.top, 40)
-
-                // Memory folder title
-                if let folder = controller.selectedMemoryFolder {
-                    Text(folder.title)
-                        .font(.custom("Arial Rounded MT Bold", size: 50))
-                        .foregroundColor(.black)
-                        .padding(.leading, 100)
-                        .padding(.top, 20)
-                }
-
-                // Chapter buttons (vertically stacked)
-                VStack(spacing: 15) {
-                    ForEach(controller.currentChapters) { chapter in
-                        ChapterButton(
-                            chapter: chapter,
-                            isSelected: controller.selectedChapter?.id == chapter.id
-                        ) {
-                            controller.selectChapter(chapter)
+        ZStack(alignment: .topLeading) {
+            // Main content
+            HStack(alignment: .top, spacing: 30) {
+                // Left side - Title and chapter list
+                VStack(alignment: .leading, spacing: 15) {
+                    // Title
+                    if let folder = controller.selectedMemoryFolder {
+                        Text(folder.title)
+                            .font(.custom("Arial Rounded MT Bold", size: 28))
+                            .foregroundColor(.black)
+                    }
+                    
+                    // Chapter list
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 10) {
+                            ForEach(controller.currentChapters) { chapter in
+                                ChapterButton(
+                                    chapter: chapter,
+                                    isSelected: controller.selectedChapter?.id == chapter.id
+                                ) {
+                                    controller.selectChapter(chapter)
+                                }
+                            }
                         }
                     }
+                    .frame(maxHeight: .infinity)
                 }
-                .padding(.leading, 100)
-                .padding(.top, 30)
-
-                Spacer()
-            }
-            .frame(width: UIScreen.main.bounds.width * 0.4)
-
-            // Right side - Chapter detail
-            if let selectedChapter = controller.selectedChapter {
-                ChapterDetailView(chapter: selectedChapter)
-                    .frame(width: UIScreen.main.bounds.width * 0.6)
-            } else {
-                // Placeholder when no chapter is selected
-                VStack {
-                    Text("Select a chapter to view details")
-                        .font(.custom("Arial Rounded MT Bold", size: 28))
-                        .foregroundColor(.gray)
+                .frame(width: 220)
+                
+                // Right side - Chapter details
+                if let selectedChapter = controller.selectedChapter {
+                    ChapterDetailView(chapter: selectedChapter)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .padding(.trailing, 20)
+                } else {
+                    VStack {
+                        Text("Select a chapter")
+                            .font(.custom("Arial Rounded MT Bold", size: 18))
+                            .foregroundColor(.gray)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                .frame(width: UIScreen.main.bounds.width * 0.6)
             }
+            .padding(.top, 70) // Reduced from 120
+            .padding(.leading, 20) // Reduced from 120
+            
+            // Back button - fixed at top-left
+            CustomBackButton {
+                controller.backToFolderSelection()
+            }
+            .padding(.top, 25) // Reduced from 20
+            .padding(.leading, 35) // Reduced from 20
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .navigationBarHidden(true)
+        .navigationBarBackButtonHidden(true)
+        .edgesIgnoringSafeArea(.all)
     }
 }
 
-// MARK: - Chapter Button
+// Updated ChapterButton
 struct ChapterButton: View {
     let chapter: MemoriesModel.Chapter
     let isSelected: Bool
     let action: () -> Void
-
+    
     var body: some View {
         Button(action: action) {
             HStack {
                 Text(chapter.title)
-                    .font(.custom("Arial Rounded MT Bold", size: 22))
+                    .font(.custom("Arial Rounded MT Bold", size: 18))
                     .foregroundColor(isSelected ? .white : .black)
-                    .padding(.vertical, 15)
+                    .padding(.vertical, 12)
                     .padding(.horizontal, 20)
                 Spacer()
             }
-            .frame(maxWidth: .infinity)
+            .frame(width: 200)
             .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(isSelected ? Color.blue.opacity(0.7) : Color.gray.opacity(0.2))
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(isSelected ? Color.blue.opacity(0.6) : Color.gray.opacity(0.2))
             )
         }
     }

@@ -33,7 +33,7 @@ struct MemoriesModel {
     // Sample data - 3 memory folders
     var memoryFolders: [MemoryFolder] = [
         MemoryFolder(
-            title: "Memories",
+            title: "A shy Scholar",
             chapters: [
                 Chapter(
                     title: "Chapter 1",
@@ -63,7 +63,7 @@ struct MemoriesModel {
             ]
         ),
         MemoryFolder(
-            title: "A Shy Scholar",
+            title: "A Brave Scholar",
             chapters: [
                 Chapter(
                     title: "Chapter 1",
@@ -93,7 +93,7 @@ struct MemoriesModel {
             ]
         ),
         MemoryFolder(
-            title: "Adventures",
+            title: "Race Cars",
             chapters: [
                 Chapter(
                     title: "Chapter 1",
