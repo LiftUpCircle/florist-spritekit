@@ -47,9 +47,7 @@ struct MainMenuView: View {
                 ) { EmptyView() }
 
                 NavigationLink(
-                    destination: Text("Memories - Coming Soon")
-                        .font(.largeTitle)
-                        .foregroundColor(.gray),
+                    destination: MemoriesView(),
                     isActive: $controller.navigateToMemories
                 ) { EmptyView() }
 
