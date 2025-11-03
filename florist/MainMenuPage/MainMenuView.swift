@@ -11,7 +11,7 @@ struct MainMenuView: View {
     @StateObject private var controller = MainMenuViewController()
 
     var body: some View {
-        NavigationView {
+        NavigationStack(path: $controller.navigationPath) {
             ZStack {
                 LinearGradient(
                     gradient: Gradient(colors: [
@@ -39,28 +39,21 @@ struct MainMenuView: View {
                                 .fill(Color.gray.opacity(0.6))
                         )
                 }
-
-                // Navigation links (hidden)
-                NavigationLink(
-                    destination: BouquetView(),
-                    isActive: $controller.navigateToBouquet
-                ) { EmptyView() }
-
-                NavigationLink(
-                    destination: MemoriesView(),
-                    isActive: $controller.navigateToMemories
-                ) { EmptyView() }
-
-                NavigationLink(
-                    destination: Text("Options - Coming Soon")
-                        .font(.largeTitle)
-                        .foregroundColor(.gray),
-                    isActive: $controller.navigateToOptions
-                ) { EmptyView() }
             }
             .navigationBarHidden(true)
+            .navigationDestination(for: MainMenuModel.MenuItem.self) { item in
+                switch item {
+                case .start:
+                    BouquetView()
+                case .memories:
+                    MemoriesView()
+                case .options:
+                    Text("Options - Coming Soon")
+                        .font(.largeTitle)
+                        .foregroundColor(.gray)
+                }
+            }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
         .statusBar(hidden: true)
     }
 }
