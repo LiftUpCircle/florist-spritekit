@@ -18,7 +18,7 @@ class BouquetViewController: ObservableObject {
         model.loadStoryRequirements(storyId: "story_default")
     }
 
-    func createGameScene() -> GameScene {
+    func createGameScene(onBookTapped: @escaping () -> Void, onSettingTapped: @escaping () -> Void) -> GameScene {
         let scene = GameScene()
         scene.scaleMode = model.sceneScaleMode
         
@@ -31,6 +31,10 @@ class BouquetViewController: ObservableObject {
         scene.onBouquetWrapped = { [weak self] result in
             self?.handleBouquetWrapped(result: result)
         }
+        
+        // Set callbacks for buttons
+        scene.onBookButtonTapped = onBookTapped
+        scene.onSettingButtonTapped = onSettingTapped
         
         gameScene = scene
         return scene

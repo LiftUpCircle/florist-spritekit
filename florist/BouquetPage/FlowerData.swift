@@ -85,15 +85,12 @@ struct StoryFlowerRequirements {
 class FlowerDatabase {
     static let shared = FlowerDatabase()
     
+    // Based on available flower assets: Rose, Jasmine, Lavender, Hibiscus
     let availableFlowers: [Flower] = [
-        Flower(flowerId: 1, flowerName: "Marigold", flowerColor: UIColor(red: 1.0, green: 0.8, blue: 0.2, alpha: 1.0), emotion: "Fondness"),
-        Flower(flowerId: 2, flowerName: "Rose", flowerColor: UIColor(red: 1.0, green: 0.4, blue: 0.5, alpha: 1.0), emotion: "Love"),
-        Flower(flowerId: 3, flowerName: "Tulip", flowerColor: UIColor(red: 1.0, green: 0.6, blue: 0.7, alpha: 1.0), emotion: "Joy"),
-        Flower(flowerId: 4, flowerName: "Lily", flowerColor: UIColor(red: 0.95, green: 0.8, blue: 1.0, alpha: 1.0), emotion: "Purity"),
-        Flower(flowerId: 5, flowerName: "Daisy", flowerColor: UIColor(red: 1.0, green: 0.95, blue: 0.5, alpha: 1.0), emotion: "Innocence"),
-        Flower(flowerId: 6, flowerName: "Violet", flowerColor: UIColor(red: 0.6, green: 0.4, blue: 0.8, alpha: 1.0), emotion: "Sadness"),
-        Flower(flowerId: 7, flowerName: "Sunflower", flowerColor: UIColor(red: 1.0, green: 0.85, blue: 0.3, alpha: 1.0), emotion: "Happiness"),
-        Flower(flowerId: 8, flowerName: "Carnation", flowerColor: UIColor(red: 1.0, green: 0.5, blue: 0.6, alpha: 1.0), emotion: "Gratitude"),
+        Flower(flowerId: 1, flowerName: "Rose", flowerColor: UIColor(red: 1.0, green: 0.4, blue: 0.5, alpha: 1.0), emotion: "Love"),
+        Flower(flowerId: 2, flowerName: "Jasmine", flowerColor: UIColor(red: 1.0, green: 0.98, blue: 0.94, alpha: 1.0), emotion: "Purity"),
+        Flower(flowerId: 3, flowerName: "Lavender", flowerColor: UIColor(red: 0.7, green: 0.5, blue: 0.85, alpha: 1.0), emotion: "Serenity"),
+        Flower(flowerId: 4, flowerName: "Hibiscus", flowerColor: UIColor(red: 1.0, green: 0.3, blue: 0.5, alpha: 1.0), emotion: "Joy"),
     ]
     
     func getFlower(byEmotion emotion: String) -> Flower? {
@@ -103,6 +100,10 @@ class FlowerDatabase {
     func getFlower(byId id: Int) -> Flower? {
         return availableFlowers.first { $0.flowerId == id }
     }
+    
+    func getFlower(byName name: String) -> Flower? {
+        return availableFlowers.first { $0.flowerName == name }
+    }
 }
 
 // MARK: - Sample Story Requirements
@@ -111,10 +112,46 @@ class StoryRequirementsDatabase {
     static let shared = StoryRequirementsDatabase()
     
     func getRequirements(for storyId: String) -> StoryFlowerRequirements? {
-        // Sample story requirements
+        // Sample story requirements using available flowers
         let sampleRequirements: [String: StoryFlowerRequirements] = [
-            "story_graduation": StoryFlowerRequirements(
-                storyId: "story_graduation",
+            "story_wedding": StoryFlowerRequirements(
+                storyId: "story_wedding",
+                requirements: [
+                    FlowerRequirement(
+                        emotion: "Love",
+                        minimumCount: 1,
+                        idealCount: 3,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
+                    ),
+                    FlowerRequirement(
+                        emotion: "Purity",
+                        minimumCount: 1,
+                        idealCount: 2,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Purity")!
+                    )
+                ],
+                hintText: "For a wedding, filled with love and purity"
+            ),
+            "story_peace": StoryFlowerRequirements(
+                storyId: "story_peace",
+                requirements: [
+                    FlowerRequirement(
+                        emotion: "Serenity",
+                        minimumCount: 1,
+                        idealCount: 4,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Serenity")!
+                    ),
+                    FlowerRequirement(
+                        emotion: "Purity",
+                        minimumCount: 1,
+                        idealCount: 2,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Purity")!
+                    )
+                ],
+                hintText: "Something to bring serenity and peace"
+            ),
+            "story_celebration": StoryFlowerRequirements(
+                storyId: "story_celebration",
                 requirements: [
                     FlowerRequirement(
                         emotion: "Joy",
@@ -123,31 +160,13 @@ class StoryRequirementsDatabase {
                         flower: FlowerDatabase.shared.getFlower(byEmotion: "Joy")!
                     ),
                     FlowerRequirement(
-                        emotion: "Happiness",
+                        emotion: "Love",
                         minimumCount: 1,
                         idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Happiness")!
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
                     )
                 ],
-                hintText: "For her graduation, something joyful and happy"
-            ),
-            "story_sadness": StoryFlowerRequirements(
-                storyId: "story_sadness",
-                requirements: [
-                    FlowerRequirement(
-                        emotion: "Sadness",
-                        minimumCount: 1,
-                        idealCount: 3,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Sadness")!
-                    ),
-                    FlowerRequirement(
-                        emotion: "Fondness",
-                        minimumCount: 1,
-                        idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Fondness")!
-                    )
-                ],
-                hintText: "I feel so sad, but I remember our fondness"
+                hintText: "A celebration of joy and love"
             ),
             // Default/Test story
             "story_default": StoryFlowerRequirements(
