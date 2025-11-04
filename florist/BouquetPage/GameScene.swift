@@ -63,36 +63,37 @@ class FlowerNode: SKSpriteNode {
 }
 
 // MARK: - Game Scene
-class GameScene: SKScene {
-    
+class GameScene: SKScene, SKPhysicsContactDelegate {
+
     // Background
     private var backgroundSprite: SKSpriteNode!
-    
+
     // UI Areas
     private var inventoryScrollNode: SKNode!
     private var chatBoxNode: SKSpriteNode!
     private var chatTextNode: SKLabelNode!
-    
+
     // Bouquet images
     private var bouquetBackNode: SKSpriteNode!
     private var bouquetFrontNode: SKSpriteNode!
     private var bouquetFlowersContainer: SKNode!
-    
+    private var bouquetPlacementArea: SKSpriteNode! // Invisible physics body for placement area
+
     // Inventory flowers (original templates)
     private var inventoryFlowers: [FlowerNode] = []
     private var inventoryScrollOffset: CGFloat = 0
     private var maxScrollOffset: CGFloat = 0
-    
-    // Bouquet slots (invisible, for positioning flowers)
-    private var bouquetSlots: [CGPoint] = []
+
+    // Placed flowers (freeform placement)
     private var placedFlowers: [FlowerNode] = []
-    private let maxSlots = 6
-    
+    private let maxFlowers = 15 // Increased limit for freeform placement
+
     // Drag state
     private var selectedFlower: FlowerNode?
     private var isDraggingFromInventory: Bool = false
     private var draggedFlowerCopy: FlowerNode?
-    private var nearestSlotIndex: Int? = nil
+    private var isValidPlacement: Bool = false
+    private var placementIndicator: SKShapeNode! // Visual feedback for placement
     
     // Buttons
     private var bookButton: SKSpriteNode!
@@ -117,7 +118,11 @@ class GameScene: SKScene {
     override func didMove(to view: SKView) {
         // Load default story requirements for testing
         storyRequirements = StoryRequirementsDatabase.shared.getRequirements(for: "story_default")
-        
+
+        // Set up physics
+        physicsWorld.contactDelegate = self
+        physicsWorld.gravity = CGVector(dx: 0, dy: 0) // No gravity for this game
+
         setupBackground()
         setupLayout()
         setupChatBox()
@@ -209,22 +214,40 @@ class GameScene: SKScene {
     }
     
     private func setupBouquet() {
-        // Container for flowers (between back and front)
-        bouquetFlowersContainer = SKNode()
-        bouquetFlowersContainer.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
-        bouquetFlowersContainer.zPosition = 15
-        addChild(bouquetFlowersContainer)
-        
-        // Bouquet back image
+        // Bouquet back image and placement area
         if let backTexture = SKTexture(imageNamed: "BouquetBack") as SKTexture? {
             bouquetBackNode = SKSpriteNode(texture: backTexture)
             bouquetBackNode.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
             bouquetBackNode.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.7)
             bouquetBackNode.zPosition = 10
             addChild(bouquetBackNode)
+
+            // Create invisible placement area with physics body from BACK texture
+            // This ensures flowers can only be placed on the back part
+            bouquetPlacementArea = SKSpriteNode(texture: backTexture)
+            bouquetPlacementArea.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
+            bouquetPlacementArea.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.7)
+            bouquetPlacementArea.zPosition = 11 // Just above the back image
+            bouquetPlacementArea.alpha = 0.0 // Make it invisible
+
+            // Create physics body from BACK texture's alpha channel
+            // This creates an accurate hitbox that follows the back's shape
+            bouquetPlacementArea.physicsBody = SKPhysicsBody(texture: backTexture, size: bouquetPlacementArea.size)
+            bouquetPlacementArea.physicsBody?.isDynamic = false
+            bouquetPlacementArea.physicsBody?.categoryBitMask = 0x1
+            bouquetPlacementArea.physicsBody?.contactTestBitMask = 0x2
+            bouquetPlacementArea.physicsBody?.collisionBitMask = 0
+            bouquetPlacementArea.name = "bouquetArea"
+            addChild(bouquetPlacementArea)
         }
-        
-        // Bouquet front image
+
+        // Container for flowers (between back and front)
+        bouquetFlowersContainer = SKNode()
+        bouquetFlowersContainer.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
+        bouquetFlowersContainer.zPosition = 15
+        addChild(bouquetFlowersContainer)
+
+        // Bouquet front image (visual only, no physics)
         if let frontTexture = SKTexture(imageNamed: "BouquetFront") as SKTexture? {
             bouquetFrontNode = SKSpriteNode(texture: frontTexture)
             bouquetFrontNode.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
@@ -232,23 +255,14 @@ class GameScene: SKScene {
             bouquetFrontNode.zPosition = 20
             addChild(bouquetFrontNode)
         }
-        
-        // Define slot positions for flowers (relative to bouquet center)
-        // Arrange in 2 rows of 3
-        let slotSpacingX: CGFloat = 60
-        let slotSpacingY: CGFloat = 50
-        let startX: CGFloat = -slotSpacingX
-        let startY: CGFloat = 20
-        
-        for row in 0..<2 {
-            for col in 0..<3 {
-                let slotPos = CGPoint(
-                    x: startX + CGFloat(col) * slotSpacingX,
-                    y: startY - CGFloat(row) * slotSpacingY
-                )
-                bouquetSlots.append(slotPos)
-            }
-        }
+
+        // Create placement indicator (initially hidden)
+        placementIndicator = SKShapeNode(circleOfRadius: 30)
+        placementIndicator.strokeColor = .clear
+        placementIndicator.fillColor = UIColor.green.withAlphaComponent(0.3)
+        placementIndicator.zPosition = 199
+        placementIndicator.isHidden = true
+        addChild(placementIndicator)
     }
     
     private func setupInventory() {
@@ -484,80 +498,121 @@ class GameScene: SKScene {
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first,
               let draggedFlower = draggedFlowerCopy else { return }
-        
+
         let location = touch.location(in: self)
         draggedFlower.position = location
-        
-        // Find nearest slot
-        let containerLocation = touch.location(in: bouquetFlowersContainer)
-        var minDistance: CGFloat = CGFloat.greatestFiniteMagnitude
-        var foundSlotIndex: Int? = nil
-        
-        for (index, slotPos) in bouquetSlots.enumerated() {
-            // Skip occupied slots
-            if placedFlowers.count >= maxSlots && isDraggingFromInventory { continue }
-            
-            let distance = hypot(containerLocation.x - slotPos.x, containerLocation.y - slotPos.y)
-            if distance < minDistance && distance < 80 {
-                minDistance = distance
-                foundSlotIndex = index
+
+        // Check if the current position is valid using physics
+        isValidPlacement = false
+        placementIndicator.isHidden = true
+
+        // Check if we're over the bouquet area and not exceeding max flowers
+        if placedFlowers.count < maxFlowers || !isDraggingFromInventory {
+            // Use physics to check if we're inside the bouquet shape
+            let physicsPoint = location
+            if let body = physicsWorld.body(at: physicsPoint),
+               body == bouquetPlacementArea.physicsBody {
+                isValidPlacement = true
+
+                // Show placement indicator
+                placementIndicator.position = location
+                placementIndicator.fillColor = UIColor.green.withAlphaComponent(0.3)
+                placementIndicator.isHidden = false
+
+                // Check for overlap with existing flowers
+                let containerLocation = bouquetFlowersContainer.convert(location, from: self)
+                for existingFlower in placedFlowers {
+                    let distance = hypot(containerLocation.x - existingFlower.position.x,
+                                       containerLocation.y - existingFlower.position.y)
+                    if distance < 40 { // Minimum spacing between flowers
+                        placementIndicator.fillColor = UIColor.yellow.withAlphaComponent(0.3)
+                        break
+                    }
+                }
+            } else if bouquetRect.contains(location) {
+                // Near the bouquet but not in valid area
+                placementIndicator.position = location
+                placementIndicator.fillColor = UIColor.red.withAlphaComponent(0.3)
+                placementIndicator.isHidden = false
+            }
+        } else {
+            // Max flowers reached
+            if bouquetRect.contains(location) {
+                placementIndicator.position = location
+                placementIndicator.fillColor = UIColor.orange.withAlphaComponent(0.3)
+                placementIndicator.isHidden = false
             }
         }
-        
-        nearestSlotIndex = foundSlotIndex
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first,
               let draggedFlower = draggedFlowerCopy else { return }
-        
+
         let location = touch.location(in: self)
-        
-        // Check if we can place in bouquet
-        if bouquetRect.contains(location) && placedFlowers.count < maxSlots {
-            // Place the flower in the bouquet
+        placementIndicator.isHidden = true
+
+        // Check if we can place the flower using physics validation
+        if isValidPlacement && (placedFlowers.count < maxFlowers || !isDraggingFromInventory) {
+            // Place the flower at the exact position (freeform placement)
             draggedFlower.removeFromParent()
-            
-            // Position at nearest slot or center if no slot found
-            let slotPosition: CGPoint
-            if let slotIndex = nearestSlotIndex {
-                slotPosition = bouquetSlots[slotIndex]
-            } else if !bouquetSlots.isEmpty {
-                // Find first available slot based on count
-                let slotIndex = min(placedFlowers.count, bouquetSlots.count - 1)
-                slotPosition = bouquetSlots[slotIndex]
-            } else {
-                slotPosition = .zero
-            }
-            
-            draggedFlower.position = slotPosition
-            draggedFlower.setScale(0.8)
-            draggedFlower.zPosition = CGFloat(placedFlowers.count)
+
+            // Convert position to container coordinates
+            let containerLocation = bouquetFlowersContainer.convert(location, from: self)
+            draggedFlower.position = containerLocation
+
+            // Dynamic z-ordering based on y-position (flowers at bottom appear in front)
+            let normalizedY = (containerLocation.y + 150) / 300 // Normalize to 0-1 range
+            let zPosition = (1 - normalizedY) * 5 // Higher z for lower flowers, but within container bounds
+            draggedFlower.zPosition = zPosition
+
+            // Scale based on distance from center for depth effect
+            let distanceFromCenter = hypot(containerLocation.x, containerLocation.y)
+            let scaleFactor = 0.7 + (1 - min(distanceFromCenter / 150, 1)) * 0.3
+            draggedFlower.setScale(scaleFactor)
+
             bouquetFlowersContainer.addChild(draggedFlower)
             placedFlowers.append(draggedFlower)
-            
+
             // Success feedback
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.success)
-            
-            // Gentle bounce
+
+            // Gentle placement animation
             let bounce = SKAction.sequence([
-                SKAction.scale(to: 0.9, duration: 0.1),
-                SKAction.scale(to: 0.8, duration: 0.1)
+                SKAction.scale(to: scaleFactor * 1.1, duration: 0.1),
+                SKAction.scale(to: scaleFactor, duration: 0.1)
             ])
-            draggedFlower.run(bounce)
-            
+            let rotate = SKAction.rotate(byAngle: CGFloat.random(in: -0.1...0.1), duration: 0.2)
+            draggedFlower.run(SKAction.group([bounce, rotate]))
+
             updateButtonStates()
         } else {
-            // Remove the dragged copy if not placed
-            draggedFlower.removeFromParent()
+            // Invalid placement - return flower with animation
+            if isDraggingFromInventory {
+                // Animate back to inventory
+                let fadeOut = SKAction.fadeOut(withDuration: 0.2)
+                let scaleDown = SKAction.scale(to: 0.1, duration: 0.2)
+                let remove = SKAction.removeFromParent()
+                draggedFlower.run(SKAction.sequence([
+                    SKAction.group([fadeOut, scaleDown]),
+                    remove
+                ]))
+            } else {
+                // It was from bouquet, just remove
+                draggedFlower.removeFromParent()
+            }
+
+            // Error feedback
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.error)
         }
-        
+
         // Reset drag state
         draggedFlowerCopy = nil
         selectedFlower = nil
         isDraggingFromInventory = false
-        nearestSlotIndex = nil
+        isValidPlacement = false
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -565,7 +620,8 @@ class GameScene: SKScene {
         draggedFlowerCopy = nil
         selectedFlower = nil
         isDraggingFromInventory = false
-        nearestSlotIndex = nil
+        isValidPlacement = false
+        placementIndicator.isHidden = true
     }
     
     // MARK: - Button Handlers
@@ -660,26 +716,26 @@ class GameScene: SKScene {
         var message: String
         var color: UIColor
         var hapticType: UINotificationFeedbackGenerator.FeedbackType
-        
+
         switch result {
         case .perfectMatch:
-            message = "✨ Perfect Match! ✨"
+            message = "Perfect Match!"
             color = UIColor(red: 0.2, green: 0.8, blue: 0.3, alpha: 1.0)
             hapticType = .success
-            
+
             // Add sparkle effect
             addSparkleEffect()
-            
+
         case .goodMatch:
-            message = "💐 Good Match!"
+            message = "Good Match!"
             color = UIColor(red: 0.3, green: 0.6, blue: 0.8, alpha: 1.0)
             hapticType = .success
-            
+
         case .failure(let failureMessage, let missingEmotions):
-            message = "💬 \(failureMessage)"
+            message = "\(failureMessage)"
             color = UIColor(red: 0.9, green: 0.6, blue: 0.3, alpha: 1.0)
             hapticType = .warning
-            
+
             print("Missing emotions: \(missingEmotions.joined(separator: ", "))")
         }
         
@@ -749,6 +805,40 @@ class GameScene: SKScene {
         return placedFlowers.map { $0.flowerData }
     }
     
+    // MARK: - Helper Methods
+    private func canPlaceFlower(at position: CGPoint, excludingFlower: FlowerNode? = nil) -> Bool {
+        // Check if position is within bouquet physics body
+        let worldPosition = bouquetFlowersContainer.convert(position, to: self)
+        guard let body = physicsWorld.body(at: worldPosition),
+              body == bouquetPlacementArea.physicsBody else {
+            return false
+        }
+
+        // Check minimum spacing with other flowers
+        let minSpacing: CGFloat = 35 // Minimum distance between flower centers
+        for flower in placedFlowers {
+            if flower === excludingFlower { continue }
+            let distance = hypot(position.x - flower.position.x, position.y - flower.position.y)
+            if distance < minSpacing {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    private func sortFlowersByDepth() {
+        // Sort flowers in container by their y-position for proper layering
+        let sortedFlowers = placedFlowers.sorted { flower1, flower2 in
+            return flower1.position.y > flower2.position.y
+        }
+
+        // Update z-positions based on sort order (keep within 0-5 range)
+        for (index, flower) in sortedFlowers.enumerated() {
+            flower.zPosition = CGFloat(index) * 0.1 // Small increments to maintain order
+        }
+    }
+
     // MARK: - Update
     override func update(_ currentTime: TimeInterval) {
         // Future: Add animations if needed
