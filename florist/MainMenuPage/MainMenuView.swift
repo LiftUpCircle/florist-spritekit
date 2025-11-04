@@ -9,9 +9,10 @@ import SwiftUI
 
 struct MainMenuView: View {
     @StateObject private var controller = MainMenuViewController()
+    @StateObject private var flowCoordinator = GameFlowCoordinator()
 
     var body: some View {
-        NavigationStack(path: $controller.navigationPath) {
+        NavigationStack(path: $flowCoordinator.navigationPath) {
             ZStack {
                 LinearGradient(
                     gradient: Gradient(colors: [
@@ -29,7 +30,7 @@ struct MainMenuView: View {
                         VStack(/*spacing: 40*/) {
                             ForEach(controller.model.menuItems, id: \.self) { item in
                                 MenuButton(title: item.rawValue) {
-                                    controller.handleMenuSelection(item)
+                                    handleMenuSelection(item)
                                 }
                                 .padding(.vertical,5)
                             }
@@ -41,20 +42,36 @@ struct MainMenuView: View {
                 }
             }
             .navigationBarHidden(true)
-            .navigationDestination(for: MainMenuModel.MenuItem.self) { item in
-                switch item {
-                case .start:
-                    BouquetView()
+            .navigationDestination(for: GameFlowCoordinator.GamePage.self) { page in
+                switch page {
+                case .listening(let storyId):
+                    ListeningPageView(storyId: storyId, flowCoordinator: flowCoordinator)
+                case .bouquet(let storyId):
+                    BouquetPageWrapper(storyId: storyId, flowCoordinator: flowCoordinator)
                 case .memories:
                     MemoriesView()
                 case .options:
                     Text("Options - Coming Soon")
                         .font(.largeTitle)
                         .foregroundColor(.gray)
+                case .mainMenu:
+                    EmptyView() // This shouldn't be reached
                 }
             }
         }
         .statusBar(hidden: true)
+        .environmentObject(flowCoordinator)
+    }
+    
+    private func handleMenuSelection(_ item: MainMenuModel.MenuItem) {
+        switch item {
+        case .start:
+            flowCoordinator.startNewGame()
+        case .memories:
+            flowCoordinator.navigateToMemories()
+        case .options:
+            flowCoordinator.navigateToOptions()
+        }
     }
 }
 

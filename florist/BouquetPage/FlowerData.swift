@@ -114,6 +114,115 @@ class StoryRequirementsDatabase {
     func getRequirements(for storyId: String) -> StoryFlowerRequirements? {
         // Sample story requirements using available flowers
         let sampleRequirements: [String: StoryFlowerRequirements] = [
+            // Story 1 - Initial story from listening page
+            "story": StoryFlowerRequirements(
+                storyId: "story",
+                requirements: [
+                    FlowerRequirement(
+                        emotion: "Love",
+                        minimumCount: 1,
+                        idealCount: 2,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
+                    ),
+                    FlowerRequirement(
+                        emotion: "Joy",
+                        minimumCount: 1,
+                        idealCount: 2,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Joy")!
+                    )
+                ],
+                hintText: "Alice felt so much love and joy today"
+            ),
+            "story_1": StoryFlowerRequirements(
+                storyId: "story_1",
+                requirements: [
+                    FlowerRequirement(
+                        emotion: "Love",
+                        minimumCount: 1,
+                        idealCount: 2,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
+                    ),
+                    FlowerRequirement(
+                        emotion: "Joy",
+                        minimumCount: 1,
+                        idealCount: 2,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Joy")!
+                    )
+                ],
+                hintText: "I felt so much love and joy today"
+            ),
+            "story_2": StoryFlowerRequirements(
+                storyId: "story_2",
+                requirements: [
+                    FlowerRequirement(
+                        emotion: "Serenity",
+                        minimumCount: 2,
+                        idealCount: 3,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Serenity")!
+                    ),
+                    FlowerRequirement(
+                        emotion: "Purity",
+                        minimumCount: 1,
+                        idealCount: 2,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Purity")!
+                    )
+                ],
+                hintText: "I need serenity and purity in my life"
+            ),
+            "story_3": StoryFlowerRequirements(
+                storyId: "story_3",
+                requirements: [
+                    FlowerRequirement(
+                        emotion: "Joy",
+                        minimumCount: 2,
+                        idealCount: 4,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Joy")!
+                    )
+                ],
+                hintText: "Today is a day full of joy and celebration"
+            ),
+            "story_4": StoryFlowerRequirements(
+                storyId: "story_4",
+                requirements: [
+                    FlowerRequirement(
+                        emotion: "Love",
+                        minimumCount: 2,
+                        idealCount: 3,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
+                    ),
+                    FlowerRequirement(
+                        emotion: "Purity",
+                        minimumCount: 1,
+                        idealCount: 2,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Purity")!
+                    )
+                ],
+                hintText: "A bouquet of love and purity for the wedding"
+            ),
+            "story_5": StoryFlowerRequirements(
+                storyId: "story_5",
+                requirements: [
+                    FlowerRequirement(
+                        emotion: "Serenity",
+                        minimumCount: 1,
+                        idealCount: 2,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Serenity")!
+                    ),
+                    FlowerRequirement(
+                        emotion: "Joy",
+                        minimumCount: 1,
+                        idealCount: 2,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Joy")!
+                    ),
+                    FlowerRequirement(
+                        emotion: "Love",
+                        minimumCount: 1,
+                        idealCount: 1,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
+                    )
+                ],
+                hintText: "I need serenity, joy, and a little love"
+            ),
             "story_wedding": StoryFlowerRequirements(
                 storyId: "story_wedding",
                 requirements: [

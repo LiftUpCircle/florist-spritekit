@@ -9,6 +9,12 @@ import SwiftUI
 
 struct CompletionOverlay: View {
     let onRestart: () -> Void
+    let buttonText: String
+    
+    init(onRestart: @escaping () -> Void, buttonText: String = "Restart") {
+        self.onRestart = onRestart
+        self.buttonText = buttonText
+    }
     
     var body: some View {
         ZStack {
@@ -22,15 +28,15 @@ struct CompletionOverlay: View {
                     .foregroundColor(.white)
                 
                 Button(action: onRestart) {
-                    Text("Restart")
+                    Text(buttonText)
                         .font(.headline)
                         .foregroundColor(.white)
                         .padding()
                         .background(Color.blue)
                         .cornerRadius(10)
                 }
-                .accessibilityLabel("Restart Story")
-                .accessibilityHint("Restarts the story from the beginning")
+                .accessibilityLabel(buttonText)
+                .accessibilityHint("Continue to arrange the bouquet")
             }
         }
         .accessibilityElement(children: .contain)

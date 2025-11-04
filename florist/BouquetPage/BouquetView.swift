@@ -9,9 +9,23 @@ import SwiftUI
 import SpriteKit
 
 struct BouquetView: View {
-    @StateObject private var controller = BouquetViewController()
+    var storyRequirements: StoryFlowerRequirements?
+    var onBouquetComplete: (() -> Void)?
+    
+    @StateObject private var controller: BouquetViewController
     @State private var showFlowerBook = false
     @State private var showSettings = false
+    
+    init(storyRequirements: StoryFlowerRequirements? = nil, onBouquetComplete: (() -> Void)? = nil) {
+        self.storyRequirements = storyRequirements
+        self.onBouquetComplete = onBouquetComplete
+        
+        // Initialize controller with requirements
+        _controller = StateObject(wrappedValue: BouquetViewController(
+            storyRequirements: storyRequirements,
+            onBouquetComplete: onBouquetComplete
+        ))
+    }
 
     var body: some View {
         ZStack {

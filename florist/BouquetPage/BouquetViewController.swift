@@ -12,10 +12,18 @@ import Combine
 class BouquetViewController: ObservableObject {
     @Published var model = BouquetModel()
     private var gameScene: GameScene?
+    private var onBouquetCompleteCallback: (() -> Void)?
     
-    init() {
-        // Load default story for testing
-        model.loadStoryRequirements(storyId: "story_default")
+    init(storyRequirements: StoryFlowerRequirements? = nil, onBouquetComplete: (() -> Void)? = nil) {
+        self.onBouquetCompleteCallback = onBouquetComplete
+        
+        // Load story requirements
+        if let requirements = storyRequirements {
+            model.currentStoryRequirements = requirements
+        } else {
+            // Load default story for testing
+            model.loadStoryRequirements(storyId: "story_default")
+        }
     }
 
     func createGameScene(onBookTapped: @escaping () -> Void, onSettingTapped: @escaping () -> Void) -> GameScene {
@@ -58,11 +66,18 @@ class BouquetViewController: ObservableObject {
         switch result {
         case .perfectMatch:
             print("🎉 Perfect Match achieved!")
-            // TODO: Save to memories, show letter, proceed to next story
+            // TODO: Save to memories, show letter
+            // Proceed to next story
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                self?.onBouquetCompleteCallback?()
+            }
             
         case .goodMatch:
             print("👍 Good Match achieved!")
-            // TODO: Proceed to next story
+            // Proceed to next story
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                self?.onBouquetCompleteCallback?()
+            }
             
         case .failure(let message, let missingEmotions):
             print("❌ Validation failed: \(message)")
