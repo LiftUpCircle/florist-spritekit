@@ -51,9 +51,7 @@ struct MainMenuView: View {
                 case .memories:
                     MemoriesView()
                 case .options:
-                    Text("Options - Coming Soon")
-                        .font(.largeTitle)
-                        .foregroundColor(.gray)
+                    SettingsOverlayView()
                 case .mainMenu:
                     EmptyView() // This shouldn't be reached
                 }

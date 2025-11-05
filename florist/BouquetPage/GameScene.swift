@@ -63,10 +63,13 @@ class FlowerNode: SKSpriteNode {
 }
 
 // MARK: - Game Scene
-class GameScene: SKScene, SKPhysicsContactDelegate {
+class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDelegate {
 
     // Background
     private var backgroundSprite: SKSpriteNode!
+
+    // Settings overlay
+    private var settingsOverlayController: SettingsOverlayController?
 
     // UI Areas
     private var inventoryScrollNode: SKNode!
@@ -122,7 +125,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var storyRequirements: StoryFlowerRequirements?
     var onBouquetWrapped: ((StoryFlowerRequirements.ValidationResult) -> Void)?
     var onBookButtonTapped: (() -> Void)?
-    var onSettingButtonTapped: (() -> Void)?
     
     // MARK: - Scene Setup
     override func didMove(to view: SKView) {
@@ -466,6 +468,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
 
+        // Check if settings overlay is handling the touch
+        if let settingsController = settingsOverlayController {
+            if settingsController.handleTouchBegan(touch) {
+                return
+            }
+        }
+
         let touchedNodes = nodes(at: location)
 
         // Check if touching a button
@@ -543,6 +552,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
+
+        // Check if settings overlay is handling the touch
+        if let settingsController = settingsOverlayController {
+            if settingsController.handleTouchMoved(touch) {
+                return
+            }
+        }
+
         let location = touch.location(in: self)
 
         // If we haven't decided the gesture type yet
@@ -648,6 +665,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
+
+        // Check if settings overlay is handling the touch
+        if let settingsController = settingsOverlayController {
+            if settingsController.handleTouchEnded(touch) {
+                return
+            }
+        }
 
         // Reset gesture state
         potentialFlowerToDrag = nil
@@ -822,15 +846,45 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Haptic feedback
         let generator = UIImpactFeedbackGenerator(style: .light)
         generator.impactOccurred()
-        
+
         // Animate button press
         settingButton.run(SKAction.sequence([
             SKAction.scale(to: 0.9, duration: 0.1),
             SKAction.scale(to: 1.0, duration: 0.1)
         ]))
-        
-        // Call callback if set
-        onSettingButtonTapped?()
+
+        // Show settings overlay
+        if settingsOverlayController == nil {
+            settingsOverlayController = SettingsOverlayController(scene: self)
+            settingsOverlayController?.delegate = self
+        } else {
+            settingsOverlayController?.show(in: self)
+        }
+    }
+
+    // MARK: - SettingsOverlayControllerDelegate
+    func settingsOverlayDidClose() {
+        // Settings overlay closed, you can perform any cleanup if needed
+    }
+
+    func settingsOverlayDidTapRateGame() {
+        // Handle rate game action
+        print("Rate game tapped")
+    }
+
+    func settingsOverlayDidTapSubscriptions() {
+        // Handle subscriptions action
+        print("Subscriptions tapped")
+    }
+
+    func settingsOverlayDidTapContactUs() {
+        // Handle contact us action
+        print("Contact us tapped")
+    }
+
+    func settingsOverlayDidTapPrivacy() {
+        // Handle privacy action
+        print("Privacy tapped")
     }
     
     private func showValidationResult(_ result: StoryFlowerRequirements.ValidationResult) {

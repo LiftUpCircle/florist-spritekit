@@ -26,24 +26,23 @@ class BouquetViewController: ObservableObject {
         }
     }
 
-    func createGameScene(onBookTapped: @escaping () -> Void, onSettingTapped: @escaping () -> Void) -> GameScene {
+    func createGameScene(onBookTapped: @escaping () -> Void) -> GameScene {
         let scene = GameScene()
         scene.scaleMode = model.sceneScaleMode
-        
+
         // Set story requirements
         if let requirements = model.currentStoryRequirements {
             scene.setStoryRequirements(requirements)
         }
-        
+
         // Set callback for when bouquet is wrapped
         scene.onBouquetWrapped = { [weak self] result in
             self?.handleBouquetWrapped(result: result)
         }
-        
-        // Set callbacks for buttons
+
+        // Set callback for book button only (settings now handled internally)
         scene.onBookButtonTapped = onBookTapped
-        scene.onSettingButtonTapped = onSettingTapped
-        
+
         gameScene = scene
         return scene
     }
