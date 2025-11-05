@@ -70,6 +70,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
     // UI Areas
     private var inventoryScrollNode: SKNode!
+    private var inventoryCropNode: SKCropNode!
     private var chatBoxNode: SKSpriteNode!
     private var chatTextNode: SKLabelNode!
 
@@ -94,6 +95,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     private var draggedFlowerCopy: FlowerNode?
     private var isValidPlacement: Bool = false
     private var placementIndicator: SKShapeNode! // Visual feedback for placement
+
+    // Scroll state
+    private var isScrolling: Bool = false
+    private var scrollStartY: CGFloat = 0
+    private var initialScrollOffset: CGFloat = 0
+    private var touchStartLocation: CGPoint = .zero
+    private var potentialFlowerToDrag: FlowerNode?
+    private var gestureDecided: Bool = false
+    private let scrollThreshold: CGFloat = 10.0 // Movement needed to decide gesture type
     
     // Buttons
     private var bookButton: SKSpriteNode!
@@ -266,21 +276,71 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     private func setupInventory() {
+        // Create a crop node to mask the inventory area
+        inventoryCropNode = SKCropNode()
+        inventoryCropNode.position = CGPoint(x: inventoryRect.midX, y: inventoryRect.midY)
+        inventoryCropNode.zPosition = 4
+
+        // Create mask shape for the inventory area
+        let maskNode = SKShapeNode(rect: CGRect(
+            x: -inventoryRect.width / 2,
+            y: -inventoryRect.height / 2,
+            width: inventoryRect.width,
+            height: inventoryRect.height
+        ))
+        maskNode.fillColor = .white
+        inventoryCropNode.maskNode = maskNode
+
         // Create scroll container
         inventoryScrollNode = SKNode()
-        inventoryScrollNode.position = CGPoint(x: inventoryRect.midX, y: inventoryRect.minY)
+        inventoryScrollNode.position = CGPoint(x: 0, y: -inventoryRect.height / 2)
         inventoryScrollNode.zPosition = 5
-        addChild(inventoryScrollNode)
-        
+        inventoryCropNode.addChild(inventoryScrollNode)
+        addChild(inventoryCropNode)
+
+        // Add a subtle background for the inventory area
+        let inventoryBackground = SKShapeNode(rect: CGRect(
+            x: inventoryRect.minX,
+            y: inventoryRect.minY,
+            width: inventoryRect.width,
+            height: inventoryRect.height
+        ), cornerRadius: 10)
+        inventoryBackground.fillColor = UIColor.white.withAlphaComponent(0.3)
+        inventoryBackground.strokeColor = UIColor.gray.withAlphaComponent(0.5)
+        inventoryBackground.lineWidth = 1
+        inventoryBackground.zPosition = 3
+        addChild(inventoryBackground)
+
         // Get available flowers from database
         let availableFlowers = FlowerDatabase.shared.availableFlowers
-        
+
         let flowerSize = CGSize(width: 80, height: 80)
         let verticalSpacing: CGFloat = 100
-        
+
         // Calculate max scroll offset
         let totalHeight = CGFloat(availableFlowers.count) * verticalSpacing
         maxScrollOffset = max(0, totalHeight - inventoryRect.height + 100)
+
+        // Add scroll indicators if there's overflow
+        if maxScrollOffset > 0 {
+            // Top scroll indicator
+            let topIndicator = SKLabelNode(text: "▲")
+            topIndicator.fontName = "Avenir-Medium"
+            topIndicator.fontSize = 16
+            topIndicator.fontColor = UIColor.gray.withAlphaComponent(0.7)
+            topIndicator.position = CGPoint(x: inventoryRect.midX, y: inventoryRect.maxY - 20)
+            topIndicator.zPosition = 5
+            addChild(topIndicator)
+
+            // Bottom scroll indicator
+            let bottomIndicator = SKLabelNode(text: "▼")
+            bottomIndicator.fontName = "Avenir-Medium"
+            bottomIndicator.fontSize = 16
+            bottomIndicator.fontColor = UIColor.gray.withAlphaComponent(0.7)
+            bottomIndicator.position = CGPoint(x: inventoryRect.midX, y: inventoryRect.minY + 20)
+            bottomIndicator.zPosition = 5
+            addChild(bottomIndicator)
+        }
         
         for (index, flowerData) in availableFlowers.enumerated() {
             // Map flower name to asset name
@@ -348,7 +408,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         // Reset and Wrap buttons (below bouquet)
         let actionButtonWidth: CGFloat = 120
         let actionButtonHeight: CGFloat = 45
-        let actionButtonY = bouquetRect.minY - 70
+        // Ensure buttons are visible by using max to keep them above bottom of screen
+        let actionButtonY = max(60, bouquetRect.minY - 60)
         let actionButtonSpacing: CGFloat = 20
         
         // Reset Button
@@ -422,9 +483,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
-        
+
         let touchedNodes = nodes(at: location)
-        
+
         // Check if touching a button
         for node in touchedNodes {
             if node.name == "resetButton" {
@@ -441,28 +502,31 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 return
             }
         }
-        
-        // Check if we touched an inventory flower
-        let inventoryLocation = touch.location(in: inventoryScrollNode)
-        for flower in inventoryFlowers {
-            if flower.contains(inventoryLocation) {
-                // Create a copy for dragging
-                let imageName = getFlowerImageName(for: flower.flowerData.flowerName)
-                draggedFlowerCopy = FlowerNode(flower: flower.flowerData, imageName: imageName, size: flower.size)
-                draggedFlowerCopy!.position = location
-                draggedFlowerCopy!.zPosition = 200
-                draggedFlowerCopy!.setScale(1.0)
-                addChild(draggedFlowerCopy!)
-                
-                isDraggingFromInventory = true
-                selectedFlower = flower
-                
-                // Haptic feedback
-                let generator = UIImpactFeedbackGenerator(style: .light)
-                generator.impactOccurred()
-                
-                return
+
+        // Check if we're touching within the inventory area
+        if inventoryRect.contains(location) {
+            // Store initial touch position
+            touchStartLocation = location
+            scrollStartY = location.y
+            initialScrollOffset = inventoryScrollOffset
+            gestureDecided = false
+
+            // Check if we touched an inventory flower
+            let inventoryLocation = touch.location(in: inventoryScrollNode)
+            for flower in inventoryFlowers {
+                if flower.contains(inventoryLocation) {
+                    // Store the flower but don't create a copy yet
+                    // We'll decide whether to drag or scroll based on movement
+                    potentialFlowerToDrag = flower
+                    selectedFlower = flower
+                    return
+                }
             }
+
+            // If no flower was touched, this is definitely a scroll
+            isScrolling = true
+            gestureDecided = true
+            return
         }
         
         // Check if we touched a flower in the bouquet
@@ -496,10 +560,65 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first,
-              let draggedFlower = draggedFlowerCopy else { return }
-
+        guard let touch = touches.first else { return }
         let location = touch.location(in: self)
+
+        // If we haven't decided the gesture type yet
+        if !gestureDecided && potentialFlowerToDrag != nil {
+            let deltaX = abs(location.x - touchStartLocation.x)
+            let deltaY = abs(location.y - touchStartLocation.y)
+
+            // Check if movement exceeds threshold
+            if deltaX > scrollThreshold || deltaY > scrollThreshold {
+                if deltaY > deltaX * 1.5 {
+                    // Vertical movement - treat as scroll
+                    isScrolling = true
+                    gestureDecided = true
+
+                    // Visual feedback: slightly fade the inventory during scroll
+                    inventoryScrollNode.run(SKAction.fadeAlpha(to: 0.7, duration: 0.1))
+                } else {
+                    // Horizontal or diagonal movement - treat as drag
+                    gestureDecided = true
+
+                    // Create the flower copy for dragging
+                    if let flower = potentialFlowerToDrag {
+                        let imageName = getFlowerImageName(for: flower.flowerData.flowerName)
+                        draggedFlowerCopy = FlowerNode(flower: flower.flowerData, imageName: imageName, size: flower.size)
+                        draggedFlowerCopy!.position = location
+                        draggedFlowerCopy!.zPosition = 200
+                        draggedFlowerCopy!.setScale(1.0)
+                        addChild(draggedFlowerCopy!)
+
+                        isDraggingFromInventory = true
+
+                        // Haptic feedback
+                        let generator = UIImpactFeedbackGenerator(style: .light)
+                        generator.impactOccurred()
+                    }
+                }
+                potentialFlowerToDrag = nil
+            }
+        }
+
+        // Handle scrolling if we're in scroll mode
+        if isScrolling {
+            let deltaY = location.y - scrollStartY
+            let newOffset = initialScrollOffset + deltaY  // Changed from - to + to fix inversion
+
+            // Apply scroll with bounds checking
+            inventoryScrollOffset = min(max(0, newOffset), maxScrollOffset)
+
+            // Update inventory position within the crop node
+            inventoryScrollNode.position = CGPoint(
+                x: 0,
+                y: -inventoryRect.height / 2 + inventoryScrollOffset
+            )
+            return
+        }
+
+        // Handle dragging flower
+        guard let draggedFlower = draggedFlowerCopy else { return }
         draggedFlower.position = location
 
         // Check if the current position is valid using physics
@@ -546,9 +665,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first,
-              let draggedFlower = draggedFlowerCopy else { return }
+        guard let touch = touches.first else { return }
 
+        // Reset gesture state
+        potentialFlowerToDrag = nil
+        gestureDecided = false
+
+        // End scrolling if we were scrolling
+        if isScrolling {
+            isScrolling = false
+            // Restore full opacity
+            inventoryScrollNode.run(SKAction.fadeAlpha(to: 1.0, duration: 0.1))
+            return
+        }
+
+        // Handle flower placement
+        guard let draggedFlower = draggedFlowerCopy else { return }
         let location = touch.location(in: self)
         placementIndicator.isHidden = true
 
@@ -622,6 +754,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         isDraggingFromInventory = false
         isValidPlacement = false
         placementIndicator.isHidden = true
+
+        if isScrolling {
+            inventoryScrollNode.run(SKAction.fadeAlpha(to: 1.0, duration: 0.1))
+        }
+        isScrolling = false
+        potentialFlowerToDrag = nil
+        gestureDecided = false
     }
     
     // MARK: - Button Handlers
