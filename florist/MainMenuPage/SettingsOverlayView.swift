@@ -16,8 +16,12 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
     override func didMove(to view: SKView) {
         super.didMove(to: view)
 
-        // Set background color
+        // Set background to transparent
         backgroundColor = SKColor.clear
+
+        // Make the view transparent
+        view.allowsTransparency = true
+        view.backgroundColor = .clear
 
         // Show settings overlay immediately
         settingsOverlayController = SettingsOverlayController(scene: self)
@@ -83,27 +87,34 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
 
 // MARK: - SwiftUI View Wrapper
 struct SettingsOverlayView: View {
-    @Environment(\.dismiss) var dismiss
+    @Binding var isPresented: Bool
 
     var body: some View {
         GeometryReader { geometry in
-            SpriteView(scene: createSettingsScene(size: geometry.size))
-                .ignoresSafeArea()
+            // Settings overlay with transparent background
+            SpriteView(
+                scene: createSettingsScene(size: geometry.size),
+                options: [.allowsTransparency]
+            )
+            .ignoresSafeArea()
+            .allowsHitTesting(true)
+            .background(Color.clear)
         }
-        .navigationBarHidden(true)
-        .statusBar(hidden: true)
     }
 
     private func createSettingsScene(size: CGSize) -> SettingsScene {
         let scene = SettingsScene(size: size)
         scene.scaleMode = .aspectFill
         scene.onDismiss = {
-            dismiss()
+            withAnimation {
+                isPresented = false
+            }
         }
         return scene
     }
 }
 
 #Preview {
-    SettingsOverlayView()
+    @State var isPresented = true
+    return SettingsOverlayView(isPresented: $isPresented)
 }

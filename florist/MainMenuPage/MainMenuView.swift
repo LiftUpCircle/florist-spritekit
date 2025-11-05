@@ -10,6 +10,7 @@ import SwiftUI
 struct MainMenuView: View {
     @StateObject private var controller = MainMenuViewController()
     @StateObject private var flowCoordinator = GameFlowCoordinator()
+    @State private var showSettings = false
 
     var body: some View {
         NavigationStack(path: $flowCoordinator.navigationPath) {
@@ -40,6 +41,13 @@ struct MainMenuView: View {
                                 .fill(Color.gray.opacity(0.6))
                         )
                 }
+
+                // Settings overlay
+                if showSettings {
+                    SettingsOverlayView(isPresented: $showSettings)
+                        .transition(.opacity)
+                        .zIndex(100)
+                }
             }
             .navigationBarHidden(true)
             .navigationDestination(for: GameFlowCoordinator.GamePage.self) { page in
@@ -51,7 +59,7 @@ struct MainMenuView: View {
                 case .memories:
                     MemoriesView()
                 case .options:
-                    SettingsOverlayView()
+                    EmptyView() // Options now handled as overlay
                 case .mainMenu:
                     EmptyView() // This shouldn't be reached
                 }
@@ -68,7 +76,9 @@ struct MainMenuView: View {
         case .memories:
             flowCoordinator.navigateToMemories()
         case .options:
-            flowCoordinator.navigateToOptions()
+            withAnimation {
+                showSettings = true
+            }
         }
     }
 }
