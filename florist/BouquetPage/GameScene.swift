@@ -298,15 +298,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         inventoryCropNode.addChild(inventoryScrollNode)
         addChild(inventoryCropNode)
 
-        // Add a subtle background for the inventory area
+        // Add a pink background for the inventory area that extends full screen height
         let inventoryBackground = SKShapeNode(rect: CGRect(
             x: inventoryRect.minX,
-            y: inventoryRect.minY,
+            y: 0,  // Start from bottom of screen
             width: inventoryRect.width,
-            height: inventoryRect.height
+            height: size.height  // Full screen height
         ), cornerRadius: 10)
-        inventoryBackground.fillColor = UIColor.white.withAlphaComponent(0.3)
-        inventoryBackground.strokeColor = UIColor.gray.withAlphaComponent(0.5)
+        // Soft pink color matching the screenshot
+        inventoryBackground.fillColor = UIColor(red: 1.0, green: 0.92, blue: 0.92, alpha: 0.95)
+        inventoryBackground.strokeColor = UIColor(red: 1.0, green: 0.85, blue: 0.85, alpha: 0.5)
         inventoryBackground.lineWidth = 1
         inventoryBackground.zPosition = 3
         addChild(inventoryBackground)
@@ -321,26 +322,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let totalHeight = CGFloat(availableFlowers.count) * verticalSpacing
         maxScrollOffset = max(0, totalHeight - inventoryRect.height + 100)
 
-        // Add scroll indicators if there's overflow
-        if maxScrollOffset > 0 {
-            // Top scroll indicator
-            let topIndicator = SKLabelNode(text: "▲")
-            topIndicator.fontName = "Avenir-Medium"
-            topIndicator.fontSize = 16
-            topIndicator.fontColor = UIColor.gray.withAlphaComponent(0.7)
-            topIndicator.position = CGPoint(x: inventoryRect.midX, y: inventoryRect.maxY - 20)
-            topIndicator.zPosition = 5
-            addChild(topIndicator)
-
-            // Bottom scroll indicator
-            let bottomIndicator = SKLabelNode(text: "▼")
-            bottomIndicator.fontName = "Avenir-Medium"
-            bottomIndicator.fontSize = 16
-            bottomIndicator.fontColor = UIColor.gray.withAlphaComponent(0.7)
-            bottomIndicator.position = CGPoint(x: inventoryRect.midX, y: inventoryRect.minY + 20)
-            bottomIndicator.zPosition = 5
-            addChild(bottomIndicator)
-        }
+        // Removed scroll indicators as requested
         
         for (index, flowerData) in availableFlowers.enumerated() {
             // Map flower name to asset name
