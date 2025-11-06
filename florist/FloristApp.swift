@@ -13,7 +13,7 @@ struct FloristApp: App {
 
     var body: some Scene {
         WindowGroup {
-            VNSceneView()
+            MainMenuView()
                 .preferredColorScheme(.light)
                 .onAppear {
                     // Lock orientation to landscape

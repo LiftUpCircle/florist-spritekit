@@ -10,24 +10,13 @@ import Combine
 
 class MainMenuViewController: ObservableObject {
     @Published var model = MainMenuModel()
-    @Published var navigateToBouquet = false
-    @Published var navigateToMemories = false
-    @Published var navigateToOptions = false
+    @Published var navigationPath = NavigationPath()
 
     func handleMenuSelection(_ item: MainMenuModel.MenuItem) {
-        switch item {
-        case .start:
-            navigateToBouquet = true
-        case .memories:
-            navigateToMemories = true
-        case .options:
-            navigateToOptions = true
-        }
+        navigationPath.append(item)
     }
 
     func resetNavigation() {
-        navigateToBouquet = false
-        navigateToMemories = false
-        navigateToOptions = false
+        navigationPath = NavigationPath()
     }
 }

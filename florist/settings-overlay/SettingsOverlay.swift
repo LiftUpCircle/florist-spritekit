@@ -1,0 +1,734 @@
+//
+//  SettingsOverlay.swift
+//  florist
+//
+//  Created by Farrah Allysha Maharani on 04/11/25.
+//
+
+import SpriteKit
+
+class SettingsOverlay: SKNode {
+    
+    
+    private let whiteColor = SKColor.white
+    private let darkGrayColor = SKColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
+    private let lightPinkColor = SKColor(red: 1.0, green: 0.85, blue: 0.9, alpha: 1.0)
+    private let redToggleColor = SKColor(red: 0.9, green: 0.2, blue: 0.2, alpha: 1.0)
+    private let separatorColor = SKColor.black
+    
+    private var backgroundNode: SKSpriteNode!
+    private var closeButton: SKNode!
+    
+    // Settings components
+    private var soundsToggle: ModernToggle!
+    private var musicToggle: ModernToggle!
+    private var vibrationToggle: ModernToggle!
+    
+    // Action buttons
+    private var rateGameButton: SKNode!
+    private var subscriptionsButton: SKNode!
+    private var contactUsButton: SKNode!
+    private var privacyButton: SKNode!
+    
+    var onClose: (() -> Void)?
+    
+    override init() {
+        super.init()
+        setupOverlay()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        setupOverlay()
+    }
+    
+    // Responsive calculation
+    private var sceneSize: CGSize = CGSize(width: 932, height: 430) //
+    
+    func setSceneSize(_ size: CGSize) {
+        sceneSize = size
+    }
+    
+    private func setupOverlay() {
+        
+        let overlayWidth = sceneSize.width * 0.70
+        let overlayHeight = sceneSize.height * 0.75
+        let cornerRadius: CGFloat = 20
+        
+        let screenBg = SKSpriteNode(color: SKColor.black.withAlphaComponent(0.5),
+                                     size: CGSize(width: sceneSize.width * 2, height: sceneSize.height * 2))
+        screenBg.position = CGPoint(x: 0, y: 0)
+        screenBg.zPosition = 1000
+        screenBg.name = "screenBackground"
+        addChild(screenBg)
+        
+        
+        let backgroundShape = SKShapeNode(rectOf: CGSize(width: overlayWidth, height: overlayHeight), cornerRadius: cornerRadius)
+        backgroundShape.fillColor = whiteColor
+        backgroundShape.strokeColor = .clear
+        backgroundShape.position = CGPoint(x: 0, y: 0)
+        backgroundShape.zPosition = 1001
+        
+        
+        backgroundNode = SKSpriteNode(color: whiteColor, size: CGSize(width: overlayWidth, height: overlayHeight))
+        backgroundNode.position = CGPoint(x: 0, y: 0)
+        backgroundNode.zPosition = 1001
+        backgroundNode.name = "settingsBackground"
+        addChild(backgroundNode)
+        
+        // Title "Settings"
+        setupTitle()
+        
+        // Close button (X)
+        setupCloseButton()
+        
+        // Settings toggles
+        setupToggles()
+        
+        // Action buttons
+        setupActionButtons()
+    }
+    
+    private func setupTitle() {
+        let overlayWidth = sceneSize.width * 0.70
+        let overlayHeight = sceneSize.height * 0.75
+        let titleFontSize = max(28, min(overlayWidth * 0.038, 40))
+        let titleLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
+        titleLabel.text = "Settings"
+        titleLabel.fontSize = titleFontSize
+        titleLabel.fontColor = darkGrayColor
+        titleLabel.horizontalAlignmentMode = .left
+        titleLabel.position = CGPoint(x: -overlayWidth * 0.35, y: overlayHeight * 0.35)
+        titleLabel.zPosition = 1002
+        addChild(titleLabel)
+    }
+    
+    private func setupCloseButton() {
+        let overlayWidth = sceneSize.width * 0.70
+        let overlayHeight = sceneSize.height * 0.75
+        let buttonSize: CGFloat = 35
+        // Close button at top-right
+        let buttonX = overlayWidth * 0.45
+        let buttonY = overlayHeight * 0.35
+        
+        closeButton = SKNode()
+        closeButton.name = "closeButton"
+        closeButton.zPosition = 1002
+        
+        // Black circular background with white X
+        let closeBg = SKShapeNode(circleOfRadius: buttonSize / 2)
+        closeBg.fillColor = darkGrayColor
+        closeBg.strokeColor = .clear
+        closeBg.zPosition = 0
+        closeButton.addChild(closeBg)
+        
+        let xMark = SKLabelNode(fontNamed: "Arial-BoldMT")
+        xMark.text = "✕"
+        xMark.fontSize = buttonSize * 0.6
+        xMark.fontColor = .white
+        xMark.verticalAlignmentMode = .center
+        xMark.horizontalAlignmentMode = .center
+        xMark.zPosition = 1
+        closeButton.addChild(xMark)
+        
+        closeButton.position = CGPoint(x: buttonX, y: buttonY)
+        addChild(closeButton)
+    }
+    
+    private func setupToggles() {
+        let overlayWidth = sceneSize.width * 0.70
+        let overlayHeight = sceneSize.height * 0.75
+        let labelFontSize = max(20, min(overlayWidth * 0.028, 28))
+        
+        // Minimized spacing - tighter rows
+        let startY = overlayHeight * 0.20
+        let rowSpacing = overlayHeight * 0.12
+        let labelX = -overlayWidth * 0.30
+        let toggleX = overlayWidth * 0.30
+        
+        // Separator lines
+        let separatorWidth = overlayWidth * 0.85
+        
+        // Sounds Toggle
+        let soundsLabel = SKLabelNode(fontNamed: "Arial")
+        soundsLabel.text = "Sounds"
+        soundsLabel.fontSize = labelFontSize
+        soundsLabel.fontColor = darkGrayColor
+        soundsLabel.horizontalAlignmentMode = .left
+        soundsLabel.position = CGPoint(x: labelX, y: startY)
+        soundsLabel.zPosition = 1002
+        addChild(soundsLabel)
+        
+        soundsToggle = ModernToggle(initialValue: SettingsManager.shared.sfxVolume > 0.0, toggleColor: redToggleColor)
+        soundsToggle.position = CGPoint(x: toggleX, y: startY)
+        soundsToggle.zPosition = 1002
+        soundsToggle.name = "soundsToggle"
+        addChild(soundsToggle)
+        
+        // Separator line after Sounds
+        let separator1 = SKShapeNode(rectOf: CGSize(width: separatorWidth, height: 1))
+        separator1.fillColor = separatorColor
+        separator1.position = CGPoint(x: 0, y: startY - rowSpacing * 0.5)
+        separator1.zPosition = 1002
+        addChild(separator1)
+        
+        // Music Toggle
+        let musicLabel = SKLabelNode(fontNamed: "Arial")
+        musicLabel.text = "Music"
+        musicLabel.fontSize = labelFontSize
+        musicLabel.fontColor = darkGrayColor
+        musicLabel.horizontalAlignmentMode = .left
+        musicLabel.position = CGPoint(x: labelX, y: startY - rowSpacing)
+        musicLabel.zPosition = 1002
+        addChild(musicLabel)
+        
+        musicToggle = ModernToggle(initialValue: SettingsManager.shared.musicVolume > 0.0, toggleColor: redToggleColor)
+        musicToggle.position = CGPoint(x: toggleX, y: startY - rowSpacing)
+        musicToggle.zPosition = 1002
+        musicToggle.name = "musicToggle"
+        addChild(musicToggle)
+        
+        // Separator line after Music
+        let separator2 = SKShapeNode(rectOf: CGSize(width: separatorWidth, height: 1))
+        separator2.fillColor = separatorColor
+        separator2.position = CGPoint(x: 0, y: startY - rowSpacing * 1.5)
+        separator2.zPosition = 1002
+        addChild(separator2)
+        
+        // Vibration Toggle
+        let vibrationLabel = SKLabelNode(fontNamed: "Arial")
+        vibrationLabel.text = "Vibration"
+        vibrationLabel.fontSize = labelFontSize
+        vibrationLabel.fontColor = darkGrayColor
+        vibrationLabel.horizontalAlignmentMode = .left
+        vibrationLabel.position = CGPoint(x: labelX, y: startY - rowSpacing * 2)
+        vibrationLabel.zPosition = 1002
+        addChild(vibrationLabel)
+        
+        vibrationToggle = ModernToggle(initialValue: SettingsManager.shared.isVibrationEnabled, toggleColor: redToggleColor)
+        vibrationToggle.position = CGPoint(x: toggleX, y: startY - rowSpacing * 2)
+        vibrationToggle.zPosition = 1002
+        vibrationToggle.name = "vibrationToggle"
+        addChild(vibrationToggle)
+        
+        // Final separator line
+        let separator3Y = startY - rowSpacing * 2.5
+        let separator3 = SKShapeNode(rectOf: CGSize(width: separatorWidth, height: 1))
+        separator3.fillColor = separatorColor
+        separator3.position = CGPoint(x: 0, y: separator3Y)
+        separator3.zPosition = 1002
+        addChild(separator3)
+    }
+    
+    
+    private func setupActionButtons() {
+        let overlayWidth = sceneSize.width * 0.70
+        let overlayHeight = sceneSize.height * 0.75
+        let buttonHeight = max(40, min(overlayHeight * 0.08, 48))
+        let buttonFontSize = max(16, min(overlayWidth * 0.024, 20))
+        let buttonCornerRadius: CGFloat = 8
+        let buttonGap: CGFloat = 8
+        
+        
+        let spacingAfterSeparator = overlayHeight * 0.08
+        let separator3Y = overlayHeight * 0.20 - overlayHeight * 0.12 * 2.5
+        let topButtonY = separator3Y - spacingAfterSeparator
+        let totalAvailableWidth = overlayWidth * 0.80
+        let totalGaps = buttonGap * 2
+        let buttonWidth = (totalAvailableWidth - totalGaps) / 3
+        
+        
+        let leftButtonX = -overlayWidth * 0.40 + buttonWidth / 2
+        let centerButtonX = leftButtonX + buttonWidth + buttonGap
+        let rightButtonX = centerButtonX + buttonWidth + buttonGap
+        
+     
+        rateGameButton = createActionButton(text: "Rate Game", width: buttonWidth, height: buttonHeight,
+                                           cornerRadius: buttonCornerRadius, fontSize: buttonFontSize)
+        rateGameButton.position = CGPoint(x: leftButtonX, y: topButtonY)
+        rateGameButton.name = "rateGameButton"
+        rateGameButton.zPosition = 1002
+        addChild(rateGameButton)
+        
+        // Subscriptions button (center)
+        subscriptionsButton = createActionButton(text: "Subscriptions", width: buttonWidth, height: buttonHeight,
+                                                 cornerRadius: buttonCornerRadius, fontSize: buttonFontSize)
+        subscriptionsButton.position = CGPoint(x: centerButtonX, y: topButtonY)
+        subscriptionsButton.name = "subscriptionsButton"
+        subscriptionsButton.zPosition = 1002
+        addChild(subscriptionsButton)
+        
+        // Contact Us button
+        contactUsButton = createActionButton(text: "Contact Us", width: buttonWidth, height: buttonHeight,
+                                            cornerRadius: buttonCornerRadius, fontSize: buttonFontSize)
+        contactUsButton.position = CGPoint(x: rightButtonX, y: topButtonY)
+        contactUsButton.name = "contactUsButton"
+        contactUsButton.zPosition = 1002
+        addChild(contactUsButton)
+        
+        let spacingBetweenButtonRows = overlayHeight * 0.06
+        let bottomButtonY = topButtonY - buttonHeight / 2 - spacingBetweenButtonRows - buttonHeight / 2
+        let privacyButtonWidth = overlayWidth * 0.75
+        
+        privacyButton = createActionButton(text: "Privacy policy & Term of use", width: privacyButtonWidth, height: buttonHeight,
+                                          cornerRadius: buttonCornerRadius, fontSize: buttonFontSize)
+        privacyButton.position = CGPoint(x: 0, y: bottomButtonY)
+        privacyButton.name = "privacyButton"
+        privacyButton.zPosition = 1002
+        addChild(privacyButton)
+    }
+    
+    private func createActionButton(text: String, width: CGFloat, height: CGFloat, cornerRadius: CGFloat, fontSize: CGFloat) -> SKNode {
+        let button = SKNode()
+        
+        let buttonBg = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: cornerRadius)
+        buttonBg.fillColor = lightPinkColor
+        buttonBg.strokeColor = .clear
+        buttonBg.zPosition = 0
+        button.addChild(buttonBg)
+        
+        let buttonLabel = SKLabelNode(fontNamed: "Arial")
+        buttonLabel.text = text
+        buttonLabel.fontSize = fontSize
+        buttonLabel.fontColor = darkGrayColor
+        buttonLabel.verticalAlignmentMode = .center
+        buttonLabel.horizontalAlignmentMode = .center
+        buttonLabel.zPosition = 1
+        button.addChild(buttonLabel)
+        
+        return button
+    }
+    
+    // MARK: - Touch Handling
+    
+    func handleTouch(at location: CGPoint, controller: SettingsOverlayController) -> Bool {
+        let touchedNode = atPoint(location)
+        
+        // Check toggles
+        var node: SKNode? = touchedNode
+        while node != nil && node != self {
+            if let toggle = node as? ModernToggle {
+                toggle.toggle()
+                
+                // Delegate to controller
+                if toggle == soundsToggle {
+                    controller.handleSoundsToggle(toggle.isOn)
+                } else if toggle == musicToggle {
+                    controller.handleMusicToggle(toggle.isOn)
+                } else if toggle == vibrationToggle {
+                    controller.handleVibrationToggle(toggle.isOn)
+                }
+                return true
+            }
+            node = node?.parent
+        }
+        
+        // Check action buttons
+        if let nodeName = touchedNode.name {
+            switch nodeName {
+            case "closeButton":
+                controller.handleCloseTap()
+                return true
+            case "rateGameButton":
+                controller.handleRateGameTap()
+                return true
+            case "subscriptionsButton":
+                controller.handleSubscriptionsTap()
+                return true
+            case "contactUsButton":
+                controller.handleContactUsTap()
+                return true
+            case "privacyButton":
+                controller.handlePrivacyTap()
+                return true
+            default:
+                break
+            }
+        }
+        
+        // Check parent nodes for buttons
+        node = touchedNode.parent
+        while node != nil && node != self {
+            if let nodeName = node?.name {
+                switch nodeName {
+                case "closeButton":
+                    controller.handleCloseTap()
+                    return true
+                case "rateGameButton":
+                    controller.handleRateGameTap()
+                    return true
+                case "subscriptionsButton":
+                    controller.handleSubscriptionsTap()
+                    return true
+                case "contactUsButton":
+                    controller.handleContactUsTap()
+                    return true
+                case "privacyButton":
+                    controller.handlePrivacyTap()
+                    return true
+                default:
+                    break
+                }
+            }
+            node = node?.parent
+        }
+        
+        return false
+    }
+    
+    // MARK: - Public Touch
+    
+    func handleTouchBegan(_ touch: UITouch, controller: SettingsOverlayController) -> Bool {
+        let location = touch.location(in: self)
+        return handleTouch(at: location, controller: controller)
+    }
+    
+    func handleTouchMoved(_ touch: UITouch, controller: SettingsOverlayController) -> Bool {
+        
+        return false
+    }
+    
+    func handleTouchEnded(_ touch: UITouch, controller: SettingsOverlayController) -> Bool {
+        return false
+    }
+    
+    func show(in scene: SKScene) {
+        alpha = 0.0
+        scene.addChild(self)
+        run(SKAction.fadeIn(withDuration: 0.3))
+    }
+    
+    func close() {
+        run(SKAction.sequence([
+            SKAction.fadeOut(withDuration: 0.2),
+            SKAction.removeFromParent()
+        ])) {
+            self.onClose?()
+        }
+    }
+    
+    func presentInScene(_ scene: SKScene) {
+        // Size for responsive calculations
+        setSceneSize(scene.size)
+        // Recreate overlay sizenya repsonsive
+        removeAllChildren()
+        setupOverlay()
+        // Overlay center
+        position = CGPoint(x: scene.size.width / 2, y: scene.size.height / 2)
+        show(in: scene)
+    }
+}
+
+// MARK: - Volume Slider Component
+
+class VolumeSlider: SKNode {
+    private let trackWidth: CGFloat
+    private var trackNode: SKShapeNode!
+    private var knobNode: SKShapeNode!
+    private var leftArrow: SKLabelNode!
+    private var rightArrow: SKLabelNode!
+    
+    let woodColor = SKColor(red: 0.40, green: 0.25, blue: 0.16, alpha: 1.0)
+    let darkWoodColor = SKColor(red: 0.25, green: 0.15, blue: 0.10, alpha: 1.0)
+    
+    var currentValue: Float = 1.0
+    private let minX: CGFloat
+    private let maxX: CGFloat
+    
+    init(width: CGFloat, initialValue: Float) {
+        self.trackWidth = width
+        self.currentValue = initialValue
+        self.minX = -width / 2
+        self.maxX = width / 2
+        
+        super.init()
+        
+        setupSlider()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupSlider() {
+        // Track
+        trackNode = SKShapeNode(rectOf: CGSize(width: trackWidth, height: 12))
+        trackNode.fillColor = woodColor
+        trackNode.strokeColor = darkWoodColor
+        trackNode.lineWidth = 2
+        trackNode.position = CGPoint(x: 0, y: 0)
+        trackNode.zPosition = 0
+        trackNode.name = "sliderTrack"
+        trackNode.isUserInteractionEnabled = false
+        addChild(trackNode)
+        
+        // Knob
+        let knobRadius: CGFloat = 25
+        knobNode = SKShapeNode(circleOfRadius: knobRadius)
+        knobNode.fillColor = woodColor
+        knobNode.strokeColor = darkWoodColor
+        knobNode.lineWidth = 3
+        knobNode.zPosition = 1
+        knobNode.name = "sliderKnob"
+        knobNode.isUserInteractionEnabled = false
+        addChild(knobNode)
+        
+        // Left arrow
+        leftArrow = SKLabelNode(fontNamed: "Arial-BoldMT")
+        leftArrow.text = "◄"
+        leftArrow.fontSize = 18
+        leftArrow.fontColor = .white
+        leftArrow.position = CGPoint(x: -knobRadius * 0.4, y: 0)
+        leftArrow.zPosition = 2
+        knobNode.addChild(leftArrow)
+        
+        // Right arrow
+        rightArrow = SKLabelNode(fontNamed: "Arial-BoldMT")
+        rightArrow.text = "►"
+        rightArrow.fontSize = 18
+        rightArrow.fontColor = .white
+        rightArrow.position = CGPoint(x: knobRadius * 0.4, y: 0)
+        rightArrow.zPosition = 2
+        knobNode.addChild(rightArrow)
+        
+        updateKnobPosition()
+    }
+    
+    func setupNames(_ baseName: String) {
+        self.name = baseName
+        trackNode.name = "\(baseName)Track"
+        knobNode.name = "\(baseName)Knob"
+    }
+    
+    private func updateKnobPosition() {
+        let normalizedValue = CGFloat(currentValue)
+        knobNode.position.x = minX + (maxX - minX) * normalizedValue
+    }
+    
+    func handleDragStart(_ location: CGPoint) {
+        updateValue(from: location.x)
+    }
+    
+    func handleDrag(_ location: CGPoint) {
+        updateValue(from: location.x)
+    }
+    
+    private func updateValue(from xPosition: CGFloat) {
+        let clampedX = max(minX, min(maxX, xPosition))
+        let normalizedValue = (clampedX - minX) / (maxX - minX)
+        currentValue = Float(normalizedValue)
+        updateKnobPosition()
+    }
+}
+
+// MARK: - Toggle Switch
+
+class WoodenToggle: SKNode {
+    private var leftSegment: SKShapeNode!
+    private var rightSegment: SKShapeNode!
+    private var leftLabel: SKLabelNode!
+    private var rightLabel: SKLabelNode!
+    
+    let woodColor = SKColor(red: 0.40, green: 0.25, blue: 0.16, alpha: 1.0)
+    let darkWoodColor = SKColor(red: 0.25, green: 0.15, blue: 0.10, alpha: 1.0)
+    let highlightedColor = SKColor(red: 0.55, green: 0.35, blue: 0.22, alpha: 1.0)
+    
+    var isOn: Bool = false
+    
+    init(initialValue: Bool) {
+        self.isOn = initialValue
+        super.init()
+        setupToggle()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupToggle() {
+        let segmentWidth: CGFloat = 80
+        let segmentHeight: CGFloat = 50
+        let segmentSpacing: CGFloat = 5
+        
+        
+        leftSegment = SKShapeNode(rectOf: CGSize(width: segmentWidth, height: segmentHeight))
+        leftSegment.fillColor = isOn ? highlightedColor : woodColor
+        leftSegment.strokeColor = darkWoodColor
+        leftSegment.lineWidth = 2
+        leftSegment.position = CGPoint(x: -(segmentWidth / 2 + segmentSpacing / 2), y: 0)
+        leftSegment.zPosition = 0
+        addChild(leftSegment)
+        
+        leftLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
+        leftLabel.text = "000"
+        leftLabel.fontSize = 24
+        leftLabel.fontColor = .white
+        leftLabel.position = CGPoint(x: 0, y: 0)
+        leftLabel.zPosition = 1
+        leftSegment.addChild(leftLabel)
+        
+        
+        rightSegment = SKShapeNode(rectOf: CGSize(width: segmentWidth, height: segmentHeight))
+        rightSegment.fillColor = isOn ? woodColor : highlightedColor
+        rightSegment.strokeColor = darkWoodColor
+        rightSegment.lineWidth = 2
+        rightSegment.position = CGPoint(x: segmentWidth / 2 + segmentSpacing / 2, y: 0)
+        rightSegment.zPosition = 0
+        addChild(rightSegment)
+        
+        rightLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
+        rightLabel.text = isOn ? "ON" : "OFF"
+        rightLabel.fontSize = 20
+        rightLabel.fontColor = .white
+        rightLabel.position = CGPoint(x: 0, y: 0)
+        rightLabel.zPosition = 1
+        rightSegment.addChild(rightLabel)
+    }
+    
+    func toggle() {
+        isOn.toggle()
+        updateAppearance()
+    }
+    
+    private func updateAppearance() {
+        leftSegment.fillColor = isOn ? highlightedColor : woodColor
+        rightSegment.fillColor = isOn ? woodColor : highlightedColor
+        rightLabel.text = isOn ? "ON" : "OFF"
+    }
+}
+
+// MARK: - Checkbox
+
+class WoodenCheckbox: SKNode {
+    private var checkboxCircle: SKShapeNode!
+    private var checkmark: SKLabelNode?
+    
+    let woodColor = SKColor(red: 0.40, green: 0.25, blue: 0.16, alpha: 1.0)
+    let darkWoodColor = SKColor(red: 0.25, green: 0.15, blue: 0.10, alpha: 1.0)
+    
+    var isOn: Bool = false
+    
+    init(initialValue: Bool) {
+        self.isOn = initialValue
+        super.init()
+        setupCheckbox()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupCheckbox() {
+        let radius: CGFloat = 30
+        
+        checkboxCircle = SKShapeNode(circleOfRadius: radius)
+        checkboxCircle.fillColor = isOn ? darkWoodColor : woodColor
+        checkboxCircle.strokeColor = darkWoodColor
+        checkboxCircle.lineWidth = 3
+        checkboxCircle.zPosition = 0
+        addChild(checkboxCircle)
+        
+        if isOn {
+            checkmark = SKLabelNode(fontNamed: "Arial-BoldMT")
+            checkmark!.text = "✓"
+            checkmark!.fontSize = 40
+            checkmark!.fontColor = .white
+            checkmark!.verticalAlignmentMode = .center
+            checkmark!.zPosition = 1
+            addChild(checkmark!)
+        }
+    }
+    
+    func toggle() {
+        isOn.toggle()
+        updateAppearance()
+    }
+    
+    private func updateAppearance() {
+        checkboxCircle.fillColor = isOn ? darkWoodColor : woodColor
+        
+        if isOn {
+            if checkmark == nil {
+                checkmark = SKLabelNode(fontNamed: "Arial-BoldMT")
+                checkmark!.text = "✓"
+                checkmark!.fontSize = 40
+                checkmark!.fontColor = .white
+                checkmark!.verticalAlignmentMode = .center
+                checkmark!.zPosition = 1
+                addChild(checkmark!)
+            }
+        } else {
+            checkmark?.removeFromParent()
+            checkmark = nil
+        }
+    }
+}
+
+// MARK: - Toggle Switch
+
+class ModernToggle: SKNode {
+    private var trackNode: SKShapeNode!
+    private var knobNode: SKShapeNode!
+    
+    private let toggleColor: SKColor
+    private let trackOffColor = SKColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1.0)
+    private let knobColor = SKColor.white
+    
+    var isOn: Bool = false
+    
+    init(initialValue: Bool, toggleColor: SKColor) {
+        self.isOn = initialValue
+        self.toggleColor = toggleColor
+        super.init()
+        setupToggle()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupToggle() {
+        // Toggle track (horizontal rectangle)
+        let trackWidth: CGFloat = 50
+        let trackHeight: CGFloat = 30
+        
+        trackNode = SKShapeNode(rectOf: CGSize(width: trackWidth, height: trackHeight), cornerRadius: trackHeight / 2)
+        trackNode.fillColor = isOn ? toggleColor : trackOffColor
+        trackNode.strokeColor = .clear
+        trackNode.zPosition = 0
+        trackNode.isUserInteractionEnabled = false
+        addChild(trackNode)
+        
+        // Toggle knob (circular)
+        let knobRadius: CGFloat = 12
+        let knobX = isOn ? trackWidth / 2 - knobRadius - 2 : -trackWidth / 2 + knobRadius + 2
+        
+        knobNode = SKShapeNode(circleOfRadius: knobRadius)
+        knobNode.fillColor = knobColor
+        knobNode.strokeColor = .clear
+        knobNode.position = CGPoint(x: knobX, y: 0)
+        knobNode.zPosition = 1
+        knobNode.isUserInteractionEnabled = false
+        addChild(knobNode)
+    }
+    
+    func toggle() {
+        isOn.toggle()
+        updateAppearance()
+    }
+    
+    private func updateAppearance() {
+        let trackWidth: CGFloat = 50
+        let knobRadius: CGFloat = 12
+        let knobX = isOn ? trackWidth / 2 - knobRadius - 2 : -trackWidth / 2 + knobRadius + 2
+        
+        
+        trackNode.fillColor = isOn ? toggleColor : trackOffColor
+        
+        
+        let moveAction = SKAction.moveTo(x: knobX, duration: 0.2)
+        moveAction.timingMode = .easeInEaseOut
+        knobNode.run(moveAction)
+    }
+}
+

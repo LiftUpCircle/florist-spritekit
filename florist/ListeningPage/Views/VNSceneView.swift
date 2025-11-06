@@ -147,7 +147,7 @@ struct VNSceneView: View {
             DialogueHistoryView(entries: controller.dialogueHistory)
         }
         .sheet(isPresented: $controller.showSettings) {
-            SettingsView()
+            StorySettingsView()
         }
         .alert("Error", isPresented: $controller.showError) {
             Button("OK", role: .cancel) { }

@@ -9,9 +9,11 @@ import SwiftUI
 
 struct MainMenuView: View {
     @StateObject private var controller = MainMenuViewController()
+    @StateObject private var flowCoordinator = GameFlowCoordinator()
+    @State private var showSettings = false
 
     var body: some View {
-        NavigationView {
+        NavigationStack(path: $flowCoordinator.navigationPath) {
             ZStack {
                 LinearGradient(
                     gradient: Gradient(colors: [
@@ -29,7 +31,7 @@ struct MainMenuView: View {
                         VStack(/*spacing: 40*/) {
                             ForEach(controller.model.menuItems, id: \.self) { item in
                                 MenuButton(title: item.rawValue) {
-                                    controller.handleMenuSelection(item)
+                                    handleMenuSelection(item)
                                 }
                                 .padding(.vertical,5)
                             }
@@ -40,28 +42,44 @@ struct MainMenuView: View {
                         )
                 }
 
-                // Navigation links (hidden)
-                NavigationLink(
-                    destination: BouquetView(),
-                    isActive: $controller.navigateToBouquet
-                ) { EmptyView() }
-
-                NavigationLink(
-                    destination: MemoriesView(),
-                    isActive: $controller.navigateToMemories
-                ) { EmptyView() }
-
-                NavigationLink(
-                    destination: Text("Options - Coming Soon")
-                        .font(.largeTitle)
-                        .foregroundColor(.gray),
-                    isActive: $controller.navigateToOptions
-                ) { EmptyView() }
+                // Settings overlay
+                if showSettings {
+                    SettingsOverlayView(isPresented: $showSettings)
+                        .transition(.opacity)
+                        .zIndex(100)
+                }
             }
             .navigationBarHidden(true)
+            .navigationDestination(for: GameFlowCoordinator.GamePage.self) { page in
+                switch page {
+                case .listening(let storyId):
+                    ListeningPageView(storyId: storyId, flowCoordinator: flowCoordinator)
+                case .bouquet(let storyId):
+                    BouquetPageWrapper(storyId: storyId, flowCoordinator: flowCoordinator)
+                case .memories:
+                    MemoriesView()
+                case .options:
+                    EmptyView() // Options now handled as overlay
+                case .mainMenu:
+                    EmptyView() // This shouldn't be reached
+                }
+            }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
         .statusBar(hidden: true)
+        .environmentObject(flowCoordinator)
+    }
+    
+    private func handleMenuSelection(_ item: MainMenuModel.MenuItem) {
+        switch item {
+        case .start:
+            flowCoordinator.startNewGame()
+        case .memories:
+            flowCoordinator.navigateToMemories()
+        case .options:
+            withAnimation {
+                showSettings = true
+            }
+        }
     }
 }
 

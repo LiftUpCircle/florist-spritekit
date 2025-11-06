@@ -8,7 +8,7 @@
 import Foundation
 
 struct MainMenuModel {
-    enum MenuItem: String, CaseIterable {
+    enum MenuItem: String, CaseIterable, Hashable {
         case start = "Start"
         case memories = "Memories"
         case options = "Options"

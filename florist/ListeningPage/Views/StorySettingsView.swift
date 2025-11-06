@@ -1,5 +1,5 @@
 //
-//  Settings.swift
+//  StorySettingsView.swift
 //  florist
 //
 //  Created by Hafi on 04/11/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct SettingsView: View {
+struct StorySettingsView: View {
     @Environment(\.dismiss) var dismiss
     @AppStorage("textSpeed") private var textSpeed: Double = 1.0
     @AppStorage("autoAdvance") private var autoAdvance: Bool = false
@@ -47,5 +47,5 @@ struct SettingsView: View {
 }
 
 #Preview {
-    SettingsView()
+    StorySettingsView()
 }
