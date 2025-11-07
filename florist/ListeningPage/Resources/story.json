@@ -1,0 +1,46 @@
+{
+  "title": "A Simple Encounter",
+  "scenes": [
+    {
+      "id": "scene_001",
+      "backgroundImage": "background_temp",
+      "characterSprite": "character_temp",
+      "characterName": "Alice",
+      "dialogue": "Hello! Welcome to our story. I'm so glad you're here.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "scene_002",
+      "backgroundImage": "background_temp",
+      "characterSprite": "character_temp",
+      "characterName": "Alice",
+      "dialogue": "This is a visual novel system built with SwiftUI. Pretty cool, right?",
+      "spritePosition": "right"
+    },
+    {
+      "id": "scene_003",
+      "backgroundImage": "background_temp",
+      "characterSprite": null,
+      "characterName": "Narrator",
+      "dialogue": "Alice walked outside into the beautiful garden, taking in the fresh air.",
+      "spritePosition": null
+    },
+    {
+      "id": "scene_004",
+      "backgroundImage": "background_temp",
+      "characterSprite": "character_temp",
+      "characterName": "Alice",
+      "dialogue": "Oh! What a lovely day it is. The flowers are blooming beautifully.",
+      "spritePosition": "left"
+    },
+    {
+      "id": "scene_005",
+      "backgroundImage": "background_temp",
+      "characterSprite": "character_temp",
+      "characterName": "Alice",
+      "dialogue": "Thanks for experiencing this story with me. I hope you enjoyed it!",
+      "spritePosition": "center"
+    }
+  ]
+}
+
