@@ -235,15 +235,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             addChild(bouquetBackNode)
 
             // Create invisible placement area with physics body from BACK texture
-            // This ensures flowers can only be placed on the back part
             bouquetPlacementArea = SKSpriteNode(texture: backTexture)
             bouquetPlacementArea.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
             bouquetPlacementArea.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.7)
-            bouquetPlacementArea.zPosition = 11 // Just above the back image
-            bouquetPlacementArea.alpha = 0.0 // Make it invisible
+            bouquetPlacementArea.zPosition = 11
+            bouquetPlacementArea.alpha = 0.0
 
-            // Create physics body from BACK texture's alpha channel
-            // This creates an accurate hitbox that follows the back's shape
             bouquetPlacementArea.physicsBody = SKPhysicsBody(texture: backTexture, size: bouquetPlacementArea.size)
             bouquetPlacementArea.physicsBody?.isDynamic = false
             bouquetPlacementArea.physicsBody?.categoryBitMask = 0x1
@@ -253,11 +250,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             addChild(bouquetPlacementArea)
         }
 
-        // Container for flowers (between back and front)
+        // Create a crop node to mask the flowers
+        let flowersCropNode = SKCropNode()
+        flowersCropNode.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
+        flowersCropNode.zPosition = 15
+        
+        // Create a mask that matches the bouquet back shape
+        // This will hide any parts of flowers that extend outside
+        if let backTexture = SKTexture(imageNamed: "BouquetBack") as SKTexture? {
+            let maskSprite = SKSpriteNode(texture: backTexture)
+            maskSprite.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.7)
+            flowersCropNode.maskNode = maskSprite
+        }
+        
+        // Container for flowers (inside the crop node)
         bouquetFlowersContainer = SKNode()
-        bouquetFlowersContainer.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
-        bouquetFlowersContainer.zPosition = 15
-        addChild(bouquetFlowersContainer)
+        flowersCropNode.addChild(bouquetFlowersContainer)
+        addChild(flowersCropNode)
 
         // Bouquet front image (visual only, no physics)
         if let frontTexture = SKTexture(imageNamed: "BouquetFront") as SKTexture? {
