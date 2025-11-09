@@ -15,32 +15,74 @@ struct MainMenuView: View {
     var body: some View {
         NavigationStack(path: $flowCoordinator.navigationPath) {
             ZStack {
-                LinearGradient(
-                    gradient: Gradient(colors: [
-                        Color.white,
-                        Color(red: 0.85, green: 0.85, blue: 0.87)
-                    ]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                // Background image
+                Image("Background")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .ignoresSafeArea()
+
+                // Main content
+                VStack {
+                    Spacer()
+                    // Top area with Memories button
+                    HStack {
+                        Spacer()
+
+                        // Memories button
+                        Button(action: {
+                            flowCoordinator.navigateToMemories()
+                        }) {
+                            Image("MemoriesButton")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 80, height: 80)
+                        }
+                        .padding(.top, 60)
+                        .padding(.trailing, 50)
+                    }
+
+                    // Settings button at bottom right
+                    HStack {
+                        Spacer()
+
+                        Button(action: {
+                            withAnimation {
+                                showSettings = true
+                            }
+                        }) {
+                            Image("MainMenuSettingsButton")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 80, height: 80)
+                        }
+                        .padding(.bottom, 40)
+                        .padding(.trailing, 50)
+                    }
+                }
                 .ignoresSafeArea()
 
-                // Menu panel on the right side
-                HStack {
+                VStack {
                     Spacer()
-                        VStack(/*spacing: 40*/) {
-                            ForEach(controller.model.menuItems, id: \.self) { item in
-                                MenuButton(title: item.rawValue) {
-                                    handleMenuSelection(item)
-                                }
-                                .padding(.vertical,5)
-                            }
+
+                    Button(action: {
+                        flowCoordinator.startNewGame()
+                    }) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 35)
+                                .fill(Color(red: 1.0, green: 0.95, blue: 0.85))
+                                .frame(width: 280, height: 80)
+                                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 3)
+
+                            Text("Tap to Play")
+                                .font(.custom("Arial Rounded MT Bold", size: 32))
+                                .foregroundColor(Color(red: 0.4, green: 0.2, blue: 0.1))
                         }
-                        .background(
-                            RoundedRectangle(cornerRadius: 25)
-                                .fill(Color.gray.opacity(0.6))
-                        )
+                    }
+
+                    Spacer()
+                        .frame(height: 60) // Adjust this to position the button
                 }
+                .ignoresSafeArea()
 
                 // Settings overlay
                 if showSettings {
@@ -49,6 +91,7 @@ struct MainMenuView: View {
                         .zIndex(100)
                 }
             }
+            .ignoresSafeArea()
             .navigationBarHidden(true)
             .navigationDestination(for: GameFlowCoordinator.GamePage.self) { page in
                 switch page {
@@ -67,35 +110,6 @@ struct MainMenuView: View {
         }
         .statusBar(hidden: true)
         .environmentObject(flowCoordinator)
-    }
-    
-    private func handleMenuSelection(_ item: MainMenuModel.MenuItem) {
-        switch item {
-        case .start:
-            flowCoordinator.startNewGame()
-        case .memories:
-            flowCoordinator.navigateToMemories()
-        case .options:
-            withAnimation {
-                showSettings = true
-            }
-        }
-    }
-}
-
-struct MenuButton: View {
-    let title: String
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.custom("Arial Rounded MT Bold", size: 40))
-                .foregroundColor(.white)
-                .padding(.vertical, 8)
-                .padding(.leading, 16)
-                .padding(.trailing, 86)
-        }
     }
 }
 
