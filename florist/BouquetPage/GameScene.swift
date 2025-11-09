@@ -257,9 +257,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         
         // Create a mask that matches the bouquet back shape
         // This will hide any parts of flowers that extend outside
+        // Extended height to allow flowers to show properly at the top
         if let backTexture = SKTexture(imageNamed: "BouquetBack") as SKTexture? {
             let maskSprite = SKSpriteNode(texture: backTexture)
-            maskSprite.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.7)
+            // Extend the mask height by 40% to allow flowers at the top to show properly
+            // while keeping the width the same
+            maskSprite.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.98)
+            // Shift the mask up slightly to extend more at the top
+            maskSprite.position = CGPoint(x: 0, y: bouquetRect.height * 0.08)
             flowersCropNode.maskNode = maskSprite
         }
         
