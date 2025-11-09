@@ -255,18 +255,69 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         flowersCropNode.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
         flowersCropNode.zPosition = 15
         
-        // Create a mask that matches the bouquet back shape
-        // This will hide any parts of flowers that extend outside
-        // Extended height to allow flowers to show properly at the top
+        // Create a composite mask with two zones:
+        // 1. Bottom zone: follows bouquet shape for natural petal draping
+        // 2. Top zone: large rectangle for full petal visibility
+        let compositeMaskNode = SKNode()
+
+        // Bottom zone: Use the original bouquet texture for the lower portion
         if let backTexture = SKTexture(imageNamed: "BouquetBack") as SKTexture? {
-            let maskSprite = SKSpriteNode(texture: backTexture)
-            // Extend the mask height by 40% to allow flowers at the top to show properly
-            // while keeping the width the same
-            maskSprite.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.98)
-            // Shift the mask up slightly to extend more at the top
-            maskSprite.position = CGPoint(x: 0, y: bouquetRect.height * 0.08)
-            flowersCropNode.maskNode = maskSprite
+            let bouquetMaskBottom = SKSpriteNode(texture: backTexture)
+            bouquetMaskBottom.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.7)
+            bouquetMaskBottom.position = CGPoint(x: 0, y: 0)
+            compositeMaskNode.addChild(bouquetMaskBottom)
         }
+
+        // Top zone: Large rectangular area for unrestricted petal display
+        // This prevents early clipping of flowers placed at the top
+        // TEMPORARY: Using cyan color for visualization
+        let topClipArea = SKSpriteNode(color: .cyan, size: CGSize(
+            width: bouquetRect.width * 1.2,  // Wider than bouquet for side petals
+            height: bouquetRect.height * 0.9  // Generous height for top flowers
+        ))
+        topClipArea.position = CGPoint(x: 0, y: bouquetRect.height * 0.66)  // Position above bouquet center
+        compositeMaskNode.addChild(topClipArea)
+
+        // Right side zone: Extra clipping area for right-side flowers
+        // This fixes the asymmetry issue
+        let rightClipArea = SKSpriteNode(color: .green, size: CGSize(
+            width: bouquetRect.width * 0.4,  // Width of the extension
+            height: bouquetRect.height * 0.2  // Height coverage
+        ))
+        rightClipArea.position = CGPoint(
+            x: bouquetRect.width * 0.45,  // Position on the right side
+            y: bouquetRect.height * 0.285   // Slightly above center
+        )
+        compositeMaskNode.addChild(rightClipArea)
+
+        flowersCropNode.maskNode = compositeMaskNode
+
+//        // DEBUG: Add visual indicator to show where the top clip area is
+//        // This is a separate sprite, not part of the mask
+//        let debugTopClipVisual = SKSpriteNode(color: UIColor.cyan.withAlphaComponent(0.3), size: CGSize(
+//            width: bouquetRect.width * 1.2,
+//            height: bouquetRect.height * 0.9
+//        ))
+//        debugTopClipVisual.position = CGPoint(
+//            x: bouquetRect.midX,
+//            y: bouquetRect.midY + bouquetRect.height * 0.66
+//        )
+//        debugTopClipVisual.zPosition = 14  // Just below the crop node
+//        debugTopClipVisual.name = "debugTopClipArea"
+//        addChild(debugTopClipVisual)
+//
+//        // DEBUG: Add visual indicator for right clip area
+//        let debugRightClipVisual = SKSpriteNode(color: UIColor.green.withAlphaComponent(0.3), size: CGSize(
+//            width: bouquetRect.width * 0.4,
+//            height: bouquetRect.height * 0.2
+//        ))
+//        debugRightClipVisual.position = CGPoint(
+//            x: bouquetRect.midX + bouquetRect.width * 0.45,
+//            y: bouquetRect.midY + bouquetRect.height * 0.285
+//        )
+//        debugRightClipVisual.zPosition = 14
+//        debugRightClipVisual.name = "debugRightClipArea"
+//        addChild(debugRightClipVisual)
         
         // Container for flowers (inside the crop node)
         bouquetFlowersContainer = SKNode()
