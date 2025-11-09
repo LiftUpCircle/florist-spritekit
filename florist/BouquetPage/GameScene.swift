@@ -90,7 +90,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
 
     // Placed flowers (freeform placement)
     private var placedFlowers: [FlowerNode] = []
-    private let maxFlowers = 15 // Increased limit for freeform placement
+    private let maxFlowers = 30 // Increased limit for freeform placement
 
     // Drag state
     private var selectedFlower: FlowerNode?
