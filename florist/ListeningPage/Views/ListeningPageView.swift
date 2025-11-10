@@ -120,17 +120,6 @@ struct ListeningPageView: View {
                     }
                     Spacer()
                 }
-                
-                // Completion Overlay - Navigate to Bouquet Page
-                if controller.isStoryComplete {
-                    CompletionOverlay(
-                        onRestart: {
-                            // Navigate to bouquet page
-                            flowCoordinator.navigateToBouquet(storyId: storyId)
-                        },
-                        buttonText: "Continue to Bouquet"
-                    )
-                }
             }
         }
         .ignoresSafeArea()
@@ -166,6 +155,13 @@ struct ListeningPageView: View {
         .onAppear {
             // Load the story for this storyId
             controller.loadStory(from: storyId)
+        }
+        .onChange(of: controller.isStoryComplete) { isComplete in
+            if isComplete {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    flowCoordinator.navigateToBouquet(storyId: storyId)
+                }
+            }
         }
     }
 }
