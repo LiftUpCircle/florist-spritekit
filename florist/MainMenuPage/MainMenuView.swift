@@ -62,23 +62,8 @@ struct MainMenuView: View {
                     }
                 }
                 .ignoresSafeArea()
-
-                VStack {
-                    Spacer()
-
-                    Button(action: {
-                        flowCoordinator.startNewGame()
-                    }) {
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 35)
-                                .fill(Color("PlayButton"))
-                                .frame(width: 168, height: 56)
-                                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 3)
-
-                            Text("Tap to Play")
-                                .font(.title3Gaegu)
-                                .foregroundColor(Color("TextPlayButton"))
                 
+                // Menu items
                 VStack(spacing: 40) {
                     ForEach(controller.model.menuItems, id: \.self) { item in
                         if item == .start {
@@ -311,6 +296,7 @@ struct MenuButton: View {
         }
     }
 }
+
 
 #Preview {
     MainMenuView()

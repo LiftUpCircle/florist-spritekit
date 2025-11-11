@@ -15,17 +15,28 @@ struct ChapterListView: View {
         ZStack(alignment: .topLeading) {
             // Main content
             HStack(alignment: .top, spacing: 30) {
-                // Left side - Title and story info
+                // Left side - Chapter list
                 VStack(alignment: .leading, spacing: 15) {
                     // Title
                     if let folder = controller.selectedMemoryFolder {
                         Text(folder.title)
                             .font(.title2Gaegu)
                             .foregroundColor(.black)
+                            .padding(.bottom, 10)
                         
-                        Text("Completed: \(formattedDate(story.completionDate))")
-                            .font(.custom("Arial", size: 14))
-                            .foregroundColor(.gray)
+                        // List of completed stories
+                        ScrollView {
+                            VStack(spacing: 10) {
+                                ForEach(completedStories, id: \.storyId) { story in
+                                    ChapterButton(
+                                        story: story,
+                                        isSelected: controller.selectedCompletedStory?.storyId == story.storyId
+                                    ) {
+                                        controller.selectCompletedStory(story)
+                                    }
+                                }
+                            }
+                        }
                     }
                     
                     Spacer()
@@ -62,22 +73,45 @@ struct ChapterListView: View {
         .edgesIgnoringSafeArea(.all)
     }
     
+    private func formattedDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
+    }
+}
+
+// MARK: - Chapter Button
+
+struct ChapterButton: View {
+    let story: CompletedStory
+    let isSelected: Bool
+    let action: () -> Void
+    
     var body: some View {
         Button(action: action) {
-            HStack {
-                Text(chapter.title)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(story.storyTitle)
                     .font(.headlineGaegu)
                     .foregroundColor(isSelected ? .white : .black)
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 20)
-                Spacer()
+                
+                Text("Completed: \(formattedDate)")
+                    .font(.custom("Arial", size: 12))
+                    .foregroundColor(isSelected ? .white.opacity(0.8) : .gray)
             }
-            .frame(width: 200)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 20)
+            .frame(width: 200, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 12)
                     .fill(isSelected ? Color.blue.opacity(0.6) : Color.gray.opacity(0.2))
             )
         }
+    }
+    
+    private var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        return formatter.string(from: story.completionDate)
     }
 }
 

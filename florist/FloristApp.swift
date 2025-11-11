@@ -11,15 +11,8 @@ import SwiftData
 @main
 struct FloristApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @State private var showSplashScreen = true
-
-    var body: some Scene {
-        WindowGroup {
-            if showSplashScreen {
-                SplashScreenView {
-                    showSplashScreen = false
-                }
     @Environment(\.scenePhase) private var scenePhase
+    @State private var showSplashScreen = true
     
     let modelContainer: ModelContainer
     
@@ -100,16 +93,18 @@ struct FloristApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainMenuView()
-                .modelContainer(modelContainer)
-                .preferredColorScheme(.light)
-                .onAppear {
-                    // Lock orientation to landscape
-                    AppDelegate.orientationLock = .landscape
+            if showSplashScreen {
+                SplashScreenView {
+                    showSplashScreen = false
                 }
             } else {
                 MainMenuView()
+                    .modelContainer(modelContainer)
                     .preferredColorScheme(.light)
+                    .onAppear {
+                        // Lock orientation to landscape
+                        AppDelegate.orientationLock = .landscape
+                    }
             }
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
