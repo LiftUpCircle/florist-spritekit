@@ -25,7 +25,7 @@ struct FlowerBookView: View {
                     // Header
                     HStack {
                         Text("🌸 Floriography Guide")
-                            .font(.custom("Gaegu-Bold", size: min(28, geometry.size.width * 0.035)))
+                            .font(.custom(GaeguTypography.boldFontName, size: min(FontSize.title2, geometry.size.width * 0.035)))
                             .foregroundColor(Color(red: 0.4, green: 0.2, blue: 0.3))
 
                         Spacer()
@@ -34,7 +34,7 @@ struct FlowerBookView: View {
                             onDismiss()
                         }) {
                             Image(systemName: "xmark.circle.fill")
-                                .font(.custom("Gaegu-Regular", size: min(28, geometry.size.width * 0.035)))
+                                .font(.custom(GaeguTypography.regularFontName, size: min(FontSize.title2, geometry.size.width * 0.035)))
                                 .foregroundColor(Color(red: 0.6, green: 0.4, blue: 0.4))
                         }
                     }
@@ -91,16 +91,16 @@ struct FlowerEntryView: View {
 
                 VStack(alignment: .leading, spacing: 8) {
                     Text(flower.flowerName)
-                        .font(.custom("Gaegu-Bold", size: min(24, geometry.size.width * 0.06)))
+                        .font(.custom(GaeguTypography.boldFontName, size: min(FontSize.title3, geometry.size.width * 0.06)))
                         .foregroundColor(Color(red: 0.3, green: 0.2, blue: 0.3))
 
                     HStack {
                         Text("Emotion:")
-                            .font(.custom("Gaegu-Bold", size: min(16, geometry.size.width * 0.04)))
+                            .font(.custom(GaeguTypography.boldFontName, size: min(FontSize.body, geometry.size.width * 0.04)))
                             .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.4))
 
                         Text(flower.emotion)
-                            .font(.custom("Gaegu-Regular", size: min(16, geometry.size.width * 0.04)))
+                            .font(.custom(GaeguTypography.regularFontName, size: min(FontSize.body, geometry.size.width * 0.04)))
                             .foregroundColor(Color(flower.flowerColor))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 4)
@@ -109,7 +109,7 @@ struct FlowerEntryView: View {
                     }
 
                     Text(getFlowerDescription(for: flower.flowerName))
-                        .font(.custom("Gaegu-Regular", size: min(14, geometry.size.width * 0.035)))
+                        .font(.custom(GaeguTypography.regularFontName, size: min(FontSize.subhead, geometry.size.width * 0.035)))
                         .foregroundColor(Color.gray)
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)

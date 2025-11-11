@@ -18,9 +18,9 @@ struct DialogueHistoryView: View {
                     ForEach(entries) { entry in
                         VStack(alignment: .leading, spacing: 4) {
                             Text(entry.characterName)
-                                .font(.custom("Gaegu-Bold", size: 17))
+                                .font(.bodyGaegu)
                             Text(entry.dialogue)
-                                .font(.custom("Gaegu-Regular", size: 17))
+                                .font(.bodyGaegu)
                         }
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)

@@ -55,7 +55,7 @@ class BouquetSlot: SKNode {
         
         // Add a subtle "+" icon to indicate empty slot
         let plusLabel = SKLabelNode(text: "+")
-        plusLabel.fontName = "Gaegu-Light"
+        plusLabel.fontName = GaeguTypography.lightFontName
         plusLabel.fontSize = 40
         plusLabel.fontColor = UIColor.gray.withAlphaComponent(0.3)
         plusLabel.verticalAlignmentMode = .center

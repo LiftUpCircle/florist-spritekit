@@ -96,7 +96,7 @@ class SettingsOverlay: SKNode {
         let overlayWidth = sceneSize.width * 0.70
         let overlayHeight = sceneSize.height * 0.75
         let titleFontSize = max(28, min(overlayWidth * 0.038, 40))
-        let titleLabel = SKLabelNode(fontNamed: "Gaegu-Bold")
+        let titleLabel = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
         titleLabel.text = "Settings"
         titleLabel.fontSize = titleFontSize
         titleLabel.fontColor = darkGrayColor
@@ -125,7 +125,7 @@ class SettingsOverlay: SKNode {
         closeBg.zPosition = 0
         closeButton.addChild(closeBg)
 
-        let xMark = SKLabelNode(fontNamed: "Gaegu-Bold")
+        let xMark = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
         xMark.text = "✕"
         xMark.fontSize = buttonSize * 0.6
         xMark.fontColor = .white
@@ -153,7 +153,7 @@ class SettingsOverlay: SKNode {
         let separatorWidth = overlayWidth * 0.85
         
         // Sounds Toggle
-        let soundsLabel = SKLabelNode(fontNamed: "Gaegu-Regular")
+        let soundsLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
         soundsLabel.text = "Sounds"
         soundsLabel.fontSize = labelFontSize
         soundsLabel.fontColor = darkGrayColor
@@ -176,7 +176,7 @@ class SettingsOverlay: SKNode {
         addChild(separator1)
         
         // Music Toggle
-        let musicLabel = SKLabelNode(fontNamed: "Gaegu-Regular")
+        let musicLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
         musicLabel.text = "Music"
         musicLabel.fontSize = labelFontSize
         musicLabel.fontColor = darkGrayColor
@@ -199,7 +199,7 @@ class SettingsOverlay: SKNode {
         addChild(separator2)
         
         // Vibration Toggle
-        let vibrationLabel = SKLabelNode(fontNamed: "Gaegu-Regular")
+        let vibrationLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
         vibrationLabel.text = "Vibration"
         vibrationLabel.fontSize = labelFontSize
         vibrationLabel.fontColor = darkGrayColor
@@ -290,7 +290,7 @@ class SettingsOverlay: SKNode {
         buttonBg.zPosition = 0
         button.addChild(buttonBg)
         
-        let buttonLabel = SKLabelNode(fontNamed: "Gaegu-Regular")
+        let buttonLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
         buttonLabel.text = text
         buttonLabel.fontSize = fontSize
         buttonLabel.fontColor = darkGrayColor
@@ -477,7 +477,7 @@ class VolumeSlider: SKNode {
         addChild(knobNode)
         
         // Left arrow
-        leftArrow = SKLabelNode(fontNamed: "Gaegu-Bold")
+        leftArrow = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
         leftArrow.text = "◄"
         leftArrow.fontSize = 18
         leftArrow.fontColor = .white
@@ -486,7 +486,7 @@ class VolumeSlider: SKNode {
         knobNode.addChild(leftArrow)
         
         // Right arrow
-        rightArrow = SKLabelNode(fontNamed: "Gaegu-Bold")
+        rightArrow = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
         rightArrow.text = "►"
         rightArrow.fontSize = 18
         rightArrow.fontColor = .white
@@ -562,7 +562,7 @@ class WoodenToggle: SKNode {
         leftSegment.zPosition = 0
         addChild(leftSegment)
         
-        leftLabel = SKLabelNode(fontNamed: "Gaegu-Bold")
+        leftLabel = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
         leftLabel.text = "000"
         leftLabel.fontSize = 24
         leftLabel.fontColor = .white
@@ -579,7 +579,7 @@ class WoodenToggle: SKNode {
         rightSegment.zPosition = 0
         addChild(rightSegment)
         
-        rightLabel = SKLabelNode(fontNamed: "Gaegu-Bold")
+        rightLabel = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
         rightLabel.text = isOn ? "ON" : "OFF"
         rightLabel.fontSize = 20
         rightLabel.fontColor = .white
@@ -632,7 +632,7 @@ class WoodenCheckbox: SKNode {
         addChild(checkboxCircle)
         
         if isOn {
-            checkmark = SKLabelNode(fontNamed: "Gaegu-Bold")
+            checkmark = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
             checkmark!.text = "✓"
             checkmark!.fontSize = 40
             checkmark!.fontColor = .white
@@ -652,7 +652,7 @@ class WoodenCheckbox: SKNode {
         
         if isOn {
             if checkmark == nil {
-                checkmark = SKLabelNode(fontNamed: "Gaegu-Bold")
+                checkmark = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
                 checkmark!.text = "✓"
                 checkmark!.fontSize = 40
                 checkmark!.fontColor = .white

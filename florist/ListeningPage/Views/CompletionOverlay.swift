@@ -23,13 +23,13 @@ struct CompletionOverlay: View {
             
             VStack(spacing: 20) {
                 Text("Story Complete")
-                    .font(.custom("Gaegu-Bold", size: 34))
+                    .font(.largeTitleGaegu)
                     .fontWeight(.bold)
                     .foregroundColor(.white)
                 
                 Button(action: onRestart) {
                     Text(buttonText)
-                        .font(.custom("Gaegu-Bold", size: 17))
+                        .font(.bodyGaegu)
                         .foregroundColor(.white)
                         .padding()
                         .background(Color.blue)

@@ -89,12 +89,12 @@ struct ListeningPageView: View {
                             .foregroundColor(.yellow)
                         
                         Text("No Story Loaded")
-                            .font(.custom("Gaegu-Bold", size: 28))
+                            .font(.title2Gaegu)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                         
                         Text("The story could not be loaded. Please check that the story file exists and is properly formatted.")
-                            .font(.custom("Gaegu-Regular", size: 17))
+                            .font(.bodyGaegu)
                             .foregroundColor(.white.opacity(0.8))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)

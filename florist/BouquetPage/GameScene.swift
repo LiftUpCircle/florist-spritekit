@@ -214,8 +214,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         // Add hint text to chat box
         let hintText = storyRequirements?.hintText ?? "Drag flowers to create your bouquet"
         chatTextNode = SKLabelNode(text: hintText)
-        chatTextNode.fontName = "Gaegu-Regular"
-        chatTextNode.fontSize = 16
+        chatTextNode.fontName = GaeguTypography.regularFontName
+        chatTextNode.fontSize = FontSize.body
         chatTextNode.fontColor = UIColor(red: 0.3, green: 0.2, blue: 0.2, alpha: 1.0)
         chatTextNode.numberOfLines = 3
         chatTextNode.preferredMaxLayoutWidth = chatBoxRect.width - 40
@@ -405,8 +405,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             
             // Add label below flower
             let label = SKLabelNode(text: flowerData.flowerName)
-            label.fontName = "Gaegu-Regular"
-            label.fontSize = 12
+            label.fontName = GaeguTypography.regularFontName
+            label.fontSize = FontSize.caption1
             label.fontColor = .darkGray
             label.position = CGPoint(x: 0, y: -flowerSize.height / 2 - 15)
             label.zPosition = 1
@@ -476,8 +476,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         addChild(resetButton)
         
         resetLabel = SKLabelNode(text: "Reset")
-        resetLabel.fontName = "Gaegu-Bold"
-        resetLabel.fontSize = 18
+        resetLabel.fontName = GaeguTypography.boldFontName
+        resetLabel.fontSize = FontSize.headline
         resetLabel.fontColor = .white
         resetLabel.verticalAlignmentMode = .center
         resetLabel.zPosition = 1
@@ -498,8 +498,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         addChild(wrapButton)
         
         wrapLabel = SKLabelNode(text: "Wrap")
-        wrapLabel.fontName = "Gaegu-Bold"
-        wrapLabel.fontSize = 18
+        wrapLabel.fontName = GaeguTypography.boldFontName
+        wrapLabel.fontSize = FontSize.headline
         wrapLabel.fontColor = .white
         wrapLabel.verticalAlignmentMode = .center
         wrapLabel.zPosition = 1
@@ -985,8 +985,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         
         // Show result label
         let resultLabel = SKLabelNode(text: message)
-        resultLabel.fontName = "Gaegu-Bold"
-        resultLabel.fontSize = 32
+        resultLabel.fontName = GaeguTypography.boldFontName
+        resultLabel.fontSize = FontSize.largeTitle
         resultLabel.fontColor = color
         resultLabel.position = CGPoint(x: size.width / 2, y: size.height / 2)
         resultLabel.zPosition = 250
