@@ -12,7 +12,6 @@ struct MainMenuView: View {
     @StateObject private var flowCoordinator = GameFlowCoordinator()
     @State private var showSettings = false
     @State private var savedProgress: StoryProgress?
-    @State private var showStartOptions = false
     
     var body: some View {
         NavigationStack(path: $flowCoordinator.navigationPath) {
@@ -63,60 +62,52 @@ struct MainMenuView: View {
                 }
                 .ignoresSafeArea()
                 
-                // Menu items
-                VStack(spacing: 40) {
+                // Menu items - centered
+                VStack(spacing: 20) {
+                    Spacer()
+                    
                     ForEach(controller.model.menuItems, id: \.self) { item in
                         if item == .start {
-                            // Show "Continue" or "Start" based on saved progress
-                            MenuButton(title: savedProgress != nil ? "Continue" : "Start") {
-                                handleMenuSelection(item)
-                            }
-                            .padding(.vertical, 5)
-                            
-                            // Show progress info if available
-                            if let progress = savedProgress {
-                                ProgressInfoView(progress: progress)
-                                    .padding(.horizontal, 16)
-                                    .padding(.bottom, 8)
+                            // Show two buttons if there's saved progress
+                            if savedProgress != nil {
+                                // Continue button
+                                MenuButton(title: "Continue") {
+                                    flowCoordinator.startNewGame()
+                                }
+                                
+                                // Show progress info
+//                                if let progress = savedProgress {
+//                                    ProgressInfoView(progress: progress)
+//                                        .padding(.horizontal, 16)
+//                                        .padding(.bottom, 4)
+//                                }
+                                
+                                // New Game button
+                                MenuButton(title: "New Game") {
+                                    startNewGame()
+                                }
+                            } else {
+                                // Just show New Game if no saved progress
+                                MenuButton(title: "New Game") {
+                                    flowCoordinator.startNewGame()
+                                }
                             }
                         } else {
                             MenuButton(title: item.rawValue) {
                                 handleMenuSelection(item)
                             }
-                            .padding(.vertical, 5)
                         }
                     }
+                    
+                    Spacer()
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
                 // Settings overlay
                 if showSettings {
                     SettingsOverlayView(isPresented: $showSettings)
                         .transition(.opacity)
                         .zIndex(100)
-                }
-                
-                // Start options overlay (Continue vs Start Fresh)
-                if showStartOptions {
-                    StartOptionsOverlay(
-                        isPresented: $showStartOptions,
-                        onContinue: {
-                            showStartOptions = false
-                            flowCoordinator.startNewGame()
-                        },
-                        onStartFresh: {
-                            showStartOptions = false
-                            Task {
-                                // Delete saved progress
-                                if let progress = savedProgress {
-                                    try? await ProgressPersistenceManager.shared.deleteProgress(for: progress.storyId)
-                                    savedProgress = nil
-                                }
-                                flowCoordinator.startNewGame()
-                            }
-                        }
-                    )
-                    .transition(.opacity)
-                    .zIndex(100)
                 }
             }
             .navigationBarHidden(true)
@@ -146,20 +137,28 @@ struct MainMenuView: View {
     private func handleMenuSelection(_ item: MainMenuModel.MenuItem) {
         switch item {
         case .start:
-            // If there's saved progress, show options to continue or start fresh
-            if savedProgress != nil {
-                withAnimation {
-                    showStartOptions = true
-                }
-            } else {
-                // No saved progress, start directly
-                flowCoordinator.startNewGame()
-            }
+            // This case is now handled directly in the view
+            break
         case .memories:
             flowCoordinator.navigateToMemories()
         case .options:
             withAnimation {
                 showSettings = true
+            }
+        }
+    }
+    
+    private func startNewGame() {
+        Task {
+            // Delete saved progress
+            if let progress = savedProgress {
+                try? await ProgressPersistenceManager.shared.deleteProgress(for: progress.storyId)
+                await MainActor.run {
+                    savedProgress = nil
+                }
+            }
+            await MainActor.run {
+                flowCoordinator.startNewGame()
             }
         }
     }
@@ -201,84 +200,6 @@ struct MainMenuView: View {
         }
     }
     
-    // MARK: - Start Options Overlay
-    
-    struct StartOptionsOverlay: View {
-        @Binding var isPresented: Bool
-        let onContinue: () -> Void
-        let onStartFresh: () -> Void
-        
-        var body: some View {
-            ZStack {
-                // Semi-transparent background
-                Color.black.opacity(0.5)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        withAnimation {
-                            isPresented = false
-                        }
-                    }
-                
-                // Options panel
-                VStack(spacing: 20) {
-                    Text("Continue or Start Fresh?")
-                        .font(.custom("Arial Rounded MT Bold", size: 28))
-                        .foregroundColor(.white)
-                        .padding(.bottom, 10)
-                    
-                    Button(action: {
-                        withAnimation {
-                            onContinue()
-                        }
-                    }) {
-                        Text("Continue from last save")
-                            .font(.custom("Arial Rounded MT Bold", size: 22))
-                            .foregroundColor(.white)
-                            .padding(.vertical, 16)
-                            .padding(.horizontal, 32)
-                            .background(
-                                RoundedRectangle(cornerRadius: 15)
-                                    .fill(Color.green.opacity(0.8))
-                            )
-                    }
-                    
-                    Button(action: {
-                        withAnimation {
-                            onStartFresh()
-                        }
-                    }) {
-                        Text("Start from beginning")
-                            .font(.custom("Arial Rounded MT Bold", size: 22))
-                            .foregroundColor(.white)
-                            .padding(.vertical, 16)
-                            .padding(.horizontal, 32)
-                            .background(
-                                RoundedRectangle(cornerRadius: 15)
-                                    .fill(Color.orange.opacity(0.8))
-                            )
-                    }
-                    
-                    Button(action: {
-                        withAnimation {
-                            isPresented = false
-                        }
-                    }) {
-                        Text("Cancel")
-                            .font(.custom("Arial Rounded MT Bold", size: 18))
-                            .foregroundColor(.white.opacity(0.8))
-                            .padding(.top, 8)
-                    }
-                }
-                .padding(40)
-                .background(
-                    RoundedRectangle(cornerRadius: 25)
-                        .fill(Color.gray.opacity(0.95))
-                )
-                .shadow(radius: 20)
-            }
-            
-        }
-    }
 }
 
 struct MenuButton: View {
