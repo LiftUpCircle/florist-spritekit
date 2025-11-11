@@ -22,7 +22,7 @@ struct StorySettingsView: View {
                             .accessibilityLabel("Text speed")
                             .accessibilityValue("\(textSpeed, specifier: "%.1f") times normal speed")
                         Text("Speed: \(textSpeed, specifier: "%.1f")x")
-                            .font(.caption)
+                            .font(.caption1Gaegu)
                             .foregroundColor(.secondary)
                             .accessibilityHidden(true)
                     }
