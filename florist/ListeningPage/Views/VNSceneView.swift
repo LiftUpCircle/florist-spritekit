@@ -83,16 +83,16 @@ struct VNSceneView: View {
                     // Empty state when story fails to load
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.system(size: 60))
+                            .font(.custom("Gaegu-Regular", size: 60))
                             .foregroundColor(.yellow)
                         
                         Text("No Story Loaded")
-                            .font(.title)
+                            .font(.custom("Gaegu-Bold", size: 28))
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                         
                         Text("The story could not be loaded. Please check that the story file exists and is properly formatted.")
-                            .font(.body)
+                            .font(.custom("Gaegu-Regular", size: 17))
                             .foregroundColor(.white.opacity(0.8))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)

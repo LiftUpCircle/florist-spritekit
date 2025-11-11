@@ -88,7 +88,7 @@ struct CustomBackButton: View {
         Button(action: action) {
             HStack(spacing: 5) {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 24))
+                    .font(.custom("Gaegu-Regular", size: 24))
                 Text("Back")
                     .font(.custom("Gaegu-Bold", size: 24))
             }

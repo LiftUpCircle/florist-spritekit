@@ -20,7 +20,7 @@ struct ChapterDetailView: View {
                                 Group{
                                 if chapter.savedBouquet != nil {
                                     Image(systemName: "photo")
-                                        .font(.system(size: 80))
+                                        .font(.custom("Gaegu-Regular", size: 80))
                                         .foregroundColor(.gray)
 
                                 }else{

@@ -24,21 +24,21 @@ struct DialogueTextboxView: View {
         ZStack(alignment: .bottomTrailing) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(characterName)
-                    .font(.headline)
+                    .font(.custom("Gaegu-Bold", size: 17))
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                 
                 ZStack(alignment: .topLeading) {
                     // Hidden text to set the size based on processed dialogue with line breaks
                     Text(processedDialogue)
-                        .font(.body)
+                        .font(.custom("Gaegu-Regular", size: 17))
                         .foregroundColor(.clear)
                         .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
                     
                     // Visible typing text
                     Text(typewriter.displayedText)
-                        .font(.body)
+                        .font(.custom("Gaegu-Regular", size: 17))
                         .foregroundColor(.primary)
                         .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
@@ -57,7 +57,7 @@ struct DialogueTextboxView: View {
             // Blinking triangle indicator
             if typewriter.isTypingComplete {
                 Image(systemName: "play.fill")
-                    .font(.system(size: 16))
+                    .font(.custom("Gaegu-Regular", size: 16))
                     .foregroundColor(.primary)
 //                    .shadow(color: .primary.opacity(0.4), radius: 2)
                     .opacity(showTriangle ? 1.0 : 0.5)
@@ -85,13 +85,13 @@ struct DialogueTextboxView: View {
                 }
         )
         .onAppear {
-            processedDialogue = typewriter.calculateLineBreaks(text: dialogue, maxWidth: maxWidth, font: UIFont.systemFont(ofSize: 17))
-            typewriter.startTyping(text: dialogue, speed: typingSpeed, maxWidth: maxWidth, font: UIFont.systemFont(ofSize: 17))
+            processedDialogue = typewriter.calculateLineBreaks(text: dialogue, maxWidth: maxWidth, font: UIFont(name: "Gaegu-Regular", size: 17) ?? UIFont.systemFont(ofSize: 17))
+            typewriter.startTyping(text: dialogue, speed: typingSpeed, maxWidth: maxWidth, font: UIFont(name: "Gaegu-Regular", size: 17) ?? UIFont.systemFont(ofSize: 17))
         }
         .onChange(of: dialogue) { oldValue, newValue in
             showTriangle = false
-            processedDialogue = typewriter.calculateLineBreaks(text: newValue, maxWidth: maxWidth, font: UIFont.systemFont(ofSize: 17))
-            typewriter.startTyping(text: newValue, speed: typingSpeed, maxWidth: maxWidth, font: UIFont.systemFont(ofSize: 17))
+            processedDialogue = typewriter.calculateLineBreaks(text: newValue, maxWidth: maxWidth, font: UIFont(name: "Gaegu-Regular", size: 17) ?? UIFont.systemFont(ofSize: 17))
+            typewriter.startTyping(text: newValue, speed: typingSpeed, maxWidth: maxWidth, font: UIFont(name: "Gaegu-Regular", size: 17) ?? UIFont.systemFont(ofSize: 17))
         }
         .onChange(of: typewriter.isTypingComplete) { _, isComplete in
             if isComplete {
