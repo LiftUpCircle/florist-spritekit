@@ -214,7 +214,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         // Add hint text to chat box
         let hintText = storyRequirements?.hintText ?? "Drag flowers to create your bouquet"
         chatTextNode = SKLabelNode(text: hintText)
-        chatTextNode.fontName = "Avenir-Medium"
+        chatTextNode.fontName = "Gaegu-Regular"
         chatTextNode.fontSize = 16
         chatTextNode.fontColor = UIColor(red: 0.3, green: 0.2, blue: 0.2, alpha: 1.0)
         chatTextNode.numberOfLines = 3
@@ -405,7 +405,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             
             // Add label below flower
             let label = SKLabelNode(text: flowerData.flowerName)
-            label.fontName = "Avenir-Medium"
+            label.fontName = "Gaegu-Regular"
             label.fontSize = 12
             label.fontColor = .darkGray
             label.position = CGPoint(x: 0, y: -flowerSize.height / 2 - 15)
@@ -476,7 +476,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         addChild(resetButton)
         
         resetLabel = SKLabelNode(text: "Reset")
-        resetLabel.fontName = "Avenir-Heavy"
+        resetLabel.fontName = "Gaegu-Bold"
         resetLabel.fontSize = 18
         resetLabel.fontColor = .white
         resetLabel.verticalAlignmentMode = .center
@@ -498,7 +498,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         addChild(wrapButton)
         
         wrapLabel = SKLabelNode(text: "Wrap")
-        wrapLabel.fontName = "Avenir-Heavy"
+        wrapLabel.fontName = "Gaegu-Bold"
         wrapLabel.fontSize = 18
         wrapLabel.fontColor = .white
         wrapLabel.verticalAlignmentMode = .center
@@ -985,7 +985,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         
         // Show result label
         let resultLabel = SKLabelNode(text: message)
-        resultLabel.fontName = "Avenir-Heavy"
+        resultLabel.fontName = "Gaegu-Bold"
         resultLabel.fontSize = 32
         resultLabel.fontColor = color
         resultLabel.position = CGPoint(x: size.width / 2, y: size.height / 2)

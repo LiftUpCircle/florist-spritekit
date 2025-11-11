@@ -35,7 +35,7 @@ struct MemoryFolderSelectionView: View {
                 Spacer()
                 // Title
                 Text("Memories")
-                    .font(.custom("Arial Rounded MT Bold", size: 40))
+                    .font(.custom("Gaegu-Bold", size: 40))
                     .foregroundColor(.black)
                 
                 // Memory cards
@@ -90,7 +90,7 @@ struct CustomBackButton: View {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 24))
                 Text("Back")
-                    .font(.custom("Arial Rounded MT Bold", size: 24))
+                    .font(.custom("Gaegu-Bold", size: 24))
             }
             .foregroundColor(.black)
         }

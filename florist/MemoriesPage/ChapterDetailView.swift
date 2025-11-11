@@ -25,7 +25,7 @@ struct ChapterDetailView: View {
 
                                 }else{
                                     Text("No saved bouquet")
-                                        .font(.custom("Arial Rounded MT Bold", size: 16))
+                                        .font(.custom("Gaegu-Bold", size: 16))
                                         .foregroundColor(.gray.opacity(0.7))
                                     }
                                 }
@@ -33,7 +33,7 @@ struct ChapterDetailView: View {
                     }
 
                 Text(chapter.description)
-                    .font(.custom("Arial", size: 20))
+                    .font(.custom("Gaegu-Regular", size: 20))
                     .foregroundColor(.black)
                     .lineSpacing(8)
                     .frame(maxWidth: .infinity, alignment: .leading)

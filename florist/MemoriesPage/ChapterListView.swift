@@ -19,7 +19,7 @@ struct ChapterListView: View {
                     // Title
                     if let folder = controller.selectedMemoryFolder {
                         Text(folder.title)
-                            .font(.custom("Arial Rounded MT Bold", size: 28))
+                            .font(.custom("Gaegu-Bold", size: 28))
                             .foregroundColor(.black)
                     }
                     
@@ -48,7 +48,7 @@ struct ChapterListView: View {
                 } else {
                     VStack {
                         Text("Select a chapter")
-                            .font(.custom("Arial Rounded MT Bold", size: 18))
+                            .font(.custom("Gaegu-Bold", size: 18))
                             .foregroundColor(.gray)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -81,7 +81,7 @@ struct ChapterButton: View {
         Button(action: action) {
             HStack {
                 Text(chapter.title)
-                    .font(.custom("Arial Rounded MT Bold", size: 18))
+                    .font(.custom("Gaegu-Bold", size: 18))
                     .foregroundColor(isSelected ? .white : .black)
                     .padding(.vertical, 12)
                     .padding(.horizontal, 20)
