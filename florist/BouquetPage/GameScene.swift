@@ -56,7 +56,9 @@ class FlowerNode: SKSpriteNode {
         case "Rose": return "Rose"
         case "Jasmine": return "Jasmine"
         case "Lavender": return "Lavender"
-        case "Hibiscus": return "Hibicus" // Note: asset is named "Hibicus"
+        case "Carnation": return "Carnations" // Note: asset is named "Carnations" (plural)
+        case "Lily": return "Lily"
+        case "Tulip": return "Tulip"
         default: return ""
         }
     }
@@ -423,7 +425,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         case "Rose": return "Rose"
         case "Jasmine": return "Jasmine"
         case "Lavender": return "Lavender"
-        case "Hibiscus": return "Hibicus" // Note: asset is named "Hibicus"
+        case "Carnation": return "Carnations" // Note: asset is named "Carnations" (plural)
+        case "Lily": return "Lily"
+        case "Tulip": return "Tulip"
         default: return ""
         }
     }

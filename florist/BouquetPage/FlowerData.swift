@@ -85,12 +85,14 @@ struct StoryFlowerRequirements {
 class FlowerDatabase {
     static let shared = FlowerDatabase()
     
-    // Based on available flower assets: Rose, Jasmine, Lavender, Hibiscus
+    // Based on available flower assets: Rose, Jasmine, Lavender, Carnation, Lily, Tulip
     let availableFlowers: [Flower] = [
         Flower(flowerId: 1, flowerName: "Rose", flowerColor: UIColor(red: 1.0, green: 0.4, blue: 0.5, alpha: 1.0), emotion: "Love"),
         Flower(flowerId: 2, flowerName: "Jasmine", flowerColor: UIColor(red: 1.0, green: 0.98, blue: 0.94, alpha: 1.0), emotion: "Purity"),
         Flower(flowerId: 3, flowerName: "Lavender", flowerColor: UIColor(red: 0.7, green: 0.5, blue: 0.85, alpha: 1.0), emotion: "Serenity"),
-        Flower(flowerId: 4, flowerName: "Hibiscus", flowerColor: UIColor(red: 1.0, green: 0.3, blue: 0.5, alpha: 1.0), emotion: "Joy"),
+        Flower(flowerId: 4, flowerName: "Carnation", flowerColor: UIColor(red: 1.0, green: 0.75, blue: 0.8, alpha: 1.0), emotion: "Joy"),
+        Flower(flowerId: 5, flowerName: "Lily", flowerColor: UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0), emotion: "Hope"),
+        Flower(flowerId: 6, flowerName: "Tulip", flowerColor: UIColor(red: 1.0, green: 0.85, blue: 0.2, alpha: 1.0), emotion: "Elegance"),
     ]
     
     func getFlower(byEmotion emotion: String) -> Flower? {
