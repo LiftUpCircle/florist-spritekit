@@ -15,7 +15,7 @@ struct ControlContainerView: View {
         HStack(spacing: 12) {
             Button(action: onSettingsTap) {
                 Image(systemName: "gearshape.fill")
-                    .font(.title2)
+                    .font(.title3Gaegu)
                     .foregroundColor(.white)
                     .padding(12)
                     .background(Circle().fill(Color.black.opacity(0.6)))
@@ -25,7 +25,7 @@ struct ControlContainerView: View {
             
             Button(action: onLogTap) {
                 Image(systemName: "book.fill")
-                    .font(.title2)
+                    .font(.title3Gaegu)
                     .foregroundColor(.white)
                     .padding(12)
                     .background(Circle().fill(Color.black.opacity(0.6)))
