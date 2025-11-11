@@ -9,40 +9,32 @@ import SwiftUI
 
 struct ChapterListView: View {
     @ObservedObject var controller: MemoriesViewController
+    let completedStories: [CompletedStory]
     
     var body: some View {
         ZStack(alignment: .topLeading) {
             // Main content
             HStack(alignment: .top, spacing: 30) {
-                // Left side - Title and chapter list
+                // Left side - Title and story info
                 VStack(alignment: .leading, spacing: 15) {
                     // Title
                     if let folder = controller.selectedMemoryFolder {
                         Text(folder.title)
                             .font(.title2Gaegu)
                             .foregroundColor(.black)
+                        
+                        Text("Completed: \(formattedDate(story.completionDate))")
+                            .font(.custom("Arial", size: 14))
+                            .foregroundColor(.gray)
                     }
                     
-                    // Chapter list
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 10) {
-                            ForEach(controller.currentChapters) { chapter in
-                                ChapterButton(
-                                    chapter: chapter,
-                                    isSelected: controller.selectedChapter?.id == chapter.id
-                                ) {
-                                    controller.selectChapter(chapter)
-                                }
-                            }
-                        }
-                    }
-                    .frame(maxHeight: .infinity)
+                    Spacer()
                 }
                 .frame(width: 220)
                 
-                // Right side - Chapter details
-                if let selectedChapter = controller.selectedChapter {
-                    ChapterDetailView(chapter: selectedChapter)
+                // Right side - Dialogue history
+                if let story = controller.selectedCompletedStory {
+                    ArchivedDialogueView(dialogueHistory: story.archivedDialogueHistory)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(.trailing, 20)
                 } else {
@@ -54,28 +46,21 @@ struct ChapterListView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
-            .padding(.top, 70) // Reduced from 120
-            .padding(.leading, 20) // Reduced from 120
+            .padding(.top, 70)
+            .padding(.leading, 20)
             
             // Back button - fixed at top-left
             CustomBackButton {
                 controller.backToFolderSelection()
             }
-            .padding(.top, 25) // Reduced from 20
-            .padding(.leading, 35) // Reduced from 20
+            .padding(.top, 25)
+            .padding(.leading, 35)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
         .edgesIgnoringSafeArea(.all)
     }
-}
-
-// Updated ChapterButton
-struct ChapterButton: View {
-    let chapter: MemoriesModel.Chapter
-    let isSelected: Bool
-    let action: () -> Void
     
     var body: some View {
         Button(action: action) {
@@ -98,9 +83,14 @@ struct ChapterButton: View {
 
 #Preview {
     let controller = MemoriesViewController()
-    controller.selectedMemoryFolder = controller.model.memoryFolders[0]
+    let sampleStory = CompletedStory(
+        storyId: "story_1",
+        completionDate: Date(),
+        storyTitle: "A Shy Scholar",
+        archivedDialogueHistory: []
+    )
+    controller.selectedCompletedStory = sampleStory
     controller.showChapterList = true
-    controller.selectedChapter = controller.model.memoryFolders[0].chapters[0]
 
-    return ChapterListView(controller: controller)
+    return ChapterListView(controller: controller, completedStories: [sampleStory])
 }

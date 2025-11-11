@@ -153,6 +153,9 @@ struct ListeningPageView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
+            // Set the flow coordinator for progress restoration
+            controller.setFlowCoordinator(flowCoordinator)
+            
             // Load the story for this storyId
             controller.loadStory(from: storyId)
         }
@@ -163,8 +166,15 @@ struct ListeningPageView: View {
                 }
             }
         }
+        .onDisappear {
+            // Save progress when navigating away from the story
+            Task {
+                await controller.saveCurrentProgress()
+            }
+        }
     }
 }
+
 
 #Preview {
     ListeningPageView(storyId: "story", flowCoordinator: GameFlowCoordinator())

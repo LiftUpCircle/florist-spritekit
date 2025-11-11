@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import SwiftData
 
 class MemoriesViewController: ObservableObject {
     @Published var model = MemoriesModel()
@@ -14,6 +15,7 @@ class MemoriesViewController: ObservableObject {
     // Navigation state
     @Published var selectedMemoryFolder: MemoriesModel.MemoryFolder?
     @Published var selectedChapter: MemoriesModel.Chapter?
+    @Published var selectedCompletedStory: CompletedStory?
     @Published var showChapterList = false
 
     // Navigate to chapter list when a memory folder is selected
@@ -22,12 +24,19 @@ class MemoriesViewController: ObservableObject {
         showChapterList = true
         selectedChapter = nil // Reset chapter selection
     }
+    
+    // Navigate to dialogue history when a completed story is selected
+    func selectCompletedStory(_ story: CompletedStory) {
+        selectedCompletedStory = story
+        showChapterList = true
+    }
 
     // Navigate back to memory folder selection
     func backToFolderSelection() {
         showChapterList = false
         selectedMemoryFolder = nil
         selectedChapter = nil
+        selectedCompletedStory = nil
     }
 
     // Select a chapter to view details
