@@ -156,8 +156,10 @@ struct ListeningPageView: View {
             // Set the flow coordinator for progress restoration
             controller.setFlowCoordinator(flowCoordinator)
             
-            // Load the story for this storyId
-            controller.loadStory(from: storyId)
+            // Map story ID to filename (for now, all stories use "story.json")
+            // In the future, you can have different files: "story_1.json", "story_2.json", etc.
+            let filename = "story"
+            controller.loadStory(from: filename)
         }
         .onChange(of: controller.isStoryComplete) { isComplete in
             if isComplete {

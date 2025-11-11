@@ -2,7 +2,7 @@
 //  GameFlowCoordinator.swift
 //  florist
 //
-//  Created by AI on 04/11/25.
+//  Created by Reynaldo on 04/11/25.
 //
 
 import SwiftUI
@@ -19,7 +19,7 @@ class GameFlowCoordinator: ObservableObject {
     }
     
     @Published var navigationPath = NavigationPath()
-    @Published var currentStoryId: String = "story"
+    @Published var currentStoryId: String = "simple-encounter"
     
     // Story progression
     private var storyIndex: Int = 1
@@ -54,9 +54,9 @@ class GameFlowCoordinator: ObservableObject {
         storyIndex += 1
         
         if storyIndex <= totalStories {
-            // For now, we only have one story file, so keep using "story"
-            // In the future, use: let nextStoryId = "story_\(storyIndex)"
-            let nextStoryId = "story"
+            // For now, only using "simple-encounter"
+            // Future use, use: let nextStoryId = "story_\(storyIndex)"
+            let nextStoryId = "simple-encounter"
             navigateToListening(storyId: nextStoryId)
         } else {
             // All stories complete, return to main menu
@@ -67,11 +67,12 @@ class GameFlowCoordinator: ObservableObject {
     func resetToMainMenu() {
         navigationPath.removeLast(navigationPath.count)
         storyIndex = 1
+        currentStoryId = "simple-encounter"
     }
     
     func startNewGame() {
         storyIndex = 1
-        currentStoryId = "story"
+        currentStoryId = "simple-encounter"
         
         // Check for saved progress before starting
         Task {
