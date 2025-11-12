@@ -1,44 +1,86 @@
 {
-  "title": "A Simple Encounter",
+  "title": "Robert's Bouquet",
+  "characterId": "robert",
+  "characterName": "Robert Adikusuma",
   "scenes": [
     {
-      "id": "scene_001",
+      "id": "robert_001",
       "backgroundImage": "background_temp",
       "characterSprite": "character_temp",
-      "characterName": "Alice",
-      "dialogue": "Hello! Welcome to our story. I'm so glad you're here.",
+      "characterName": "Maria",
+      "dialogue": "Robert! You're early.",
       "spritePosition": "center"
     },
     {
-      "id": "scene_002",
+      "id": "robert_002",
       "backgroundImage": "background_temp",
       "characterSprite": "character_temp",
-      "characterName": "Alice",
-      "dialogue": "This is a visual novel system built with SwiftUI. Pretty cool, right?",
+      "characterName": "Robert",
+      "dialogue": "I figured I'd come before you get busy. Didn't want you closing shop without me picking up one last bouquet.",
       "spritePosition": "right"
     },
     {
-      "id": "scene_003",
-      "backgroundImage": "background_temp",
-      "characterSprite": null,
-      "characterName": "Narrator",
-      "dialogue": "Alice walked outside into the beautiful garden, taking in the fresh air.",
-      "spritePosition": null
-    },
-    {
-      "id": "scene_004",
+      "id": "robert_003",
       "backgroundImage": "background_temp",
       "characterSprite": "character_temp",
-      "characterName": "Alice",
-      "dialogue": "Oh! What a lovely day it is. The flowers are blooming beautifully.",
-      "spritePosition": "left"
+      "characterName": "Maria",
+      "dialogue": "Still can't live without flowers on your table, huh?",
+      "spritePosition": "center"
     },
     {
-      "id": "scene_005",
+      "id": "robert_004",
       "backgroundImage": "background_temp",
       "characterSprite": "character_temp",
-      "characterName": "Alice",
-      "dialogue": "Thanks for experiencing this story with me. I hope you enjoyed it!",
+      "characterName": "Robert",
+      "dialogue": "Not really. I still put them by the window every week. The same kind I used to give my wife.",
+      "spritePosition": "right"
+    },
+    {
+      "id": "robert_005",
+      "backgroundImage": "background_temp",
+      "characterSprite": "character_temp",
+      "characterName": "Robert",
+      "dialogue": "She's been gone for a few years now, but… I guess old habits never die. Or maybe I just miss her.",
+      "spritePosition": "right"
+    },
+    {
+      "id": "robert_006",
+      "backgroundImage": "background_temp",
+      "characterSprite": "character_temp",
+      "characterName": "Maria",
+      "dialogue": "She wouldn't want you to be sad, Robert. She used to light up every time you walked in with flowers.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "robert_007",
+      "backgroundImage": "background_temp",
+      "characterSprite": "character_temp",
+      "characterName": "Robert",
+      "dialogue": "Yeah… she always said the scent followed me home. Sometimes, when I pass this street, I swear I still catch it.",
+      "spritePosition": "right"
+    },
+    {
+      "id": "robert_008",
+      "backgroundImage": "background_temp",
+      "characterSprite": "character_temp",
+      "characterName": "Maria",
+      "dialogue": "That's because you never stopped bringing her along with you.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "robert_009",
+      "backgroundImage": "background_temp",
+      "characterSprite": "character_temp",
+      "characterName": "Robert",
+      "dialogue": "Maybe. I just thought… one more bouquet couldn't hurt. Something that feels like the way mornings used to.",
+      "spritePosition": "right"
+    },
+    {
+      "id": "robert_010",
+      "backgroundImage": "background_temp",
+      "characterSprite": "character_temp",
+      "characterName": "Maria",
+      "dialogue": "Then let's make something that remembers with you.",
       "spritePosition": "center"
     }
   ]

@@ -23,15 +23,15 @@ struct ChapterListView: View {
                             .foregroundColor(.black)
                     }
                     
-                    // Chapter list
+                    // Memory list (formerly chapter list)
                     ScrollView {
                         VStack(alignment: .leading, spacing: 10) {
-                            ForEach(controller.currentChapters) { chapter in
-                                ChapterButton(
-                                    chapter: chapter,
-                                    isSelected: controller.selectedChapter?.id == chapter.id
+                            ForEach(controller.currentMemories) { memory in
+                                MemoryButton(
+                                    memory: memory,
+                                    isSelected: controller.selectedMemory?.id == memory.id
                                 ) {
-                                    controller.selectChapter(chapter)
+                                    controller.selectMemory(memory)
                                 }
                             }
                         }
@@ -39,15 +39,15 @@ struct ChapterListView: View {
                     .frame(maxHeight: .infinity)
                 }
                 .frame(width: 220)
-                
-                // Right side - Chapter details
-                if let selectedChapter = controller.selectedChapter {
-                    ChapterDetailView(chapter: selectedChapter)
+
+                // Right side - Memory details
+                if let selectedMemory = controller.selectedMemory {
+                    ChapterDetailView(memory: selectedMemory)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(.trailing, 20)
                 } else {
                     VStack {
-                        Text("Select a chapter")
+                        Text("Select a memory")
                             .font(.headlineGaegu)
                             .foregroundColor(.gray)
                     }
@@ -71,21 +71,28 @@ struct ChapterListView: View {
     }
 }
 
-// Updated ChapterButton
-struct ChapterButton: View {
-    let chapter: MemoriesModel.Chapter
+// Memory Button
+struct MemoryButton: View {
+    let memory: MemoriesModel.Memory
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             HStack {
-                Text(chapter.title)
+                Text(memory.title)
                     .font(.headlineGaegu)
                     .foregroundColor(isSelected ? .white : .black)
                     .padding(.vertical, 12)
                     .padding(.horizontal, 20)
                 Spacer()
+
+                // Indicator if bouquet is saved
+                if memory.savedBouquet != nil {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                        .padding(.trailing, 10)
+                }
             }
             .frame(width: 200)
             .background(
@@ -96,11 +103,14 @@ struct ChapterButton: View {
     }
 }
 
+// Backward compatibility alias
+typealias ChapterButton = MemoryButton
+
 #Preview {
     let controller = MemoriesViewController()
     controller.selectedMemoryFolder = controller.model.memoryFolders[0]
     controller.showChapterList = true
-    controller.selectedChapter = controller.model.memoryFolders[0].chapters[0]
+    controller.selectedMemory = controller.model.memoryFolders[0].memories[0]
 
     return ChapterListView(controller: controller)
 }

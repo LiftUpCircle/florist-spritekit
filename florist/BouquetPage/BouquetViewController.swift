@@ -13,16 +13,21 @@ class BouquetViewController: ObservableObject {
     @Published var model = BouquetModel()
     private var gameScene: GameScene?
     private var onBouquetCompleteCallback: (() -> Void)?
-    
-    init(storyRequirements: StoryFlowerRequirements? = nil, onBouquetComplete: (() -> Void)? = nil) {
+    private var currentStoryId: String?
+
+    init(storyRequirements: StoryFlowerRequirements? = nil, storyId: String? = nil, onBouquetComplete: (() -> Void)? = nil) {
         self.onBouquetCompleteCallback = onBouquetComplete
-        
+        self.currentStoryId = storyId
+
         // Load story requirements
         if let requirements = storyRequirements {
             model.currentStoryRequirements = requirements
+        } else if let storyId = storyId {
+            model.loadStoryRequirements(storyId: storyId)
         } else {
             // Load default story for testing
             model.loadStoryRequirements(storyId: "story_default")
+            self.currentStoryId = "story_default"
         }
     }
 
@@ -35,9 +40,17 @@ class BouquetViewController: ObservableObject {
             scene.setStoryRequirements(requirements)
         }
 
+        // Set story ID
+        scene.currentStoryId = currentStoryId
+
         // Set callback for when bouquet is wrapped
         scene.onBouquetWrapped = { [weak self] result in
             self?.handleBouquetWrapped(result: result)
+        }
+
+        // Set callback for bouquet completion (save to memories)
+        scene.onBouquetCompleted = { [weak self] image, storyId in
+            self?.saveBouquetToMemories(image: image, storyId: storyId)
         }
 
         // Set callback for book button only (settings now handled internally)
@@ -65,23 +78,31 @@ class BouquetViewController: ObservableObject {
         switch result {
         case .perfectMatch:
             print("🎉 Perfect Match achieved!")
-            // TODO: Save to memories, show letter
-            // Proceed to next story
+            // Proceed to next story after delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
                 self?.onBouquetCompleteCallback?()
             }
-            
+
         case .goodMatch:
             print("👍 Good Match achieved!")
-            // Proceed to next story
+            // Proceed to next story after delay
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
                 self?.onBouquetCompleteCallback?()
             }
-            
+
         case .failure(let message, let missingEmotions):
             print("❌ Validation failed: \(message)")
             print("Missing: \(missingEmotions.joined(separator: ", "))")
             // Player can try again
+        }
+    }
+
+    private func saveBouquetToMemories(image: UIImage, storyId: String) {
+        let success = MemoriesManager.shared.saveBouquet(image: image, storyId: storyId)
+        if success {
+            print("✅ BouquetViewController: Bouquet saved to memories for story: \(storyId)")
+        } else {
+            print("❌ BouquetViewController: Failed to save bouquet for story: \(storyId)")
         }
     }
     

@@ -116,24 +116,75 @@ class StoryRequirementsDatabase {
     func getRequirements(for storyId: String) -> StoryFlowerRequirements? {
         // Sample story requirements using available flowers
         let sampleRequirements: [String: StoryFlowerRequirements] = [
-            // Story 1 - Initial story from listening page
+            // Robert's Story - Love and Memory
+            "story_robert_1": StoryFlowerRequirements(
+                storyId: "story_robert_1",
+                requirements: [
+                    FlowerRequirement(
+                        emotion: "Love",
+                        minimumCount: 2,
+                        idealCount: 4,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
+                    )
+                ],
+                hintText: "The same kind I used to give her... something that feels alive"
+            ),
+            // Abigail's Story - Serenity, Hope, and Forgiveness
+            "story_abigail_1": StoryFlowerRequirements(
+                storyId: "story_abigail_1",
+                requirements: [
+                    FlowerRequirement(
+                        emotion: "Serenity",
+                        minimumCount: 2,
+                        idealCount: 3,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Serenity")!
+                    ),
+                    FlowerRequirement(
+                        emotion: "Hope",
+                        minimumCount: 1,
+                        idealCount: 2,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Hope")!
+                    )
+                ],
+                hintText: "The kind that feels safe... quiet but not sad"
+            ),
+            // Michael's Story - Joy and Hope
+            "story_michael_1": StoryFlowerRequirements(
+                storyId: "story_michael_1",
+                requirements: [
+                    FlowerRequirement(
+                        emotion: "Joy",
+                        minimumCount: 2,
+                        idealCount: 3,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Joy")!
+                    ),
+                    FlowerRequirement(
+                        emotion: "Hope",
+                        minimumCount: 1,
+                        idealCount: 2,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Hope")!
+                    )
+                ],
+                hintText: "Something yellow... so you don't forget to smile"
+            ),
+            // Backward compatibility - default story
             "story": StoryFlowerRequirements(
                 storyId: "story",
                 requirements: [
                     FlowerRequirement(
-                        emotion: "Love",
-                        minimumCount: 1,
-                        idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
+                        emotion: "Serenity",
+                        minimumCount: 2,
+                        idealCount: 3,
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Serenity")!
                     ),
                     FlowerRequirement(
-                        emotion: "Joy",
+                        emotion: "Hope",
                         minimumCount: 1,
                         idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Joy")!
+                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Hope")!
                     )
                 ],
-                hintText: "Alice felt so much love and joy today"
+                hintText: "Something with serenity and hope for a new beginning"
             ),
             "story_1": StoryFlowerRequirements(
                 storyId: "story_1",
