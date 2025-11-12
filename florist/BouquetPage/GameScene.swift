@@ -137,6 +137,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         setupBouquet()
         setupInventory()
         setupButtons()
+
+        // Start gameplay BGM
+        SettingsManager.shared.playMusic(named: "gameplayLoopBGM", loops: -1)
     }
     
     private func setupBackground() {

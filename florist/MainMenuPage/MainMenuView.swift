@@ -152,6 +152,10 @@ struct MainMenuView: View {
                 // Check for saved progress when view appears
                 await checkForSavedProgress()
             }
+            .onAppear {
+                // Start main menu BGM
+                SettingsManager.shared.playMusic(named: "mainMenuBGM", loops: -1)
+            }
             .statusBar(hidden: true)
             .environmentObject(flowCoordinator)
         }
