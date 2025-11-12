@@ -1,4 +1,5 @@
 {
+  "id": "simple-encounter",
   "title": "A Simple Encounter",
   "scenes": [
     {
@@ -43,4 +44,3 @@
     }
   ]
 }
-
