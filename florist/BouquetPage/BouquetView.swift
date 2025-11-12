@@ -35,6 +35,7 @@ struct BouquetView: View {
                     onBookTapped: { showFlowerBook = true }
                 ))
                     .ignoresSafeArea()
+                    .zIndex(controller.isSettingsOpen ? 2 : 0)
 
                 VStack {
                     HStack {
@@ -55,6 +56,7 @@ struct BouquetView: View {
 
                     Spacer()
                 }
+                .zIndex(1)
 
                 // Flower Book Modal
                 if showFlowerBook {

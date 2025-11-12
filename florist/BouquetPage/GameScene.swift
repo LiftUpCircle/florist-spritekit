@@ -122,6 +122,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     var storyRequirements: StoryFlowerRequirements?
     var onBouquetWrapped: ((StoryFlowerRequirements.ValidationResult) -> Void)?
     var onBookButtonTapped: (() -> Void)?
+    var onSettingsStateChanged: ((Bool) -> Void)?
     
     // MARK: - Scene Setup
     override func didMove(to view: SKView) {
@@ -877,11 +878,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         } else {
             settingsOverlayController?.show(in: self)
         }
+
+        // Notify that settings are now open
+        onSettingsStateChanged?(true)
     }
 
     // MARK: - SettingsOverlayControllerDelegate
     func settingsOverlayDidClose() {
-        // Settings overlay closed, you can perform any cleanup if needed
+        // Notify that settings are now closed
+        onSettingsStateChanged?(false)
     }
 
     func settingsOverlayDidTapRateGame() {
