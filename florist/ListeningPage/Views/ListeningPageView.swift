@@ -153,8 +153,16 @@ struct ListeningPageView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
-            // Load the story for this storyId
-            controller.loadStory(from: storyId)
+            // Set the flow coordinator for progress restoration
+            controller.setFlowCoordinator(flowCoordinator)
+
+            // Map story ID to filename (for now, all stories use "story.json")
+            // In the future, you can have different files: "story_1.json", "story_2.json", etc.
+            let filename = "story"
+            controller.loadStory(from: filename)
+
+            // Start listening BGM
+            SettingsManager.shared.playMusic(named: "listeningBGM", loops: -1)
         }
         .onChange(of: controller.isStoryComplete) { isComplete in
             if isComplete {
@@ -163,8 +171,15 @@ struct ListeningPageView: View {
                 }
             }
         }
+        .onDisappear {
+            // Save progress when navigating away from the story
+            Task {
+                await controller.saveCurrentProgress()
+            }
+        }
     }
 }
+
 
 #Preview {
     ListeningPageView(storyId: "story", flowCoordinator: GameFlowCoordinator())

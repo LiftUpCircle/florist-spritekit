@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import SwiftData
 
 class MemoriesViewController: ObservableObject {
     // Use shared MemoriesManager
@@ -20,6 +21,7 @@ class MemoriesViewController: ObservableObject {
     // Navigation state
     @Published var selectedMemoryFolder: MemoriesModel.MemoryFolder?
     @Published var selectedMemory: MemoriesModel.Memory?
+    @Published var selectedCompletedStory: CompletedStory?
     @Published var showChapterList = false
 
     // Initialize and observe MemoriesManager changes
@@ -36,12 +38,19 @@ class MemoriesViewController: ObservableObject {
         showChapterList = true
         selectedMemory = nil // Reset memory selection
     }
+    
+    // Navigate to dialogue history when a completed story is selected
+    func selectCompletedStory(_ story: CompletedStory) {
+        selectedCompletedStory = story
+        showChapterList = true
+    }
 
     /// Navigate back to memory folder selection
     func backToFolderSelection() {
         showChapterList = false
         selectedMemoryFolder = nil
         selectedMemory = nil
+        selectedCompletedStory = nil
     }
 
     /// Select a memory to view details

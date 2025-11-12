@@ -83,8 +83,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     // UI Areas
     private var inventoryScrollNode: SKNode!
     private var inventoryCropNode: SKCropNode!
-    private var chatBoxNode: SKSpriteNode!
-    private var chatTextNode: SKLabelNode!
 
     // Bouquet images
     private var bouquetBackNode: SKSpriteNode!
@@ -128,7 +126,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     // Layout properties
     private var inventoryRect: CGRect!
     private var bouquetRect: CGRect!
-    private var chatBoxRect: CGRect!
     
     // Model data
     var storyRequirements: StoryFlowerRequirements?
@@ -148,10 +145,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
 
         setupBackground()
         setupLayout()
-        setupChatBox()
         setupBouquet()
         setupInventory()
         setupButtons()
+
+        // Start gameplay BGM
+        SettingsManager.shared.playMusic(named: "gameplayLoopBGM", loops: -1)
     }
     
     private func setupBackground() {
@@ -170,7 +169,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     private func setupLayout() {
         let padding: CGFloat = 20
-        
+
         // Left side: Inventory (1 column, scrollable)
         let inventoryWidth: CGFloat = 120
         let inventoryHeight = size.height - 100
@@ -180,7 +179,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             width: inventoryWidth,
             height: inventoryHeight
         )
-        
+
         // Center: Bouquet area
         let bouquetSize: CGFloat = min(400, size.height * 0.6)
         bouquetRect = CGRect(
@@ -189,53 +188,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             width: bouquetSize,
             height: bouquetSize
         )
-        
-        // Top right: Chat box
-        let chatBoxWidth: CGFloat = 400
-        let chatBoxHeight: CGFloat = 120
-        chatBoxRect = CGRect(
-            x: size.width - chatBoxWidth - padding - 80,
-            y: size.height - chatBoxHeight - padding - 20,
-            width: chatBoxWidth,
-            height: chatBoxHeight
-        )
     }
-    
-    private func setupChatBox() {
-        // Load chat box image
-        if let chatBoxTexture = SKTexture(imageNamed: "ChatBox") as SKTexture? {
-            chatBoxNode = SKSpriteNode(texture: chatBoxTexture)
-            chatBoxNode.position = CGPoint(
-                x: chatBoxRect.midX,
-                y: chatBoxRect.midY
-            )
-            chatBoxNode.size = chatBoxRect.size
-            chatBoxNode.zPosition = 50
-            addChild(chatBoxNode)
-        } else {
-            // Fallback to shape
-            let chatBoxShape = SKShapeNode(rect: chatBoxRect, cornerRadius: 15)
-            chatBoxShape.fillColor = UIColor(red: 1.0, green: 0.95, blue: 0.9, alpha: 0.95)
-            chatBoxShape.strokeColor = UIColor(red: 0.9, green: 0.7, blue: 0.7, alpha: 1.0)
-            chatBoxShape.lineWidth = 3
-            chatBoxShape.zPosition = 50
-            addChild(chatBoxShape)
-        }
-        
-        // Add hint text to chat box
-        let hintText = storyRequirements?.hintText ?? "Drag flowers to create your bouquet"
-        chatTextNode = SKLabelNode(text: hintText)
-        chatTextNode.fontName = GaeguTypography.regularFontName
-        chatTextNode.fontSize = FontSize.body
-        chatTextNode.fontColor = UIColor(red: 0.3, green: 0.2, blue: 0.2, alpha: 1.0)
-        chatTextNode.numberOfLines = 3
-        chatTextNode.preferredMaxLayoutWidth = chatBoxRect.width - 40
-        chatTextNode.verticalAlignmentMode = .center
-        chatTextNode.position = CGPoint(x: chatBoxRect.midX, y: chatBoxRect.midY)
-        chatTextNode.zPosition = 51
-        addChild(chatTextNode)
-    }
-    
+
+
     private func setupBouquet() {
         // Bouquet back image and placement area
         if let backTexture = SKTexture(imageNamed: "BouquetBack") as SKTexture? {
@@ -1067,7 +1022,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     // MARK: - Public Methods
     func setStoryRequirements(_ requirements: StoryFlowerRequirements) {
         self.storyRequirements = requirements
-        chatTextNode?.text = requirements.hintText
     }
 
     func getCurrentBouquet() -> [Flower] {
