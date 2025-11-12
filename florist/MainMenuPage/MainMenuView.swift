@@ -62,45 +62,68 @@ struct MainMenuView: View {
                 }
                 .ignoresSafeArea()
                 
-                // Menu items - centered
-                VStack(spacing: 20) {
+                VStack {
                     Spacer()
                     
-                    ForEach(controller.model.menuItems, id: \.self) { item in
-                        if item == .start {
-                            // Show two buttons if there's saved progress
-                            if savedProgress != nil {
-                                // Continue button
-                                MenuButton(title: "Continue") {
-                                    flowCoordinator.startNewGame()
-                                }
-                                
-                                // Show progress info
-//                                if let progress = savedProgress {
-//                                    ProgressInfoView(progress: progress)
-//                                        .padding(.horizontal, 16)
-//                                        .padding(.bottom, 4)
-//                                }
-                                
-                                // New Game button
-                                MenuButton(title: "New Game") {
-                                    startNewGame()
-                                }
-                            } else {
-                                // Just show New Game if no saved progress
-                                MenuButton(title: "New Game") {
-                                    flowCoordinator.startNewGame()
-                                }
-                            }
-                        } else {
-                            MenuButton(title: item.rawValue) {
-                                handleMenuSelection(item)
-                            }
+                    Button(action: {
+                        flowCoordinator.startNewGame()
+                    }) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 35)
+                                .fill(Color("PlayButton"))
+                                .frame(width: 168, height: 56)
+                                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 3)
+                            
+                            Text("Tap to Play")
+                                .font(.title3Gaegu)
+                                .foregroundColor(Color("TextPlayButton"))
                         }
                     }
                     
                     Spacer()
+                        .frame(height: 60) // Adjust this to position the button
                 }
+                .ignoresSafeArea()
+                
+                // Menu items - centered
+                //                VStack(spacing: 20) {
+                //                    Spacer()
+                //                    
+                //                    ForEach(controller.model.menuItems, id: \.self) { item in
+                //                        if item == .start {
+                //                            // Show two buttons if there's saved progress
+                //                            if savedProgress != nil {
+                //                                // Continue button
+                //                                MenuButton(title: "Continue") {
+                //                                    flowCoordinator.startNewGame()
+                //                                }
+                //                                
+                //                                // Show progress info
+                ////                                if let progress = savedProgress {
+                ////                                    ProgressInfoView(progress: progress)
+                ////                                        .padding(.horizontal, 16)
+                ////                                        .padding(.bottom, 4)
+                ////                                }
+                //                                
+                //                                // New Game button
+                //                                MenuButton(title: "New Game") {
+                //                                    startNewGame()
+                //                                }
+                //                            } else {
+                //                                // Just show New Game if no saved progress
+                //                                MenuButton(title: "New Game") {
+                //                                    flowCoordinator.startNewGame()
+                //                                }
+                //                            }
+                //                        } else {
+                //                            MenuButton(title: item.rawValue) {
+                //                                handleMenuSelection(item)
+                //                            }
+                //                        }
+                //                    }
+                //                    
+                //                    Spacer()
+                //                }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 
                 // Settings overlay
