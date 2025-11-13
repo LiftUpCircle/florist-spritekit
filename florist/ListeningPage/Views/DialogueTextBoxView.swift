@@ -18,36 +18,58 @@ struct DialogueTextboxView: View {
     
     @StateObject private var typewriter = TypewriterViewModel()
     @State private var processedDialogue: String = ""
+    @State private var showTriangle = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(characterName)
-                .font(.headline)
-                .foregroundColor(.white)
-            
-            ZStack(alignment: .topLeading) {
-                // Hidden text to set the size based on processed dialogue with line breaks
-                Text(processedDialogue)
-                    .font(.body)
-                    .foregroundColor(.clear)
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
+        ZStack(alignment: .bottomTrailing) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(characterName)
+                    .font(.bodyGaegu)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
                 
-                // Visible typing text
-                Text(typewriter.displayedText)
-                    .font(.body)
-                    .foregroundColor(.white)
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
+                ZStack(alignment: .topLeading) {
+                    // Hidden text to set the size based on processed dialogue with line breaks
+                    Text(processedDialogue)
+                        .font(.bodyGaegu)
+                        .foregroundColor(.clear)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                    
+                    // Visible typing text
+                    Text(typewriter.displayedText)
+                        .font(.bodyGaegu)
+                        .foregroundColor(.primary)
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .fixedSize(horizontal: true, vertical: true)
+            .padding(16)
+            .padding(.trailing, 40)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color("DialogueTextbox"))
+                    .stroke(Color("DialogueTextboxBorder"), lineWidth: 5)
+            )
+            
+            
+            // Blinking triangle indicator
+            if typewriter.isTypingComplete {
+                Image(systemName: "play.fill")
+                    .font(.bodyGaegu)
+                    .foregroundColor(.primary)
+//                    .shadow(color: .primary.opacity(0.4), radius: 2)
+                    .opacity(showTriangle ? 1.0 : 0.5)
+                    .padding(.trailing, 12)
+                    .padding(.bottom, 12)
+                    .onAppear {
+                        withAnimation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true)) {
+                            showTriangle = true
+                        }
+                    }
             }
         }
-        .fixedSize(horizontal: true, vertical: true)
-        .padding(16)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color.black.opacity(0.75))
-                .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
-        )
         .contentShape(Rectangle())
         .simultaneousGesture(
             TapGesture()
@@ -63,12 +85,13 @@ struct DialogueTextboxView: View {
                 }
         )
         .onAppear {
-            processedDialogue = typewriter.calculateLineBreaks(text: dialogue, maxWidth: maxWidth, font: UIFont.systemFont(ofSize: 17))
-            typewriter.startTyping(text: dialogue, speed: typingSpeed, maxWidth: maxWidth, font: UIFont.systemFont(ofSize: 17))
+            processedDialogue = typewriter.calculateLineBreaks(text: dialogue, maxWidth: maxWidth, font: GaeguTypography.body)
+            typewriter.startTyping(text: dialogue, speed: typingSpeed, maxWidth: maxWidth, font: GaeguTypography.body)
         }
         .onChange(of: dialogue) { oldValue, newValue in
-            processedDialogue = typewriter.calculateLineBreaks(text: newValue, maxWidth: maxWidth, font: UIFont.systemFont(ofSize: 17))
-            typewriter.startTyping(text: newValue, speed: typingSpeed, maxWidth: maxWidth, font: UIFont.systemFont(ofSize: 17))
+            showTriangle = false
+            processedDialogue = typewriter.calculateLineBreaks(text: newValue, maxWidth: maxWidth, font: GaeguTypography.body)
+            typewriter.startTyping(text: newValue, speed: typingSpeed, maxWidth: maxWidth, font: GaeguTypography.body)
         }
         .onChange(of: typewriter.isTypingComplete) { _, isComplete in
             if isComplete {

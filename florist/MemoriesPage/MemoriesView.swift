@@ -6,28 +6,41 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MemoriesView: View {
     @StateObject private var controller = MemoriesViewController()
+    @Query(sort: \CompletedStory.completionDate, order: .reverse) private var completedStories: [CompletedStory]
 
     var body: some View {
         ZStack {
             if controller.showChapterList {
-                ChapterListView(controller: controller)
+                ChapterListView(
+                    controller: controller,
+                    completedStories: completedStories
+                )
             } else {
-                MemoryFolderSelectionView(controller: controller)
+                MemoryFolderSelectionView(
+                    controller: controller,
+                    completedStories: completedStories
+                )
             }
         }
-        .navigationBarHidden(false)
+        .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            // Refresh saved bouquets when view appears
+            controller.refreshSavedBouquets()
+        }
     }
 }
 
 // MARK: - Memory Folder Selection View
 struct MemoryFolderSelectionView: View {
     @ObservedObject var controller: MemoriesViewController
+    let completedStories: [CompletedStory]
     @Environment(\.dismiss) var dismiss
-    
+
     var body: some View {
         ZStack(alignment: .topLeading) {
             // Main content
@@ -35,14 +48,16 @@ struct MemoryFolderSelectionView: View {
                 Spacer()
                 // Title
                 Text("Memories")
-                    .font(.custom("Arial Rounded MT Bold", size: 40))
+                    .font(.largeTitleGaegu)
                     .foregroundColor(.black)
-                
-                // Memory cards
-                HStack(spacing: 20) {
-                    ForEach(controller.model.memoryFolders) { folder in
-                        MemoryFolderCard(folder: folder) {
-                            controller.selectMemoryFolder(folder)
+
+                // Memory folders with bouquet images
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 20) {
+                        ForEach(controller.model.memoryFolders) { folder in
+                            MemoryFolderCard(folder: folder) {
+                                controller.selectMemoryFolder(folder)
+                            }
                         }
                     }
                 }
@@ -50,7 +65,7 @@ struct MemoryFolderSelectionView: View {
             }
             .padding(.top, 50)
             .padding(.horizontal, 90)
-            
+
             CustomBackButton {
                 dismiss()
             }
@@ -71,7 +86,7 @@ struct MemoryFolderCard: View {
         Button(action: action) {
             Rectangle()
                 .fill(Color.gray.opacity(0.3))
-                .frame(width:175, height: 87)
+                .frame(width: 175, height: 87)
                 .overlay(
                     Image("PlaceholderMemories")
                         .resizable()
@@ -88,9 +103,9 @@ struct CustomBackButton: View {
         Button(action: action) {
             HStack(spacing: 5) {
                 Image(systemName: "chevron.left")
-                    .font(.system(size: 24))
+                    .font(.title3Gaegu)
                 Text("Back")
-                    .font(.custom("Arial Rounded MT Bold", size: 24))
+                    .font(.title3Gaegu)
             }
             .foregroundColor(.black)
         }

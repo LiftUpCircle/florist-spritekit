@@ -90,25 +90,38 @@ class SettingsManager {
     }
     
     func playMusic(named fileName: String, ofType type: String = "mp3", loops: Int = -1) {
+        // Configure audio session for playback
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("Failed to setup audio session: \(error.localizedDescription)")
+        }
+
+        // Stop any currently playing music
+        stopMusic()
+
         guard let path = Bundle.main.path(forResource: fileName, ofType: type) else {
             print("Music file not found: \(fileName).\(type)")
             return
         }
-        
+
         let url = URL(fileURLWithPath: path)
-        
+
         do {
             musicPlayer = try AVAudioPlayer(contentsOf: url)
             musicPlayer?.volume = musicVolume
             musicPlayer?.numberOfLoops = loops
+            musicPlayer?.prepareToPlay()
             musicPlayer?.play()
         } catch {
             print("Error playing music: \(error.localizedDescription)")
         }
     }
-    
+
     func stopMusic() {
         musicPlayer?.stop()
+        musicPlayer = nil
     }
     
     // MARK: - Vibration Settings

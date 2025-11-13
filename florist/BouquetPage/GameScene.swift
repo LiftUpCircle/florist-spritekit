@@ -17,7 +17,7 @@ class FlowerNode: SKSpriteNode {
     
     init(flower: Flower, imageName: String, size: CGSize) {
         self.flowerData = flower
-        
+
         // Try to load the flower image from assets
         if let texture = SKTexture(imageNamed: imageName) as SKTexture? {
             super.init(texture: texture, color: .clear, size: size)
@@ -25,13 +25,20 @@ class FlowerNode: SKSpriteNode {
             // Fallback to colored sprite if image not found
             super.init(texture: nil, color: flower.flowerColor, size: size)
         }
-        
+
         self.name = "flower_\(flower.flowerName)"
         isUserInteractionEnabled = false
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    // Required initializer for SKSpriteNode subclass (needed for copy())
+    override init(texture: SKTexture?, color: UIColor, size: CGSize) {
+        // Default flower data - this will be overridden when copying
+        self.flowerData = Flower(flowerId: 0, flowerName: "Unknown", flowerColor: color, emotion: "")
+        super.init(texture: texture, color: color, size: size)
     }
     
     // Create a copy of this flower node
@@ -56,7 +63,9 @@ class FlowerNode: SKSpriteNode {
         case "Rose": return "Rose"
         case "Jasmine": return "Jasmine"
         case "Lavender": return "Lavender"
-        case "Hibiscus": return "Hibicus" // Note: asset is named "Hibicus"
+        case "Carnation": return "Carnations" // Note: asset is named "Carnations" (plural)
+        case "Lily": return "Lily"
+        case "Tulip": return "Tulip"
         default: return ""
         }
     }
@@ -74,8 +83,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     // UI Areas
     private var inventoryScrollNode: SKNode!
     private var inventoryCropNode: SKCropNode!
-    private var chatBoxNode: SKSpriteNode!
-    private var chatTextNode: SKLabelNode!
 
     // Bouquet images
     private var bouquetBackNode: SKSpriteNode!
@@ -90,7 +97,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
 
     // Placed flowers (freeform placement)
     private var placedFlowers: [FlowerNode] = []
-    private let maxFlowers = 15 // Increased limit for freeform placement
+    private let maxFlowers = 30 // Increased limit for freeform placement
 
     // Drag state
     private var selectedFlower: FlowerNode?
@@ -119,11 +126,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     // Layout properties
     private var inventoryRect: CGRect!
     private var bouquetRect: CGRect!
-    private var chatBoxRect: CGRect!
     
     // Model data
     var storyRequirements: StoryFlowerRequirements?
+    var currentStoryId: String? // Story ID for saving to memories
     var onBouquetWrapped: ((StoryFlowerRequirements.ValidationResult) -> Void)?
+    var onBouquetCompleted: ((UIImage, String) -> Void)? // Callback with image and storyId
     var onBookButtonTapped: (() -> Void)?
     
     // MARK: - Scene Setup
@@ -137,10 +145,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
 
         setupBackground()
         setupLayout()
-        setupChatBox()
         setupBouquet()
         setupInventory()
         setupButtons()
+
+        // Start gameplay BGM
+        SettingsManager.shared.playMusic(named: "gameplayLoopBGM", loops: -1)
     }
     
     private func setupBackground() {
@@ -159,7 +169,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     private func setupLayout() {
         let padding: CGFloat = 20
-        
+
         // Left side: Inventory (1 column, scrollable)
         let inventoryWidth: CGFloat = 120
         let inventoryHeight = size.height - 100
@@ -169,7 +179,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             width: inventoryWidth,
             height: inventoryHeight
         )
-        
+
         // Center: Bouquet area
         let bouquetSize: CGFloat = min(400, size.height * 0.6)
         bouquetRect = CGRect(
@@ -178,53 +188,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             width: bouquetSize,
             height: bouquetSize
         )
-        
-        // Top right: Chat box
-        let chatBoxWidth: CGFloat = 400
-        let chatBoxHeight: CGFloat = 120
-        chatBoxRect = CGRect(
-            x: size.width - chatBoxWidth - padding - 80,
-            y: size.height - chatBoxHeight - padding - 20,
-            width: chatBoxWidth,
-            height: chatBoxHeight
-        )
     }
-    
-    private func setupChatBox() {
-        // Load chat box image
-        if let chatBoxTexture = SKTexture(imageNamed: "ChatBox") as SKTexture? {
-            chatBoxNode = SKSpriteNode(texture: chatBoxTexture)
-            chatBoxNode.position = CGPoint(
-                x: chatBoxRect.midX,
-                y: chatBoxRect.midY
-            )
-            chatBoxNode.size = chatBoxRect.size
-            chatBoxNode.zPosition = 50
-            addChild(chatBoxNode)
-        } else {
-            // Fallback to shape
-            let chatBoxShape = SKShapeNode(rect: chatBoxRect, cornerRadius: 15)
-            chatBoxShape.fillColor = UIColor(red: 1.0, green: 0.95, blue: 0.9, alpha: 0.95)
-            chatBoxShape.strokeColor = UIColor(red: 0.9, green: 0.7, blue: 0.7, alpha: 1.0)
-            chatBoxShape.lineWidth = 3
-            chatBoxShape.zPosition = 50
-            addChild(chatBoxShape)
-        }
-        
-        // Add hint text to chat box
-        let hintText = storyRequirements?.hintText ?? "Drag flowers to create your bouquet"
-        chatTextNode = SKLabelNode(text: hintText)
-        chatTextNode.fontName = "Avenir-Medium"
-        chatTextNode.fontSize = 16
-        chatTextNode.fontColor = UIColor(red: 0.3, green: 0.2, blue: 0.2, alpha: 1.0)
-        chatTextNode.numberOfLines = 3
-        chatTextNode.preferredMaxLayoutWidth = chatBoxRect.width - 40
-        chatTextNode.verticalAlignmentMode = .center
-        chatTextNode.position = CGPoint(x: chatBoxRect.midX, y: chatBoxRect.midY)
-        chatTextNode.zPosition = 51
-        addChild(chatTextNode)
-    }
-    
+
+
     private func setupBouquet() {
         // Bouquet back image and placement area
         if let backTexture = SKTexture(imageNamed: "BouquetBack") as SKTexture? {
@@ -235,15 +201,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             addChild(bouquetBackNode)
 
             // Create invisible placement area with physics body from BACK texture
-            // This ensures flowers can only be placed on the back part
             bouquetPlacementArea = SKSpriteNode(texture: backTexture)
             bouquetPlacementArea.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
             bouquetPlacementArea.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.7)
-            bouquetPlacementArea.zPosition = 11 // Just above the back image
-            bouquetPlacementArea.alpha = 0.0 // Make it invisible
+            bouquetPlacementArea.zPosition = 11
+            bouquetPlacementArea.alpha = 0.0
 
-            // Create physics body from BACK texture's alpha channel
-            // This creates an accurate hitbox that follows the back's shape
             bouquetPlacementArea.physicsBody = SKPhysicsBody(texture: backTexture, size: bouquetPlacementArea.size)
             bouquetPlacementArea.physicsBody?.isDynamic = false
             bouquetPlacementArea.physicsBody?.categoryBitMask = 0x1
@@ -253,11 +216,79 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             addChild(bouquetPlacementArea)
         }
 
-        // Container for flowers (between back and front)
+        // Create a crop node to mask the flowers
+        let flowersCropNode = SKCropNode()
+        flowersCropNode.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
+        flowersCropNode.zPosition = 15
+        
+        // Create a composite mask with two zones:
+        // 1. Bottom zone: follows bouquet shape for natural petal draping
+        // 2. Top zone: large rectangle for full petal visibility
+        let compositeMaskNode = SKNode()
+
+        // Bottom zone: Use the original bouquet texture for the lower portion
+        if let backTexture = SKTexture(imageNamed: "BouquetBack") as SKTexture? {
+            let bouquetMaskBottom = SKSpriteNode(texture: backTexture)
+            bouquetMaskBottom.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.7)
+            bouquetMaskBottom.position = CGPoint(x: 0, y: 0)
+            compositeMaskNode.addChild(bouquetMaskBottom)
+        }
+
+        // Top zone: Large rectangular area for unrestricted petal display
+        // This prevents early clipping of flowers placed at the top
+        // TEMPORARY: Using cyan color for visualization
+        let topClipArea = SKSpriteNode(color: .cyan, size: CGSize(
+            width: bouquetRect.width * 1.2,  // Wider than bouquet for side petals
+            height: bouquetRect.height * 0.9  // Generous height for top flowers
+        ))
+        topClipArea.position = CGPoint(x: 0, y: bouquetRect.height * 0.66)  // Position above bouquet center
+        compositeMaskNode.addChild(topClipArea)
+
+        // Right side zone: Extra clipping area for right-side flowers
+        // This fixes the asymmetry issue
+        let rightClipArea = SKSpriteNode(color: .green, size: CGSize(
+            width: bouquetRect.width * 0.4,  // Width of the extension
+            height: bouquetRect.height * 0.2  // Height coverage
+        ))
+        rightClipArea.position = CGPoint(
+            x: bouquetRect.width * 0.45,  // Position on the right side
+            y: bouquetRect.height * 0.285   // Slightly above center
+        )
+        compositeMaskNode.addChild(rightClipArea)
+
+        flowersCropNode.maskNode = compositeMaskNode
+
+//        // DEBUG: Add visual indicator to show where the top clip area is
+//        // This is a separate sprite, not part of the mask
+//        let debugTopClipVisual = SKSpriteNode(color: UIColor.cyan.withAlphaComponent(0.3), size: CGSize(
+//            width: bouquetRect.width * 1.2,
+//            height: bouquetRect.height * 0.9
+//        ))
+//        debugTopClipVisual.position = CGPoint(
+//            x: bouquetRect.midX,
+//            y: bouquetRect.midY + bouquetRect.height * 0.66
+//        )
+//        debugTopClipVisual.zPosition = 14  // Just below the crop node
+//        debugTopClipVisual.name = "debugTopClipArea"
+//        addChild(debugTopClipVisual)
+//
+//        // DEBUG: Add visual indicator for right clip area
+//        let debugRightClipVisual = SKSpriteNode(color: UIColor.green.withAlphaComponent(0.3), size: CGSize(
+//            width: bouquetRect.width * 0.4,
+//            height: bouquetRect.height * 0.2
+//        ))
+//        debugRightClipVisual.position = CGPoint(
+//            x: bouquetRect.midX + bouquetRect.width * 0.45,
+//            y: bouquetRect.midY + bouquetRect.height * 0.285
+//        )
+//        debugRightClipVisual.zPosition = 14
+//        debugRightClipVisual.name = "debugRightClipArea"
+//        addChild(debugRightClipVisual)
+        
+        // Container for flowers (inside the crop node)
         bouquetFlowersContainer = SKNode()
-        bouquetFlowersContainer.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
-        bouquetFlowersContainer.zPosition = 15
-        addChild(bouquetFlowersContainer)
+        flowersCropNode.addChild(bouquetFlowersContainer)
+        addChild(flowersCropNode)
 
         // Bouquet front image (visual only, no physics)
         if let frontTexture = SKTexture(imageNamed: "BouquetFront") as SKTexture? {
@@ -340,8 +371,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             
             // Add label below flower
             let label = SKLabelNode(text: flowerData.flowerName)
-            label.fontName = "Avenir-Medium"
-            label.fontSize = 12
+            label.fontName = GaeguTypography.regularFontName
+            label.fontSize = FontSize.caption1
             label.fontColor = .darkGray
             label.position = CGPoint(x: 0, y: -flowerSize.height / 2 - 15)
             label.zPosition = 1
@@ -358,7 +389,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         case "Rose": return "Rose"
         case "Jasmine": return "Jasmine"
         case "Lavender": return "Lavender"
-        case "Hibiscus": return "Hibicus" // Note: asset is named "Hibicus"
+        case "Carnation": return "Carnations" // Note: asset is named "Carnations" (plural)
+        case "Lily": return "Lily"
+        case "Tulip": return "Tulip"
         default: return ""
         }
     }
@@ -411,8 +444,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         addChild(resetButton)
         
         resetLabel = SKLabelNode(text: "Reset")
-        resetLabel.fontName = "Avenir-Heavy"
-        resetLabel.fontSize = 18
+        resetLabel.fontName = GaeguTypography.boldFontName
+        resetLabel.fontSize = FontSize.headline
         resetLabel.fontColor = .white
         resetLabel.verticalAlignmentMode = .center
         resetLabel.zPosition = 1
@@ -433,8 +466,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         addChild(wrapButton)
         
         wrapLabel = SKLabelNode(text: "Wrap")
-        wrapLabel.fontName = "Avenir-Heavy"
-        wrapLabel.fontSize = 18
+        wrapLabel.fontName = GaeguTypography.boldFontName
+        wrapLabel.fontSize = FontSize.headline
         wrapLabel.fontColor = .white
         wrapLabel.verticalAlignmentMode = .center
         wrapLabel.zPosition = 1
@@ -821,9 +854,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         if let requirements = storyRequirements {
             let result = requirements.validate(bouquet: bouquetFlowers)
             showValidationResult(result)
-            
+
             // Call callback if set
             onBouquetWrapped?(result)
+
+            // If successful match, capture and save bouquet image
+            switch result {
+            case .perfectMatch, .goodMatch:
+                // Capture bouquet snapshot
+                if let bouquetImage = captureBouquetSnapshot(),
+                   let storyId = currentStoryId {
+                    // Call completion callback with image and storyId
+                    onBouquetCompleted?(bouquetImage, storyId)
+                    print("✅ Bouquet completed for story: \(storyId)")
+                } else if currentStoryId == nil {
+                    print("⚠️ No storyId set, cannot save bouquet to memories")
+                }
+            case .failure:
+                break // Don't save failed bouquets
+            }
         }
     }
     
@@ -920,8 +969,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         
         // Show result label
         let resultLabel = SKLabelNode(text: message)
-        resultLabel.fontName = "Avenir-Heavy"
-        resultLabel.fontSize = 32
+        resultLabel.fontName = GaeguTypography.boldFontName
+        resultLabel.fontSize = FontSize.largeTitle
         resultLabel.fontColor = color
         resultLabel.position = CGPoint(x: size.width / 2, y: size.height / 2)
         resultLabel.zPosition = 250
@@ -973,11 +1022,104 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     // MARK: - Public Methods
     func setStoryRequirements(_ requirements: StoryFlowerRequirements) {
         self.storyRequirements = requirements
-        chatTextNode?.text = requirements.hintText
     }
-    
+
     func getCurrentBouquet() -> [Flower] {
         return placedFlowers.map { $0.flowerData }
+    }
+
+    /// Capture a snapshot of the bouquet area (back + flowers + front)
+    /// Returns a UIImage of just the bouquet portion (no background, no UI)
+    func captureBouquetSnapshot() -> UIImage? {
+        guard let view = self.view else {
+            print("❌ Cannot capture snapshot: view is nil")
+            return nil
+        }
+
+        print("📸 Starting bouquet snapshot capture")
+        print("📸 Total flowers to capture: \(placedFlowers.count)")
+
+        // Get the bouquet center position
+        let bouquetCenter = CGPoint(
+            x: bouquetBackNode.position.x,
+            y: bouquetBackNode.position.y
+        )
+        print("📸 Bouquet center: \(bouquetCenter)")
+
+        // Create a clean container for ONLY bouquet elements centered at bouquet position
+        let snapshotContainer = SKNode()
+        snapshotContainer.position = bouquetCenter
+
+        // Add bouquet back (base layer) - position relative to container center
+        if let backCopy = bouquetBackNode.copy() as? SKSpriteNode {
+            backCopy.position = CGPoint.zero // Center in container
+            backCopy.zPosition = 0
+            snapshotContainer.addChild(backCopy)
+            print("✅ Added bouquet back at center")
+        }
+
+        // Add all placed flowers with positions relative to bouquet center
+        for (index, flower) in placedFlowers.enumerated() {
+            let flowerCopy = flower.createCopy()
+
+            // Flowers are in bouquetFlowersContainer coordinate space
+            // Convert to scene coordinates first, then make relative to bouquet center
+            let flowerWorldPos = bouquetFlowersContainer.convert(flower.position, to: self)
+            flowerCopy.position = CGPoint(
+                x: flowerWorldPos.x - bouquetCenter.x,
+                y: flowerWorldPos.y - bouquetCenter.y
+            )
+            flowerCopy.zPosition = flower.zPosition
+            flowerCopy.zRotation = flower.zRotation
+            flowerCopy.xScale = flower.xScale
+            flowerCopy.yScale = flower.yScale
+            flowerCopy.alpha = flower.alpha
+            snapshotContainer.addChild(flowerCopy)
+            print("✅ Added flower \(index + 1): \(flower.flowerData.flowerName)")
+            print("   Original container pos: \(flower.position)")
+            print("   World pos: \(flowerWorldPos)")
+            print("   Relative to bouquet: \(flowerCopy.position)")
+        }
+
+        // Add bouquet front (top layer) - position relative to container center
+        if let frontCopy = bouquetFrontNode.copy() as? SKSpriteNode {
+            frontCopy.position = CGPoint.zero // Center in container
+            frontCopy.zPosition = 999
+            snapshotContainer.addChild(frontCopy)
+            print("✅ Added bouquet front at center")
+        }
+
+        // Temporarily add to scene
+        addChild(snapshotContainer)
+
+        // Calculate the bounds to capture (centered on container)
+        // Smaller crop area = larger bouquet in final image
+        let snapshotSize = CGSize(width: 250, height: 250)
+        let snapshotRect = CGRect(
+            x: bouquetCenter.x - snapshotSize.width / 2,
+            y: bouquetCenter.y - snapshotSize.height / 2,
+            width: snapshotSize.width,
+            height: snapshotSize.height
+        )
+
+        print("📸 Snapshot rect: \(snapshotRect)")
+
+        // Capture texture from the container
+        let texture = view.texture(from: snapshotContainer, crop: snapshotRect)
+
+        // Remove temporary container
+        snapshotContainer.removeFromParent()
+
+        // Convert to UIImage
+        if let cgImage = texture?.cgImage() {
+            let image = UIImage(cgImage: cgImage)
+            print("✅ Captured bouquet snapshot: \(image.size)")
+            print("✅ Flowers included: \(placedFlowers.count)")
+            return image
+        }
+
+        print("❌ Failed to create UIImage from texture")
+        return nil
     }
     
     // MARK: - Helper Methods

@@ -2,7 +2,7 @@
 //  ListeningPageView.swift
 //  florist
 //
-//  Created by AI on 04/11/25.
+//  Created by reynaldo on 04/11/25.
 //
 
 import SwiftUI
@@ -85,16 +85,16 @@ struct ListeningPageView: View {
                     // Empty state when story fails to load
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.system(size: 60))
+                            .font(.custom("Gaegu-Regular", size: 60))
                             .foregroundColor(.yellow)
                         
                         Text("No Story Loaded")
-                            .font(.title)
+                            .font(.title2Gaegu)
                             .fontWeight(.bold)
                             .foregroundColor(.white)
                         
                         Text("The story could not be loaded. Please check that the story file exists and is properly formatted.")
-                            .font(.body)
+                            .font(.bodyGaegu)
                             .foregroundColor(.white.opacity(0.8))
                             .multilineTextAlignment(.center)
                             .padding(.horizontal, 40)
@@ -119,17 +119,6 @@ struct ListeningPageView: View {
                         .padding(.trailing, 20)
                     }
                     Spacer()
-                }
-                
-                // Completion Overlay - Navigate to Bouquet Page
-                if controller.isStoryComplete {
-                    CompletionOverlay(
-                        onRestart: {
-                            // Navigate to bouquet page
-                            flowCoordinator.navigateToBouquet(storyId: storyId)
-                        },
-                        buttonText: "Continue to Bouquet"
-                    )
                 }
             }
         }
@@ -164,11 +153,33 @@ struct ListeningPageView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
-            // Load the story for this storyId
-            controller.loadStory(from: storyId)
+            // Set the flow coordinator for progress restoration
+            controller.setFlowCoordinator(flowCoordinator)
+
+            // Map story ID to filename (for now, all stories use "story.json")
+            // In the future, you can have different files: "story_1.json", "story_2.json", etc.
+            let filename = "story"
+            controller.loadStory(from: filename)
+
+            // Start listening BGM
+            SettingsManager.shared.playMusic(named: "listeningBGM", loops: -1)
+        }
+        .onChange(of: controller.isStoryComplete) { isComplete in
+            if isComplete {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    flowCoordinator.navigateToBouquet(storyId: storyId)
+                }
+            }
+        }
+        .onDisappear {
+            // Save progress when navigating away from the story
+            Task {
+                await controller.saveCurrentProgress()
+            }
         }
     }
 }
+
 
 #Preview {
     ListeningPageView(storyId: "story", flowCoordinator: GameFlowCoordinator())
