@@ -11,6 +11,7 @@ import Combine
 
 class BouquetViewController: ObservableObject {
     @Published var model = BouquetModel()
+    @Published var isSettingsOpen = false
     private var gameScene: GameScene?
     private var onBouquetCompleteCallback: (() -> Void)?
     private var currentStoryId: String?
@@ -55,6 +56,13 @@ class BouquetViewController: ObservableObject {
 
         // Set callback for book button only (settings now handled internally)
         scene.onBookButtonTapped = onBookTapped
+
+        // Set callback for settings state changes
+        scene.onSettingsStateChanged = { [weak self] isOpen in
+            DispatchQueue.main.async {
+                self?.isSettingsOpen = isOpen
+            }
+        }
 
         gameScene = scene
         return scene

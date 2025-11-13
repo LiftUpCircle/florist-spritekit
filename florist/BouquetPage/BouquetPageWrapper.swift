@@ -12,32 +12,20 @@ struct BouquetPageWrapper: View {
     @ObservedObject var flowCoordinator: GameFlowCoordinator
 
     var body: some View {
-        ZStack {
-            BouquetView(
-                storyRequirements: StoryRequirementsDatabase.shared.getRequirements(for: storyId),
-                storyId: storyId, // Pass storyId for saving to memories
-                onBouquetComplete: {
-                    // Trigger completion (will show dialog)
-                    flowCoordinator.onBouquetComplete()
-                }
-            )
-            .navigationBarHidden(true)
-
-            // Show completion dialog overlay
-            if flowCoordinator.showCompletionDialog {
-                StoryCompletionDialog(
-                    storyId: storyId,
-                    hasMoreStories: GameProgressManager.shared.hasMoreStories,
-                    onContinue: {
-                        flowCoordinator.continueToNextStory()
-                    },
-                    onReturnToMenu: {
-                        flowCoordinator.returnToMainMenu()
-                    }
-                )
-                .transition(.opacity)
-                .zIndex(100)
+        BouquetView(
+            storyRequirements: StoryRequirementsDatabase.shared.getRequirements(for: storyId),
+            storyId: storyId, // Pass storyId for saving to memories
+            onBouquetComplete: {
+                // Trigger completion (will show toast and auto-continue)
+                flowCoordinator.onBouquetComplete()
             }
-        }
+        )
+        .navigationBarHidden(true)
+        .toast(
+            isShowing: $flowCoordinator.showBouquetSavedToast,
+            message: flowCoordinator.toastMessage,
+            icon: "book.closed.fill",
+            duration: 2.0
+        )
     }
 }

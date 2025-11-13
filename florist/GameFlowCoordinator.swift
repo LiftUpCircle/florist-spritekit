@@ -20,8 +20,8 @@ class GameFlowCoordinator: ObservableObject {
     }
 
     @Published var navigationPath = NavigationPath()
-    @Published var showCompletionDialog = false
-    @Published var currentCompletedStoryId: String?
+    @Published var showBouquetSavedToast = false
+    @Published var toastMessage = ""
 
     private let progressManager = GameProgressManager.shared
 
@@ -52,45 +52,54 @@ class GameFlowCoordinator: ObservableObject {
 
     // Called when bouquet is successfully wrapped
     func onBouquetComplete() {
-        let completedStoryId = currentStoryId
-
         // Mark story as complete
         progressManager.completeCurrentStory()
 
-        // Show completion dialog
-        currentCompletedStoryId = completedStoryId
-        showCompletionDialog = true
+        // Get character name from story ID
+        let characterName = getCharacterName(from: currentStoryId)
+
+        // Show toast notification
+        toastMessage = "Bouquet for \(characterName) saved to memories!"
+        showBouquetSavedToast = true
+
+        // Automatically continue to next story after delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+            self?.continueToNextStory()
+        }
     }
 
-    // User chooses to continue to next story
-    func continueToNextStory() {
-        showCompletionDialog = false
-
+    // Automatically continue to next story
+    private func continueToNextStory() {
         if progressManager.hasMoreStories {
             // Move to next story
             progressManager.moveToNextStory()
             navigateToListening(storyId: currentStoryId)
         } else {
             // All stories complete, return to main menu
-            showAllStoriesCompleteDialog()
+            print("🎉 All stories completed!")
+            returnToMainMenu()
         }
     }
 
-    // User chooses to return to main menu
+    // Return to main menu
     func returnToMainMenu() {
-        showCompletionDialog = false
         navigationPath.removeLast(navigationPath.count)
-    }
-
-    private func showAllStoriesCompleteDialog() {
-        // TODO: Show a special "All stories complete!" dialog
-        print("🎉 All stories completed!")
-        returnToMainMenu()
     }
 
     func resetToMainMenu() {
-        showCompletionDialog = false
         navigationPath.removeLast(navigationPath.count)
+    }
+
+    // Helper to get character name from story ID
+    private func getCharacterName(from storyId: String) -> String {
+        if storyId.contains("robert") {
+            return "Robert"
+        } else if storyId.contains("abigail") {
+            return "Abigail"
+        } else if storyId.contains("michael") {
+            return "Michael"
+        }
+        return "this character"
     }
 
     func startNewGame() {
