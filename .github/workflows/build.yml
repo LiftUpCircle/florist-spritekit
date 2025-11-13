@@ -29,6 +29,10 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
+      - name: Install iOS Simulator Runtime
+        run: |
+          xcodebuild -downloadPlatform iOS
+
       - name: List available schemes
         run: xcodebuild -list -project florist.xcodeproj
 
