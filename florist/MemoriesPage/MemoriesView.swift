@@ -26,8 +26,12 @@ struct MemoriesView: View {
                 )
             }
         }
-        .navigationBarHidden(false)
+        .navigationBarHidden(true)
         .navigationBarBackButtonHidden(true)
+        .onAppear {
+            // Refresh saved bouquets when view appears
+            controller.refreshSavedBouquets()
+        }
     }
 }
 
@@ -36,7 +40,7 @@ struct MemoryFolderSelectionView: View {
     @ObservedObject var controller: MemoriesViewController
     let completedStories: [CompletedStory]
     @Environment(\.dismiss) var dismiss
-    
+
     var body: some View {
         ZStack(alignment: .topLeading) {
             // Main content
@@ -46,20 +50,13 @@ struct MemoryFolderSelectionView: View {
                 Text("Memories")
                     .font(.largeTitleGaegu)
                     .foregroundColor(.black)
-                
-                // Display completed stories or placeholder
-                if completedStories.isEmpty {
-                    Text("No completed stories yet")
-                        .font(.custom("Arial Rounded MT Bold", size: 24))
-                        .foregroundColor(.gray)
-                        .frame(maxWidth: .infinity)
-                } else {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 20) {
-                            ForEach(completedStories) { story in
-                                CompletedStoryCard(story: story) {
-                                    controller.selectCompletedStory(story)
-                                }
+
+                // Memory folders with bouquet images
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 20) {
+                        ForEach(controller.model.memoryFolders) { folder in
+                            MemoryFolderCard(folder: folder) {
+                                controller.selectMemoryFolder(folder)
                             }
                         }
                     }
@@ -68,7 +65,7 @@ struct MemoryFolderSelectionView: View {
             }
             .padding(.top, 50)
             .padding(.horizontal, 90)
-            
+
             CustomBackButton {
                 dismiss()
             }
@@ -80,41 +77,20 @@ struct MemoryFolderSelectionView: View {
     }
 }
 
-// MARK: - Completed Story Card
-struct CompletedStoryCard: View {
-    let story: CompletedStory
+// MARK: - Memory Folder Card
+struct MemoryFolderCard: View {
+    let folder: MemoriesModel.MemoryFolder
     let action: () -> Void
-    
-    private var formattedDate: String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        formatter.timeStyle = .none
-        return formatter.string(from: story.completionDate)
-    }
 
     var body: some View {
         Button(action: action) {
-            VStack(alignment: .leading, spacing: 8) {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 175, height: 87)
-                    .overlay(
-                        Image("PlaceholderMemories")
-                            .resizable()
-                    )
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(story.storyTitle)
-                        .font(.custom("Arial Rounded MT Bold", size: 16))
-                        .foregroundColor(.black)
-                        .lineLimit(2)
-                    
-                    Text("Completed: \(formattedDate)")
-                        .font(.custom("Arial", size: 12))
-                        .foregroundColor(.gray)
-                }
-                .frame(width: 175, alignment: .leading)
-            }
+            Rectangle()
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: 175, height: 87)
+                .overlay(
+                    Image("PlaceholderMemories")
+                        .resizable()
+                )
         }
     }
 }

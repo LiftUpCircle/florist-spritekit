@@ -2,7 +2,7 @@
 //  FlowerBookView.swift
 //  florist
 //
-//  Created by AI on 04/11/25.
+//  Created by reynaldo on 04/11/25.
 //
 
 import SwiftUI
@@ -130,7 +130,9 @@ struct FlowerEntryView: View {
         case "Rose": return "Rose"
         case "Jasmine": return "Jasmine"
         case "Lavender": return "Lavender"
-        case "Hibiscus": return "Hibicus"
+        case "Carnation": return "Carnations"
+        case "Lily": return "Lily"
+        case "Tulip": return "Tulip"
         default: return nil
         }
     }
@@ -140,7 +142,9 @@ struct FlowerEntryView: View {
         case "Rose": return "Symbol of love and passion. Perfect for romantic occasions."
         case "Jasmine": return "Represents purity and innocence. Often used in spiritual ceremonies."
         case "Lavender": return "Brings serenity and calmness. Known for its soothing properties."
-        case "Hibiscus": return "Expresses joy and celebration. Bright and cheerful."
+        case "Carnation": return "Expresses joy and celebration. A symbol of fascination and distinction."
+        case "Lily": return "Embodies hope and renewal. Represents optimism for the future."
+        case "Tulip": return "Represents elegance and grace. A flower of refined beauty."
         default: return "A beautiful flower with special meaning."
         }
     }

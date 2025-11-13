@@ -146,6 +146,8 @@ struct MainMenuView: View {
                     EmptyView() // Options now handled as overlay
                 case .mainMenu:
                     EmptyView() // This shouldn't be reached
+                default:
+                    EmptyView()
                 }
             }
             .task {

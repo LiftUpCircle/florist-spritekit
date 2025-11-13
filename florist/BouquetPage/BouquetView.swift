@@ -10,6 +10,7 @@ import SpriteKit
 
 struct BouquetView: View {
     var storyRequirements: StoryFlowerRequirements?
+    var storyId: String?
     var onBouquetComplete: (() -> Void)?
 
     @StateObject private var controller: BouquetViewController
@@ -17,13 +18,15 @@ struct BouquetView: View {
     @State private var dialogueText: String = ""
     @State private var characterName: String = "Hint"
 
-    init(storyRequirements: StoryFlowerRequirements? = nil, onBouquetComplete: (() -> Void)? = nil) {
+    init(storyRequirements: StoryFlowerRequirements? = nil, storyId: String? = nil, onBouquetComplete: (() -> Void)? = nil) {
         self.storyRequirements = storyRequirements
+        self.storyId = storyId
         self.onBouquetComplete = onBouquetComplete
 
-        // Initialize controller with requirements
+        // Initialize controller with requirements and storyId
         _controller = StateObject(wrappedValue: BouquetViewController(
             storyRequirements: storyRequirements,
+            storyId: storyId,
             onBouquetComplete: onBouquetComplete
         ))
     }
