@@ -7,120 +7,93 @@
 
 import Foundation
 
-struct MemoriesModel {
-    // Represents a memory folder (the 3 rectangles on the main memories page)
-    struct MemoryFolder: Identifiable {
-        let id: UUID = UUID()
-        let title: String
-        let chapters: [Chapter]
+struct MemoriesModel: Codable {
+    // Represents a memory folder (character folder with multiple stories)
+    struct MemoryFolder: Identifiable, Codable {
+        let id: UUID
+        let characterName: String // Character name (e.g., "Alice")
+        let characterImage: String // Character image asset name
+        var memories: [Memory] // Stories for this character
+
+        // Computed property for backward compatibility
+        var title: String { characterName }
+
+        enum CodingKeys: String, CodingKey {
+            case id, characterName, characterImage, memories
+        }
     }
 
-    // Represents a chapter (5 vertical items on the left side)
-    struct Chapter: Identifiable {
-        let id: UUID = UUID()
-        let title: String
-        let description: String
-        let savedBouquet: SavedBouquet?
+    // Represents a memory (one completed story with saved bouquet)
+    struct Memory: Identifiable, Codable {
+        let id: UUID
+        let storyId: String // Story identifier to link with story.json
+        let title: String // Memory/Story title (e.g., "Chapter 1")
+        let description: String // Story description
+        var savedBouquet: SavedBouquet? // Optional saved bouquet
+
+        enum CodingKeys: String, CodingKey {
+            case id, storyId, title, description, savedBouquet
+        }
     }
 
-    // Represents a saved bouquet
-    struct SavedBouquet: Identifiable {
-        let id: UUID = UUID()
-        let imageName: String // The image asset name for the bouquet
+    // Represents a saved bouquet image
+    struct SavedBouquet: Identifiable, Codable {
+        let id: UUID
+        let imageFileName: String // Filename in Documents directory (e.g., "bouquet_uuid.png")
         let dateCreated: Date
+
+        enum CodingKeys: String, CodingKey {
+            case id, imageFileName, dateCreated
+        }
     }
 
-    // Sample data - 3 memory folders
+    // Sample data - Maria's Last Day - Three Special Customers
     var memoryFolders: [MemoryFolder] = [
         MemoryFolder(
-            title: "A shy Scholar",
-            chapters: [
-                Chapter(
-                    title: "Chapter 1",
-                    description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500",
-                    savedBouquet: SavedBouquet(imageName: "sample_bouquet", dateCreated: Date())
-                ),
-                Chapter(
-                    title: "Chapter 2",
-                    description: "The beginning of a new journey filled with beautiful moments.",
-                    savedBouquet: nil
-                ),
-                Chapter(
-                    title: "Chapter 3",
-                    description: "A collection of cherished memories from special occasions.",
-                    savedBouquet: nil
-                ),
-                Chapter(
-                    title: "Chapter 4",
-                    description: "Moments that shaped our story together.",
-                    savedBouquet: nil
-                ),
-                Chapter(
-                    title: "Chapter 5",
-                    description: "The latest adventures and experiences.",
+            id: UUID(),
+            characterName: "Robert Adikusuma",
+            characterImage: "character_temp",
+            memories: [
+                Memory(
+                    id: UUID(),
+                    storyId: "urutan1",
+                    title: "Robert's Bouquet",
+                    description: "\"For the wife he still holds dear.\" — Robert wanted flowers that remember the way mornings used to feel, blooms that carry his late wife's memory forward. Love that persists beyond time.",
                     savedBouquet: nil
                 )
             ]
         ),
         MemoryFolder(
-            title: "A Brave Scholar",
-            chapters: [
-                Chapter(
-                    title: "Chapter 1",
-                    description: "The quiet beginning of an intellectual journey.",
-                    savedBouquet: SavedBouquet(imageName: "scholar_bouquet", dateCreated: Date())
-                ),
-                Chapter(
-                    title: "Chapter 2",
-                    description: "Discovering confidence through knowledge.",
-                    savedBouquet: nil
-                ),
-                Chapter(
-                    title: "Chapter 3",
-                    description: "Building friendships in unexpected places.",
-                    savedBouquet: nil
-                ),
-                Chapter(
-                    title: "Chapter 4",
-                    description: "Overcoming challenges and growing stronger.",
-                    savedBouquet: nil
-                ),
-                Chapter(
-                    title: "Chapter 5",
-                    description: "Finding one's voice and purpose.",
+            id: UUID(),
+            characterName: "Abigail Surya Kencana",
+            characterImage: "character_temp",
+            memories: [
+                Memory(
+                    id: UUID(),
+                    storyId: "urutan2",
+                    title: "Abigail's Hope",
+                    description: "\"Maybe she'll talk to him...\" — Abigail brought flowers for her mother, hoping they might soften her father's heart about demolishing the shop. Peace that feels safe, not sad.",
                     savedBouquet: nil
                 )
             ]
         ),
         MemoryFolder(
-            title: "Race Cars",
-            chapters: [
-                Chapter(
-                    title: "Chapter 1",
-                    description: "The first step into the unknown.",
-                    savedBouquet: nil
-                ),
-                Chapter(
-                    title: "Chapter 2",
-                    description: "Exploring new horizons and possibilities.",
-                    savedBouquet: nil
-                ),
-                Chapter(
-                    title: "Chapter 3",
-                    description: "Meeting companions along the way.",
-                    savedBouquet: nil
-                ),
-                Chapter(
-                    title: "Chapter 4",
-                    description: "Facing trials and emerging victorious.",
-                    savedBouquet: nil
-                ),
-                Chapter(
-                    title: "Chapter 5",
-                    description: "The journey continues with hope.",
+            id: UUID(),
+            characterName: "Michael Kosasih",
+            characterImage: "character_temp",
+            memories: [
+                Memory(
+                    id: UUID(),
+                    storyId: "urutan3",
+                    title: "Michael's Gift",
+                    description: "\"Nobody ever makes one for you...\" — Little Michael bought flowers for Maria herself, wanting something yellow so she wouldn't forget to smile. Joy that blooms forward.",
                     savedBouquet: nil
                 )
             ]
         )
     ]
+
+    enum CodingKeys: String, CodingKey {
+        case memoryFolders
+    }
 }

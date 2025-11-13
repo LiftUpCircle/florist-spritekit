@@ -2,7 +2,7 @@
 //  BouquetPageWrapper.swift
 //  florist
 //
-//  Created by AI on 04/11/25.
+//  Created by reynaldo on 04/11/25.
 //
 
 import SwiftUI
@@ -10,15 +10,22 @@ import SwiftUI
 struct BouquetPageWrapper: View {
     let storyId: String
     @ObservedObject var flowCoordinator: GameFlowCoordinator
-    
+
     var body: some View {
         BouquetView(
             storyRequirements: StoryRequirementsDatabase.shared.getRequirements(for: storyId),
+            storyId: storyId, // Pass storyId for saving to memories
             onBouquetComplete: {
-                // Navigate to next story
+                // Trigger completion (will show toast and auto-continue)
                 flowCoordinator.onBouquetComplete()
             }
         )
         .navigationBarHidden(true)
+        .toast(
+            isShowing: $flowCoordinator.showBouquetSavedToast,
+            message: flowCoordinator.toastMessage,
+            icon: "book.closed.fill",
+            duration: 2.0
+        )
     }
 }

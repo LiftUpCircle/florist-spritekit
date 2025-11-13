@@ -12,9 +12,9 @@ class SettingsOverlay: SKNode {
     
     private let whiteColor = SKColor.white
     private let darkGrayColor = SKColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
-    private let lightPinkColor = SKColor(red: 1.0, green: 0.85, blue: 0.9, alpha: 1.0)
-    private let redToggleColor = SKColor(red: 0.9, green: 0.2, blue: 0.2, alpha: 1.0)
-    private let separatorColor = SKColor.black
+    private let lightPinkColor = SKColor(red: 0.98, green: 0.85, blue: 0.82, alpha: 1.0) // Softer peach/pink
+    private let redToggleColor = SKColor(red: 0.75, green: 0.35, blue: 0.35, alpha: 1.0) // Softer red/brown
+    private let separatorColor = SKColor(red: 0.85, green: 0.85, blue: 0.85, alpha: 1.0) // Lighter separator
     
     private var backgroundNode: SKSpriteNode!
     private var closeButton: SKNode!
@@ -50,31 +50,34 @@ class SettingsOverlay: SKNode {
     }
     
     private func setupOverlay() {
-        
+
         let overlayWidth = sceneSize.width * 0.70
         let overlayHeight = sceneSize.height * 0.75
-        let cornerRadius: CGFloat = 20
-        
-        let screenBg = SKSpriteNode(color: SKColor.black.withAlphaComponent(0.5),
+        let cornerRadius: CGFloat = 25
+
+        // Cream/beige background overlay (similar to screenshot)
+        let creamColor = SKColor(red: 0.96, green: 0.93, blue: 0.88, alpha: 0.85)
+        let screenBg = SKSpriteNode(color: creamColor,
                                      size: CGSize(width: sceneSize.width * 2, height: sceneSize.height * 2))
         screenBg.position = CGPoint(x: 0, y: 0)
         screenBg.zPosition = 1000
         screenBg.name = "screenBackground"
         addChild(screenBg)
-        
-        
+
+        // White modal with rounded corners
         let backgroundShape = SKShapeNode(rectOf: CGSize(width: overlayWidth, height: overlayHeight), cornerRadius: cornerRadius)
         backgroundShape.fillColor = whiteColor
         backgroundShape.strokeColor = .clear
         backgroundShape.position = CGPoint(x: 0, y: 0)
         backgroundShape.zPosition = 1001
-        
-        
-        backgroundNode = SKSpriteNode(color: whiteColor, size: CGSize(width: overlayWidth, height: overlayHeight))
+        addChild(backgroundShape)
+
+        // Note: Using SKShapeNode for rounded corners instead of SKSpriteNode
+        backgroundNode = SKSpriteNode(color: .clear, size: CGSize(width: overlayWidth, height: overlayHeight))
         backgroundNode.position = CGPoint(x: 0, y: 0)
         backgroundNode.zPosition = 1001
         backgroundNode.name = "settingsBackground"
-        addChild(backgroundNode)
+        // Not adding backgroundNode since we're using backgroundShape for the visual
         
         // Title "Settings"
         setupTitle()
@@ -93,7 +96,7 @@ class SettingsOverlay: SKNode {
         let overlayWidth = sceneSize.width * 0.70
         let overlayHeight = sceneSize.height * 0.75
         let titleFontSize = max(28, min(overlayWidth * 0.038, 40))
-        let titleLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
+        let titleLabel = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
         titleLabel.text = "Settings"
         titleLabel.fontSize = titleFontSize
         titleLabel.fontColor = darkGrayColor
@@ -108,21 +111,21 @@ class SettingsOverlay: SKNode {
         let overlayHeight = sceneSize.height * 0.75
         let buttonSize: CGFloat = 35
         // Close button at top-right
-        let buttonX = overlayWidth * 0.45
-        let buttonY = overlayHeight * 0.35
-        
+        let buttonX = overlayWidth * 0.42
+        let buttonY = overlayHeight * 0.33
+
         closeButton = SKNode()
         closeButton.name = "closeButton"
         closeButton.zPosition = 1002
-        
-        // Black circular background with white X
+
+        // Simple X mark in red/brown color (matching the screenshot)
         let closeBg = SKShapeNode(circleOfRadius: buttonSize / 2)
-        closeBg.fillColor = darkGrayColor
+        closeBg.fillColor = SKColor(red: 0.8, green: 0.3, blue: 0.3, alpha: 1.0)
         closeBg.strokeColor = .clear
         closeBg.zPosition = 0
         closeButton.addChild(closeBg)
-        
-        let xMark = SKLabelNode(fontNamed: "Arial-BoldMT")
+
+        let xMark = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
         xMark.text = "✕"
         xMark.fontSize = buttonSize * 0.6
         xMark.fontColor = .white
@@ -130,7 +133,7 @@ class SettingsOverlay: SKNode {
         xMark.horizontalAlignmentMode = .center
         xMark.zPosition = 1
         closeButton.addChild(xMark)
-        
+
         closeButton.position = CGPoint(x: buttonX, y: buttonY)
         addChild(closeButton)
     }
@@ -150,7 +153,7 @@ class SettingsOverlay: SKNode {
         let separatorWidth = overlayWidth * 0.85
         
         // Sounds Toggle
-        let soundsLabel = SKLabelNode(fontNamed: "Arial")
+        let soundsLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
         soundsLabel.text = "Sounds"
         soundsLabel.fontSize = labelFontSize
         soundsLabel.fontColor = darkGrayColor
@@ -173,7 +176,7 @@ class SettingsOverlay: SKNode {
         addChild(separator1)
         
         // Music Toggle
-        let musicLabel = SKLabelNode(fontNamed: "Arial")
+        let musicLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
         musicLabel.text = "Music"
         musicLabel.fontSize = labelFontSize
         musicLabel.fontColor = darkGrayColor
@@ -196,7 +199,7 @@ class SettingsOverlay: SKNode {
         addChild(separator2)
         
         // Vibration Toggle
-        let vibrationLabel = SKLabelNode(fontNamed: "Arial")
+        let vibrationLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
         vibrationLabel.text = "Vibration"
         vibrationLabel.fontSize = labelFontSize
         vibrationLabel.fontColor = darkGrayColor
@@ -287,7 +290,7 @@ class SettingsOverlay: SKNode {
         buttonBg.zPosition = 0
         button.addChild(buttonBg)
         
-        let buttonLabel = SKLabelNode(fontNamed: "Arial")
+        let buttonLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
         buttonLabel.text = text
         buttonLabel.fontSize = fontSize
         buttonLabel.fontColor = darkGrayColor
@@ -474,7 +477,7 @@ class VolumeSlider: SKNode {
         addChild(knobNode)
         
         // Left arrow
-        leftArrow = SKLabelNode(fontNamed: "Arial-BoldMT")
+        leftArrow = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
         leftArrow.text = "◄"
         leftArrow.fontSize = 18
         leftArrow.fontColor = .white
@@ -483,7 +486,7 @@ class VolumeSlider: SKNode {
         knobNode.addChild(leftArrow)
         
         // Right arrow
-        rightArrow = SKLabelNode(fontNamed: "Arial-BoldMT")
+        rightArrow = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
         rightArrow.text = "►"
         rightArrow.fontSize = 18
         rightArrow.fontColor = .white
@@ -559,7 +562,7 @@ class WoodenToggle: SKNode {
         leftSegment.zPosition = 0
         addChild(leftSegment)
         
-        leftLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
+        leftLabel = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
         leftLabel.text = "000"
         leftLabel.fontSize = 24
         leftLabel.fontColor = .white
@@ -576,7 +579,7 @@ class WoodenToggle: SKNode {
         rightSegment.zPosition = 0
         addChild(rightSegment)
         
-        rightLabel = SKLabelNode(fontNamed: "Arial-BoldMT")
+        rightLabel = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
         rightLabel.text = isOn ? "ON" : "OFF"
         rightLabel.fontSize = 20
         rightLabel.fontColor = .white
@@ -629,7 +632,7 @@ class WoodenCheckbox: SKNode {
         addChild(checkboxCircle)
         
         if isOn {
-            checkmark = SKLabelNode(fontNamed: "Arial-BoldMT")
+            checkmark = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
             checkmark!.text = "✓"
             checkmark!.fontSize = 40
             checkmark!.fontColor = .white
@@ -649,7 +652,7 @@ class WoodenCheckbox: SKNode {
         
         if isOn {
             if checkmark == nil {
-                checkmark = SKLabelNode(fontNamed: "Arial-BoldMT")
+                checkmark = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
                 checkmark!.text = "✓"
                 checkmark!.fontSize = 40
                 checkmark!.fontColor = .white
