@@ -11,20 +11,38 @@ import Combine
 class GameProgressManager: ObservableObject {
     static let shared = GameProgressManager()
 
-    // All available stories in order using the new structure
-    private let allStories: [String] = [
-        "urutan1",    // Customer 1: Robert - Love and Memory
-        "urutan2",    // Customer 2: Abigail - Hope and Forgiveness
-        "urutan3"     // Customer 3: Michael - Joy and Gratitude
-    ]
+    // Dynamically loaded stories from story.json
+    private var allStories: [String] = []
 
     @Published var currentStoryIndex: Int = 0
     @Published var completedStories: Set<String> = []
 
-    private let userDefaultsKey = "completedStories"
+    private let completedStoriesKey = "completedStories"
+    private let currentStoryIndexKey = "currentStoryIndex"
 
     private init() {
+        // Load available stories from story.json
+        loadAvailableStories()
+        // Then load user progress
         loadProgress()
+    }
+
+    /// Load available stories dynamically from story.json
+    private func loadAvailableStories() {
+        do {
+            let storyIndex = try StoryManager.shared.loadStoryIndex()
+
+            // Sort stories by their order field and extract the keys
+            allStories = storyIndex.stories
+                .sorted { $0.value.order < $1.value.order }
+                .map { $0.key }
+
+            print("📚 Loaded \(allStories.count) stories from story.json: \(allStories)")
+        } catch {
+            // Fallback to default stories if loading fails
+            print("⚠️ Failed to load story index, using defaults: \(error)")
+            allStories = ["urutan1", "urutan2", "urutan3"]
+        }
     }
 
     // MARK: - Story Access
@@ -73,6 +91,7 @@ class GameProgressManager: ObservableObject {
     func moveToNextStory() {
         if hasMoreStories {
             currentStoryIndex += 1
+            saveProgress()  // Save the new story index
             print("➡️ Moving to story: \(currentStoryId)")
         } else {
             print("🎉 All stories completed!")
@@ -82,6 +101,7 @@ class GameProgressManager: ObservableObject {
     /// Reset to first story
     func resetToFirstStory() {
         currentStoryIndex = 0
+        saveProgress()  // Save the reset index
         print("🔄 Reset to first story: \(currentStoryId)")
     }
 
@@ -93,20 +113,38 @@ class GameProgressManager: ObservableObject {
         print("🔄 All progress reset")
     }
 
+    /// Reload available stories from story.json (useful after adding new stories)
+    func reloadAvailableStories() {
+        loadAvailableStories()
+        // Ensure current index is still valid
+        if currentStoryIndex >= allStories.count {
+            currentStoryIndex = 0
+            saveProgress()
+        }
+    }
+
     // MARK: - Persistence
 
     private func saveProgress() {
         let completedArray = Array(completedStories)
-        UserDefaults.standard.set(completedArray, forKey: userDefaultsKey)
-        UserDefaults.standard.set(currentStoryIndex, forKey: "currentStoryIndex")
+        UserDefaults.standard.set(completedArray, forKey: completedStoriesKey)
+        UserDefaults.standard.set(currentStoryIndex, forKey: currentStoryIndexKey)
     }
 
     private func loadProgress() {
-        if let saved = UserDefaults.standard.array(forKey: userDefaultsKey) as? [String] {
+        // Load completed stories
+        if let saved = UserDefaults.standard.array(forKey: completedStoriesKey) as? [String] {
             completedStories = Set(saved)
         }
-        currentStoryIndex = UserDefaults.standard.integer(forKey: "currentStoryIndex")
-        print("✅ Loaded progress: \(completedCount)/\(totalStories) stories completed")
+
+        // Load current story index
+        let savedIndex = UserDefaults.standard.integer(forKey: currentStoryIndexKey)
+        // Ensure the saved index is valid
+        if savedIndex >= 0 && savedIndex < allStories.count {
+            currentStoryIndex = savedIndex
+        }
+
+        print("✅ Loaded progress: Story \(currentStoryIndex + 1)/\(totalStories) - \(completedCount) completed")
     }
 
     // MARK: - Query Methods

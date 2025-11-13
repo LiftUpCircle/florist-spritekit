@@ -113,11 +113,12 @@ class StoryManager {
     /// - Returns: A StoryData object containing the parsed story
     /// - Throws: StoryLoadError if the file cannot be found or parsed
     func loadStory(from filename: String) throws -> StoryData {
-        // Try to load from the story index first using the current story
+        // Try to load from the story index first using GameProgressManager's current story
         if filename == "story" {
             do {
-                let storyIndex = try loadStoryIndex()
-                return try loadStoryByOrder(storyIndex.currentStory)
+                // Get the current story from GameProgressManager
+                let currentStoryId = GameProgressManager.shared.currentStoryId
+                return try loadStoryByOrder(currentStoryId)
             } catch {
                 // If index loading fails, fall back to direct file loading
                 return try loadStoryFromFile(filename)

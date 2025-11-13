@@ -94,6 +94,17 @@ class GameFlowCoordinator: ObservableObject {
     }
 
     func startNewGame() {
+        // Don't reset to first story - continue from where the player was
+        // The GameProgressManager already loads the saved story index on init
+
+        // Check for saved progress before starting
+        Task {
+            await checkForSavedProgress()
+        }
+    }
+
+    func resetAndStartNewGame() {
+        // This actually resets to the first story (for when user explicitly wants new game)
         progressManager.resetToFirstStory()
 
         // Check for saved progress before starting

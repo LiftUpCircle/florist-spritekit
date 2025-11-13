@@ -10,8 +10,11 @@ import Foundation
 /// Represents the main story index file structure
 struct StoryIndex: Codable {
     let stories: [String: StoryIndexEntry]
-    let currentStory: String
-    let totalStories: Int
+
+    /// Computed property to get total number of stories
+    var totalStories: Int {
+        return stories.count
+    }
 }
 
 /// Represents an individual story entry in the index
