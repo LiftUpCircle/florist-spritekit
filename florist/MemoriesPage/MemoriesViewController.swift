@@ -30,6 +30,13 @@ class MemoriesViewController: ObservableObject {
         print("✅ MemoriesViewController initialized with MemoriesManager")
     }
 
+    /// Refreshes saved bouquet data from storage
+    func refreshSavedBouquets() {
+        // Reload the model from persistence
+        memoriesManager.loadMemories()
+        print("🔄 Refreshed saved bouquets from MemoriesManager")
+    }
+
     // MARK: - Navigation
 
     /// Navigate to memory list when a memory folder is selected
