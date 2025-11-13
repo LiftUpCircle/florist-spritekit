@@ -194,8 +194,9 @@ struct MainMenuView: View {
     
     private func checkForSavedProgress() async {
         do {
-            // Check for progress for the default story (matches story.json id)
-            let progress = try await ProgressPersistenceManager.shared.loadProgress(for: "simple-encounter")
+            // Check for progress for the current story from GameProgressManager
+            let currentStoryId = GameProgressManager.shared.currentStoryId
+            let progress = try await ProgressPersistenceManager.shared.loadProgress(for: currentStoryId)
             await MainActor.run {
                 savedProgress = progress
             }

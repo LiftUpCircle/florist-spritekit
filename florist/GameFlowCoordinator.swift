@@ -92,17 +92,43 @@ class GameFlowCoordinator: ObservableObject {
 
     // Helper to get character name from story ID
     private func getCharacterName(from storyId: String) -> String {
-        if storyId.contains("robert") {
+        // Load story index to get character name
+        do {
+            let storyIndex = try StoryManager.shared.loadStoryIndex()
+            if let storyEntry = storyIndex.stories[storyId] {
+                // Extract first name from full character name
+                let fullName = storyEntry.characterName
+                let firstName = fullName.split(separator: " ").first.map(String.init) ?? fullName
+                return firstName
+            }
+        } catch {
+            print("⚠️ Failed to load story index for character name: \(error)")
+        }
+
+        // Fallback for old story IDs or when loading fails
+        if storyId.contains("robert") || storyId == "urutan1" {
             return "Robert"
-        } else if storyId.contains("abigail") {
+        } else if storyId.contains("abigail") || storyId == "urutan2" {
             return "Abigail"
-        } else if storyId.contains("michael") {
+        } else if storyId.contains("michael") || storyId == "urutan3" {
             return "Michael"
         }
+
         return "this character"
     }
 
     func startNewGame() {
+        // Don't reset to first story - continue from where the player was
+        // The GameProgressManager already loads the saved story index on init
+
+        // Check for saved progress before starting
+        Task {
+            await checkForSavedProgress()
+        }
+    }
+
+    func resetAndStartNewGame() {
+        // This actually resets to the first story (for when user explicitly wants new game)
         progressManager.resetToFirstStory()
 
         // Check for saved progress before starting

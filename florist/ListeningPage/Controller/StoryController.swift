@@ -65,26 +65,26 @@ class StoryController: ObservableObject {
     }
     
     // MARK: - Public Methods
-    
-    /// Loads a story from a JSON file
-    /// - Parameter filename: The name of the JSON file (without extension)
-    func loadStory(from filename: String) {
+
+    /// Loads a story by its order key (e.g., "urutan1", "urutan2")
+    /// - Parameter orderKey: The order key from the story index
+    func loadStoryByOrder(_ orderKey: String) {
         do {
-            storyData = try storyManager.loadStory(from: filename)
-            
+            storyData = try storyManager.loadStoryByOrder(orderKey)
+
             // Validate that we have at least one scene
             guard let firstScene = storyData?.scenes.first else {
                 throw StoryLoadError.emptyStory
             }
-            
+
             currentSceneIndex = 0
             currentScene = firstScene
             dialogueHistory = []
             isStoryComplete = false
             isTypingComplete = false
-            
+
             addToHistory(firstScene)
-            
+
             // Check if there's saved progress to restore from the coordinator
             Task {
                 await restoreProgressIfAvailable()
@@ -92,7 +92,42 @@ class StoryController: ObservableObject {
         } catch {
             errorMessage = error.localizedDescription
             showError = true
-            
+
+            // Set to empty state
+            storyData = nil
+            currentScene = nil
+            dialogueHistory = []
+            isStoryComplete = false
+        }
+    }
+
+    /// Loads a story from a JSON file
+    /// - Parameter filename: The name of the JSON file (without extension)
+    func loadStory(from filename: String) {
+        do {
+            storyData = try storyManager.loadStory(from: filename)
+
+            // Validate that we have at least one scene
+            guard let firstScene = storyData?.scenes.first else {
+                throw StoryLoadError.emptyStory
+            }
+
+            currentSceneIndex = 0
+            currentScene = firstScene
+            dialogueHistory = []
+            isStoryComplete = false
+            isTypingComplete = false
+
+            addToHistory(firstScene)
+
+            // Check if there's saved progress to restore from the coordinator
+            Task {
+                await restoreProgressIfAvailable()
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+            showError = true
+
             // Set to empty state
             storyData = nil
             currentScene = nil
