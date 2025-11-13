@@ -1,87 +1,33 @@
 {
-  "title": "Robert's Bouquet",
-  "characterId": "robert",
-  "characterName": "Robert Adikusuma",
-  "scenes": [
-    {
-      "id": "robert_001",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
-      "characterName": "Maria",
-      "dialogue": "Robert! You're early.",
-      "spritePosition": "center"
+  "stories": {
+    "urutan1": {
+      "id": "story_robert",
+      "file": "story_robert_1.json",
+      "characterId": "robert",
+      "characterName": "Robert Adikusuma",
+      "title": "Robert's Bouquet",
+      "unlocked": true,
+      "order": 1
     },
-    {
-      "id": "robert_002",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
-      "characterName": "Robert",
-      "dialogue": "I figured I'd come before you get busy. Didn't want you closing shop without me picking up one last bouquet.",
-      "spritePosition": "right"
+    "urutan2": {
+      "id": "story_abigail",
+      "file": "story_abigail_1.json",
+      "characterId": "abigail",
+      "characterName": "Abigail Surya Kencana",
+      "title": "Abigail's Hope",
+      "unlocked": true,
+      "order": 2
     },
-    {
-      "id": "robert_003",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
-      "characterName": "Maria",
-      "dialogue": "Still can't live without flowers on your table, huh?",
-      "spritePosition": "center"
-    },
-    {
-      "id": "robert_004",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
-      "characterName": "Robert",
-      "dialogue": "Not really. I still put them by the window every week. The same kind I used to give my wife.",
-      "spritePosition": "right"
-    },
-    {
-      "id": "robert_005",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
-      "characterName": "Robert",
-      "dialogue": "She's been gone for a few years now, but… I guess old habits never die. Or maybe I just miss her.",
-      "spritePosition": "right"
-    },
-    {
-      "id": "robert_006",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
-      "characterName": "Maria",
-      "dialogue": "She wouldn't want you to be sad, Robert. She used to light up every time you walked in with flowers.",
-      "spritePosition": "center"
-    },
-    {
-      "id": "robert_007",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
-      "characterName": "Robert",
-      "dialogue": "Yeah… she always said the scent followed me home. Sometimes, when I pass this street, I swear I still catch it.",
-      "spritePosition": "right"
-    },
-    {
-      "id": "robert_008",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
-      "characterName": "Maria",
-      "dialogue": "That's because you never stopped bringing her along with you.",
-      "spritePosition": "center"
-    },
-    {
-      "id": "robert_009",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
-      "characterName": "Robert",
-      "dialogue": "Maybe. I just thought… one more bouquet couldn't hurt. Something that feels like the way mornings used to.",
-      "spritePosition": "right"
-    },
-    {
-      "id": "robert_010",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
-      "characterName": "Maria",
-      "dialogue": "Then let's make something that remembers with you.",
-      "spritePosition": "center"
+    "urutan3": {
+      "id": "story_michael",
+      "file": "story_michael_1.json",
+      "characterId": "michael",
+      "characterName": "Michael Kosasih",
+      "title": "Michael's Gift",
+      "unlocked": true,
+      "order": 3
     }
-  ]
+  },
+  "currentStory": "urutan1",
+  "totalStories": 3
 }

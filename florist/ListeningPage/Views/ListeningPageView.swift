@@ -156,10 +156,15 @@ struct ListeningPageView: View {
             // Set the flow coordinator for progress restoration
             controller.setFlowCoordinator(flowCoordinator)
 
-            // Map story ID to filename (for now, all stories use "story.json")
-            // In the future, you can have different files: "story_1.json", "story_2.json", etc.
-            let filename = "story"
-            controller.loadStory(from: filename)
+            // Map story ID to order key or load directly
+            // storyId can be: "urutan1", "urutan2", "urutan3" for new structure
+            // or "story" for legacy/default loading
+            if storyId.starts(with: "urutan") {
+                controller.loadStoryByOrder(storyId)
+            } else {
+                // Default behavior - loads the current story from the index
+                controller.loadStory(from: "story")
+            }
 
             // Start listening BGM
             SettingsManager.shared.playMusic(named: "listeningBGM", loops: -1)

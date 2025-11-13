@@ -11,11 +11,11 @@ import Combine
 class GameProgressManager: ObservableObject {
     static let shared = GameProgressManager()
 
-    // All available stories in order - Maria's last day at the shop
+    // All available stories in order using the new structure
     private let allStories: [String] = [
-        "story_robert_1",    // Customer 1: Robert - Love and Memory
-        "story_abigail_1",   // Customer 2: Abigail - Hope and Forgiveness
-        "story_michael_1"    // Customer 3: Michael - Joy and Gratitude
+        "urutan1",    // Customer 1: Robert - Love and Memory
+        "urutan2",    // Customer 2: Abigail - Hope and Forgiveness
+        "urutan3"     // Customer 3: Michael - Joy and Gratitude
     ]
 
     @Published var currentStoryIndex: Int = 0
@@ -32,7 +32,7 @@ class GameProgressManager: ObservableObject {
     /// Get the current story ID
     var currentStoryId: String {
         guard currentStoryIndex < allStories.count else {
-            return allStories.first ?? "story_alice_1"
+            return allStories.first ?? "urutan1"
         }
         return allStories[currentStoryIndex]
     }
