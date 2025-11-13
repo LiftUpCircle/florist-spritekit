@@ -56,7 +56,7 @@ struct MemoriesModel: Codable {
             memories: [
                 Memory(
                     id: UUID(),
-                    storyId: "story_robert_1",
+                    storyId: "urutan1",
                     title: "Robert's Bouquet",
                     description: "\"For the wife he still holds dear.\" — Robert wanted flowers that remember the way mornings used to feel, blooms that carry his late wife's memory forward. Love that persists beyond time.",
                     savedBouquet: nil
@@ -70,7 +70,7 @@ struct MemoriesModel: Codable {
             memories: [
                 Memory(
                     id: UUID(),
-                    storyId: "story_abigail_1",
+                    storyId: "urutan2",
                     title: "Abigail's Hope",
                     description: "\"Maybe she'll talk to him...\" — Abigail brought flowers for her mother, hoping they might soften her father's heart about demolishing the shop. Peace that feels safe, not sad.",
                     savedBouquet: nil
@@ -84,7 +84,7 @@ struct MemoriesModel: Codable {
             memories: [
                 Memory(
                     id: UUID(),
-                    storyId: "story_michael_1",
+                    storyId: "urutan3",
                     title: "Michael's Gift",
                     description: "\"Nobody ever makes one for you...\" — Little Michael bought flowers for Maria herself, wanting something yellow so she wouldn't forget to smile. Joy that blooms forward.",
                     savedBouquet: nil
