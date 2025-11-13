@@ -2,7 +2,7 @@
 //  SettingsOverlayView.swift
 //  florist
 //
-//  Created by AI Assistant on 05/11/25.
+//  Created by reynaldo on 05/11/25.
 //
 
 import SwiftUI

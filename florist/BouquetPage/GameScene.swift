@@ -17,7 +17,7 @@ class FlowerNode: SKSpriteNode {
     
     init(flower: Flower, imageName: String, size: CGSize) {
         self.flowerData = flower
-        
+
         // Try to load the flower image from assets
         if let texture = SKTexture(imageNamed: imageName) as SKTexture? {
             super.init(texture: texture, color: .clear, size: size)
@@ -25,13 +25,20 @@ class FlowerNode: SKSpriteNode {
             // Fallback to colored sprite if image not found
             super.init(texture: nil, color: flower.flowerColor, size: size)
         }
-        
+
         self.name = "flower_\(flower.flowerName)"
         isUserInteractionEnabled = false
     }
-    
+
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    // Required initializer for SKSpriteNode subclass (needed for copy())
+    override init(texture: SKTexture?, color: UIColor, size: CGSize) {
+        // Default flower data - this will be overridden when copying
+        self.flowerData = Flower(flowerId: 0, flowerName: "Unknown", flowerColor: color, emotion: "")
+        super.init(texture: texture, color: color, size: size)
     }
     
     // Create a copy of this flower node
@@ -56,7 +63,9 @@ class FlowerNode: SKSpriteNode {
         case "Rose": return "Rose"
         case "Jasmine": return "Jasmine"
         case "Lavender": return "Lavender"
-        case "Hibiscus": return "Hibicus" // Note: asset is named "Hibicus"
+        case "Carnation": return "Carnations" // Note: asset is named "Carnations" (plural)
+        case "Lily": return "Lily"
+        case "Tulip": return "Tulip"
         default: return ""
         }
     }
@@ -120,7 +129,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     // Model data
     var storyRequirements: StoryFlowerRequirements?
+    var currentStoryId: String? // Story ID for saving to memories
     var onBouquetWrapped: ((StoryFlowerRequirements.ValidationResult) -> Void)?
+    var onBouquetCompleted: ((UIImage, String) -> Void)? // Callback with image and storyId
     var onBookButtonTapped: (() -> Void)?
     var onSettingsStateChanged: ((Bool) -> Void)?
     
@@ -138,6 +149,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         setupBouquet()
         setupInventory()
         setupButtons()
+
+        // Start gameplay BGM
+        SettingsManager.shared.playMusic(named: "gameplayLoopBGM", loops: -1)
     }
     
     private func setupBackground() {
@@ -376,7 +390,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         case "Rose": return "Rose"
         case "Jasmine": return "Jasmine"
         case "Lavender": return "Lavender"
-        case "Hibiscus": return "Hibicus" // Note: asset is named "Hibicus"
+        case "Carnation": return "Carnations" // Note: asset is named "Carnations" (plural)
+        case "Lily": return "Lily"
+        case "Tulip": return "Tulip"
         default: return ""
         }
     }
@@ -839,9 +855,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         if let requirements = storyRequirements {
             let result = requirements.validate(bouquet: bouquetFlowers)
             showValidationResult(result)
-            
+
             // Call callback if set
             onBouquetWrapped?(result)
+
+            // If successful match, capture and save bouquet image
+            switch result {
+            case .perfectMatch, .goodMatch:
+                // Capture bouquet snapshot
+                if let bouquetImage = captureBouquetSnapshot(),
+                   let storyId = currentStoryId {
+                    // Call completion callback with image and storyId
+                    onBouquetCompleted?(bouquetImage, storyId)
+                    print("✅ Bouquet completed for story: \(storyId)")
+                } else if currentStoryId == nil {
+                    print("⚠️ No storyId set, cannot save bouquet to memories")
+                }
+            case .failure:
+                break // Don't save failed bouquets
+            }
         }
     }
     
@@ -996,9 +1028,103 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     func setStoryRequirements(_ requirements: StoryFlowerRequirements) {
         self.storyRequirements = requirements
     }
-    
+
     func getCurrentBouquet() -> [Flower] {
         return placedFlowers.map { $0.flowerData }
+    }
+
+    /// Capture a snapshot of the bouquet area (back + flowers + front)
+    /// Returns a UIImage of just the bouquet portion (no background, no UI)
+    func captureBouquetSnapshot() -> UIImage? {
+        guard let view = self.view else {
+            print("❌ Cannot capture snapshot: view is nil")
+            return nil
+        }
+
+        print("📸 Starting bouquet snapshot capture")
+        print("📸 Total flowers to capture: \(placedFlowers.count)")
+
+        // Get the bouquet center position
+        let bouquetCenter = CGPoint(
+            x: bouquetBackNode.position.x,
+            y: bouquetBackNode.position.y
+        )
+        print("📸 Bouquet center: \(bouquetCenter)")
+
+        // Create a clean container for ONLY bouquet elements centered at bouquet position
+        let snapshotContainer = SKNode()
+        snapshotContainer.position = bouquetCenter
+
+        // Add bouquet back (base layer) - position relative to container center
+        if let backCopy = bouquetBackNode.copy() as? SKSpriteNode {
+            backCopy.position = CGPoint.zero // Center in container
+            backCopy.zPosition = 0
+            snapshotContainer.addChild(backCopy)
+            print("✅ Added bouquet back at center")
+        }
+
+        // Add all placed flowers with positions relative to bouquet center
+        for (index, flower) in placedFlowers.enumerated() {
+            let flowerCopy = flower.createCopy()
+
+            // Flowers are in bouquetFlowersContainer coordinate space
+            // Convert to scene coordinates first, then make relative to bouquet center
+            let flowerWorldPos = bouquetFlowersContainer.convert(flower.position, to: self)
+            flowerCopy.position = CGPoint(
+                x: flowerWorldPos.x - bouquetCenter.x,
+                y: flowerWorldPos.y - bouquetCenter.y
+            )
+            flowerCopy.zPosition = flower.zPosition
+            flowerCopy.zRotation = flower.zRotation
+            flowerCopy.xScale = flower.xScale
+            flowerCopy.yScale = flower.yScale
+            flowerCopy.alpha = flower.alpha
+            snapshotContainer.addChild(flowerCopy)
+            print("✅ Added flower \(index + 1): \(flower.flowerData.flowerName)")
+            print("   Original container pos: \(flower.position)")
+            print("   World pos: \(flowerWorldPos)")
+            print("   Relative to bouquet: \(flowerCopy.position)")
+        }
+
+        // Add bouquet front (top layer) - position relative to container center
+        if let frontCopy = bouquetFrontNode.copy() as? SKSpriteNode {
+            frontCopy.position = CGPoint.zero // Center in container
+            frontCopy.zPosition = 999
+            snapshotContainer.addChild(frontCopy)
+            print("✅ Added bouquet front at center")
+        }
+
+        // Temporarily add to scene
+        addChild(snapshotContainer)
+
+        // Calculate the bounds to capture (centered on container)
+        // Smaller crop area = larger bouquet in final image
+        let snapshotSize = CGSize(width: 250, height: 250)
+        let snapshotRect = CGRect(
+            x: bouquetCenter.x - snapshotSize.width / 2,
+            y: bouquetCenter.y - snapshotSize.height / 2,
+            width: snapshotSize.width,
+            height: snapshotSize.height
+        )
+
+        print("📸 Snapshot rect: \(snapshotRect)")
+
+        // Capture texture from the container
+        let texture = view.texture(from: snapshotContainer, crop: snapshotRect)
+
+        // Remove temporary container
+        snapshotContainer.removeFromParent()
+
+        // Convert to UIImage
+        if let cgImage = texture?.cgImage() {
+            let image = UIImage(cgImage: cgImage)
+            print("✅ Captured bouquet snapshot: \(image.size)")
+            print("✅ Flowers included: \(placedFlowers.count)")
+            return image
+        }
+
+        print("❌ Failed to create UIImage from texture")
+        return nil
     }
     
     // MARK: - Helper Methods

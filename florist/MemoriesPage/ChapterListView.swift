@@ -10,7 +10,7 @@ import SwiftUI
 struct ChapterListView: View {
     @ObservedObject var controller: MemoriesViewController
     let completedStories: [CompletedStory]
-    
+
     var body: some View {
         ZStack(alignment: .topLeading) {
             // Main content
@@ -23,34 +23,38 @@ struct ChapterListView: View {
                             .font(.title2Gaegu)
                             .foregroundColor(.black)
                             .padding(.bottom, 10)
-                        
-                        // List of completed stories
-                        ScrollView {
-                            VStack(spacing: 10) {
-                                ForEach(completedStories, id: \.storyId) { story in
-                                    ChapterButton(
-                                        story: story,
-                                        isSelected: controller.selectedCompletedStory?.storyId == story.storyId
-                                    ) {
-                                        controller.selectCompletedStory(story)
-                                    }
+                    }
+
+                    // Memory list
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 10) {
+                            ForEach(controller.currentMemories) { memory in
+                                MemoryButton(
+                                    memory: memory,
+                                    isSelected: controller.selectedMemory?.id == memory.id
+                                ) {
+                                    controller.selectMemory(memory)
                                 }
                             }
                         }
                     }
-                    
+
                     Spacer()
                 }
                 .frame(width: 220)
-                
-                // Right side - Dialogue history
-                if let story = controller.selectedCompletedStory {
+
+                // Right side - Memory details or dialogue history
+                if let selectedMemory = controller.selectedMemory {
+                    ChapterDetailView(memory: selectedMemory)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .padding(.trailing, 20)
+                } else if let story = controller.selectedCompletedStory {
                     ArchivedDialogueView(dialogueHistory: story.archivedDialogueHistory)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .padding(.trailing, 20)
                 } else {
                     VStack {
-                        Text("Select a chapter")
+                        Text("Select a memory")
                             .font(.headlineGaegu)
                             .foregroundColor(.gray)
                     }
@@ -59,7 +63,7 @@ struct ChapterListView: View {
             }
             .padding(.top, 70)
             .padding(.leading, 20)
-            
+
             // Back button - fixed at top-left
             CustomBackButton {
                 controller.backToFolderSelection()
@@ -80,20 +84,53 @@ struct ChapterListView: View {
     }
 }
 
-// MARK: - Chapter Button
+// MARK: - Memory Button
+
+struct MemoryButton: View {
+    let memory: MemoriesModel.Memory
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(memory.title)
+                    .font(.headlineGaegu)
+                    .foregroundColor(isSelected ? .white : .black)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 20)
+                Spacer()
+
+                // Indicator if bouquet is saved
+                if memory.savedBouquet != nil {
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundColor(.green)
+                        .padding(.trailing, 10)
+                }
+            }
+            .frame(width: 200, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(isSelected ? Color.blue.opacity(0.6) : Color.gray.opacity(0.2))
+            )
+        }
+    }
+}
+
+// MARK: - Chapter Button (for CompletedStory with dialogue history)
 
 struct ChapterButton: View {
     let story: CompletedStory
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(story.storyTitle)
                     .font(.headlineGaegu)
                     .foregroundColor(isSelected ? .white : .black)
-                
+
                 Text("Completed: \(formattedDate)")
                     .font(.custom("Arial", size: 12))
                     .foregroundColor(isSelected ? .white.opacity(0.8) : .gray)
@@ -107,7 +144,7 @@ struct ChapterButton: View {
             )
         }
     }
-    
+
     private var formattedDate: String {
         let formatter = DateFormatter()
         formatter.dateStyle = .short
@@ -125,6 +162,7 @@ struct ChapterButton: View {
     )
     controller.selectedCompletedStory = sampleStory
     controller.showChapterList = true
+    controller.selectedMemory = controller.model.memoryFolders[0].memories[0]
 
     return ChapterListView(controller: controller, completedStories: [sampleStory])
 }
