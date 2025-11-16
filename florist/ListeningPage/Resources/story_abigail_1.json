@@ -7,7 +7,7 @@
     {
       "id": "abigail_001",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "character_temp",
+      "characterSprite": "abigail",
       "characterName": "Maria",
       "dialogue": "Welcome, dear. You look… like someone who's been thinking too much.",
       "spritePosition": "center"
@@ -15,7 +15,7 @@
     {
       "id": "abigail_002",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "character_temp",
+      "characterSprite": "abigail",
       "characterName": "Abigail",
       "dialogue": "You could say that. Could you help me make a bouquet, Maria? It's for my mom.",
       "spritePosition": "right"
@@ -23,7 +23,7 @@
     {
       "id": "abigail_003",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "character_temp",
+      "characterSprite": "abigail",
       "characterName": "Maria",
       "dialogue": "Of course. A special occasion?",
       "spritePosition": "center"
@@ -31,7 +31,7 @@
     {
       "id": "abigail_004",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "character_temp",
+      "characterSprite": "abigail",
       "characterName": "Abigail",
       "dialogue": "Not really. I just… haven't been home much lately. And I heard my father's company will soon start construction around here.",
       "spritePosition": "right"
@@ -39,7 +39,7 @@
     {
       "id": "abigail_005",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "character_temp",
+      "characterSprite": "abigail",
       "characterName": "Abigail",
       "dialogue": "I guess I wanted to bring her something before that happens.",
       "spritePosition": "right"
@@ -47,7 +47,7 @@
     {
       "id": "abigail_006",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "character_temp",
+      "characterSprite": "abigail",
       "characterName": "Maria",
       "dialogue": "That's thoughtful of you.",
       "spritePosition": "center"
@@ -55,7 +55,7 @@
     {
       "id": "abigail_007",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "character_temp",
+      "characterSprite": "abigail",
       "characterName": "Abigail",
       "dialogue": "Maybe if I bring her flowers, she'll talk to him. She's the only one he really listens to.",
       "spritePosition": "right"
@@ -63,7 +63,7 @@
     {
       "id": "abigail_008",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "character_temp",
+      "characterSprite": "abigail",
       "characterName": "Abigail",
       "dialogue": "I don't know if it'll change anything — but it feels wrong not to try.",
       "spritePosition": "right"
@@ -71,7 +71,7 @@
     {
       "id": "abigail_009",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "character_temp",
+      "characterSprite": "abigail",
       "characterName": "Maria",
       "dialogue": "It's never wrong to remind people what beauty looks like. What kind of flowers does she like?",
       "spritePosition": "center"
@@ -79,7 +79,7 @@
     {
       "id": "abigail_010",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "character_temp",
+      "characterSprite": "abigail",
       "characterName": "Abigail",
       "dialogue": "She likes… the ones that make the room feel quiet. Not sad quiet — the kind that feels safe.",
       "spritePosition": "right"
@@ -87,7 +87,7 @@
     {
       "id": "abigail_011",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "character_temp",
+      "characterSprite": "abigail",
       "characterName": "Abigail",
       "dialogue": "When I was little, she'd open the window, and the smell would fill the whole house. I remember that most when things get noisy.",
       "spritePosition": "right"
@@ -95,7 +95,7 @@
     {
       "id": "abigail_012",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "character_temp",
+      "characterSprite": "abigail",
       "characterName": "Maria",
       "dialogue": "Then let's make something that feels like that.",
       "spritePosition": "center"

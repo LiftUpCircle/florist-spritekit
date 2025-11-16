@@ -16,7 +16,28 @@ struct ListeningPageView: View {
     private func backgroundImageExists(_ imageName: String) -> Bool {
         UIImage(named: imageName) != nil
     }
-    
+
+    /// Map character sprite name to real asset name based on current scene's character
+    private func getCharacterAssetName(from spriteName: String) -> String {
+        // Check the characterName from the scene to determine which asset to use
+        guard let scene = controller.currentScene else {
+            return spriteName
+        }
+
+        let characterName = scene.characterName.lowercased()
+
+        if characterName.contains("robert") {
+            return "robert"
+        } else if characterName.contains("abigail") {
+            return "abigail"
+        } else if characterName.contains("michael") {
+            return "michael"
+        }
+
+        // Fallback to original sprite name
+        return spriteName
+    }
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -42,43 +63,45 @@ struct ListeningPageView: View {
                     Color.black
                         .accessibilityHidden(true)
                 }
-                
-                // Layer 2: Character Sprite and Floating Dialogue
+
+                // Layer 1.5: Dark overlay when in conversation
+                if controller.currentScene != nil {
+                    Color.black.opacity(0.3)
+                        .ignoresSafeArea()
+                        .accessibilityHidden(true)
+                }
+
+                // Layer 2: Character Sprite (centered)
                 if let scene = controller.currentScene {
                     ZStack {
-                        // Character Sprite (positioned on left, clipped to screen height)
+                        // Character Sprite
                         if let sprite = scene.characterSprite {
-                            HStack {
-                                CharacterSpriteView(
-                                    spriteName: sprite,
-                                    position: scene.spritePosition ?? .center
-                                )
-                                .frame(width: geometry.size.width * 0.4, height: geometry.size.height * 1.2)
-                                .position(x: geometry.size.width * 0.2, y: geometry.size.height * 0.6)
-                                Spacer()
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: geometry.size.height, alignment: .bottom)
+                            CharacterSpriteView(
+                                spriteName: getCharacterAssetName(from: sprite),
+                                position: .center
+                            )
+                            .frame(height: geometry.size.height * 1.8)
+                            .position(x: geometry.size.width / 2, y: geometry.size.height * 0.9)
                             .clipped()
-                            .padding(.leading, 20)
                         }
-                        
-                        // Floating Dialogue Box (positioned on right)
-                        HStack {
+
+                        // Dialogue Box (bottom center, in front of character)
+                        VStack {
                             Spacer()
-                                .frame(width: geometry.size.width * 0.25)
+
                             DialogueTextboxView(
                                 characterName: scene.characterName,
                                 dialogue: scene.dialogue,
                                 typingSpeed: controller.typingSpeed,
                                 shouldCompleteTyping: controller.shouldCompleteTyping,
-                                maxWidth: geometry.size.width * 0.5 - 32,
+                                maxWidth: geometry.size.width * 0.7,
                                 onTypingComplete: { controller.onTypingComplete() },
                                 onTap: { controller.handleDialogueTap() }
                             )
-                            .frame(maxWidth: geometry.size.width * 0.5, alignment: .topLeading)
-                            .padding(.trailing, 20)
+                            .padding(.horizontal, 40)
+                            .padding(.bottom, 30)
                         }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if controller.showError {
