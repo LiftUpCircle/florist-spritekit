@@ -422,10 +422,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 y: -(cardHeight / 2) + (labelBackgroundHeight / 2) - 9 // pos bottom
             )
             labelBackground.zPosition = 10
+            
             label.position = CGPoint(
                 x: 0,
                 y: -(cardHeight / 2) + (labelBackgroundHeight / 2) - 14 // center in label background
             )
+            label.fontSize = FontSize.headline
             label.fontColor = .white
             label.zPosition = 11
 
