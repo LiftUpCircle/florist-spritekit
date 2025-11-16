@@ -130,18 +130,36 @@ struct ListeningPageView: View {
                     .padding(.horizontal, 20)
                 }
                 
-                // Layer 3: Control Container (top-right)
+                // Layer 3: Skip Button (top-right)
                 VStack {
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            controller.skipStory()
+                        }) {
+                            Image("SkipButton")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 90, height: 50)
+                        }
+                        .padding(.top, 50)
+                        .padding(.trailing, 20)
+                    }
+                    Spacer()
+                }
+
+                // Layer 4: Control Container (bottom-right)
+                VStack {
+                    Spacer()
                     HStack {
                         Spacer()
                         ControlContainerView(
                             onSettingsTap: { controller.openSettings() },
                             onLogTap: { controller.openDialogueHistory() }
                         )
-                        .padding(.top, 50)
+                        .padding(.bottom, 30)
                         .padding(.trailing, 20)
                     }
-                    Spacer()
                 }
             }
         }
