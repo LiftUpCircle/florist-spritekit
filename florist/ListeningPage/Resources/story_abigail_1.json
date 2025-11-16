@@ -6,7 +6,7 @@
   "scenes": [
     {
       "id": "abigail_001",
-      "backgroundImage": "background_temp",
+      "backgroundImage": "BackgroundNew",
       "characterSprite": "character_temp",
       "characterName": "Maria",
       "dialogue": "Welcome, dear. You look… like someone who's been thinking too much.",
@@ -14,7 +14,7 @@
     },
     {
       "id": "abigail_002",
-      "backgroundImage": "background_temp",
+      "backgroundImage": "BackgroundNew",
       "characterSprite": "character_temp",
       "characterName": "Abigail",
       "dialogue": "You could say that. Could you help me make a bouquet, Maria? It's for my mom.",
@@ -22,7 +22,7 @@
     },
     {
       "id": "abigail_003",
-      "backgroundImage": "background_temp",
+      "backgroundImage": "BackgroundNew",
       "characterSprite": "character_temp",
       "characterName": "Maria",
       "dialogue": "Of course. A special occasion?",
@@ -30,7 +30,7 @@
     },
     {
       "id": "abigail_004",
-      "backgroundImage": "background_temp",
+      "backgroundImage": "BackgroundNew",
       "characterSprite": "character_temp",
       "characterName": "Abigail",
       "dialogue": "Not really. I just… haven't been home much lately. And I heard my father's company will soon start construction around here.",
@@ -38,7 +38,7 @@
     },
     {
       "id": "abigail_005",
-      "backgroundImage": "background_temp",
+      "backgroundImage": "BackgroundNew",
       "characterSprite": "character_temp",
       "characterName": "Abigail",
       "dialogue": "I guess I wanted to bring her something before that happens.",
@@ -46,7 +46,7 @@
     },
     {
       "id": "abigail_006",
-      "backgroundImage": "background_temp",
+      "backgroundImage": "BackgroundNew",
       "characterSprite": "character_temp",
       "characterName": "Maria",
       "dialogue": "That's thoughtful of you.",
@@ -54,7 +54,7 @@
     },
     {
       "id": "abigail_007",
-      "backgroundImage": "background_temp",
+      "backgroundImage": "BackgroundNew",
       "characterSprite": "character_temp",
       "characterName": "Abigail",
       "dialogue": "Maybe if I bring her flowers, she'll talk to him. She's the only one he really listens to.",
@@ -62,7 +62,7 @@
     },
     {
       "id": "abigail_008",
-      "backgroundImage": "background_temp",
+      "backgroundImage": "BackgroundNew",
       "characterSprite": "character_temp",
       "characterName": "Abigail",
       "dialogue": "I don't know if it'll change anything — but it feels wrong not to try.",
@@ -70,7 +70,7 @@
     },
     {
       "id": "abigail_009",
-      "backgroundImage": "background_temp",
+      "backgroundImage": "BackgroundNew",
       "characterSprite": "character_temp",
       "characterName": "Maria",
       "dialogue": "It's never wrong to remind people what beauty looks like. What kind of flowers does she like?",
@@ -78,7 +78,7 @@
     },
     {
       "id": "abigail_010",
-      "backgroundImage": "background_temp",
+      "backgroundImage": "BackgroundNew",
       "characterSprite": "character_temp",
       "characterName": "Abigail",
       "dialogue": "She likes… the ones that make the room feel quiet. Not sad quiet — the kind that feels safe.",
@@ -86,7 +86,7 @@
     },
     {
       "id": "abigail_011",
-      "backgroundImage": "background_temp",
+      "backgroundImage": "BackgroundNew",
       "characterSprite": "character_temp",
       "characterName": "Abigail",
       "dialogue": "When I was little, she'd open the window, and the smell would fill the whole house. I remember that most when things get noisy.",
@@ -94,7 +94,7 @@
     },
     {
       "id": "abigail_012",
-      "backgroundImage": "background_temp",
+      "backgroundImage": "BackgroundNew",
       "characterSprite": "character_temp",
       "characterName": "Maria",
       "dialogue": "Then let's make something that feels like that.",

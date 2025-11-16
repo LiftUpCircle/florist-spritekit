@@ -156,7 +156,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     private func setupBackground() {
         // Load and display background image
-        if let backgroundTexture = SKTexture(imageNamed: "Background") as SKTexture? {
+        if let backgroundTexture = SKTexture(imageNamed: "BackgroundNew") as SKTexture? {
             backgroundSprite = SKSpriteNode(texture: backgroundTexture)
             backgroundSprite.position = CGPoint(x: size.width / 2, y: size.height / 2)
             backgroundSprite.size = size
