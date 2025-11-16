@@ -156,7 +156,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     private func setupBackground() {
         // Load and display background image
-        if let backgroundTexture = SKTexture(imageNamed: "Background") as SKTexture? {
+        if let backgroundTexture = SKTexture(imageNamed: "BackgroundNew") as SKTexture? {
             backgroundSprite = SKSpriteNode(texture: backgroundTexture)
             backgroundSprite.position = CGPoint(x: size.width / 2, y: size.height / 2)
             backgroundSprite.size = size
@@ -173,16 +173,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
 
         // Left side: Inventory (1 column, scrollable)
         let inventoryWidth: CGFloat = 120
-        let inventoryHeight = size.height - 100
+        let titleHeight: CGFloat = 40
+        let inventoryHeight = size.height - 80 - titleHeight
         inventoryRect = CGRect(
-            x: padding,
-            y: 50,
+            x: padding + 40,
+            y: 20 + titleHeight,
             width: inventoryWidth,
             height: inventoryHeight
         )
 
         // Center: Bouquet area
-        let bouquetSize: CGFloat = min(400, size.height * 0.6)
+        let bouquetSize: CGFloat = min(400, size.height * 0.75)
         bouquetRect = CGRect(
             x: (size.width - bouquetSize) / 2,
             y: (size.height - bouquetSize) / 2 - 20,
@@ -259,32 +260,32 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
 
         flowersCropNode.maskNode = compositeMaskNode
 
-//        // DEBUG: Add visual indicator to show where the top clip area is
-//        // This is a separate sprite, not part of the mask
-//        let debugTopClipVisual = SKSpriteNode(color: UIColor.cyan.withAlphaComponent(0.3), size: CGSize(
-//            width: bouquetRect.width * 1.2,
-//            height: bouquetRect.height * 0.9
-//        ))
-//        debugTopClipVisual.position = CGPoint(
-//            x: bouquetRect.midX,
-//            y: bouquetRect.midY + bouquetRect.height * 0.66
-//        )
-//        debugTopClipVisual.zPosition = 14  // Just below the crop node
-//        debugTopClipVisual.name = "debugTopClipArea"
-//        addChild(debugTopClipVisual)
-//
-//        // DEBUG: Add visual indicator for right clip area
-//        let debugRightClipVisual = SKSpriteNode(color: UIColor.green.withAlphaComponent(0.3), size: CGSize(
-//            width: bouquetRect.width * 0.4,
-//            height: bouquetRect.height * 0.2
-//        ))
-//        debugRightClipVisual.position = CGPoint(
-//            x: bouquetRect.midX + bouquetRect.width * 0.45,
-//            y: bouquetRect.midY + bouquetRect.height * 0.285
-//        )
-//        debugRightClipVisual.zPosition = 14
-//        debugRightClipVisual.name = "debugRightClipArea"
-//        addChild(debugRightClipVisual)
+        // DEBUG: Add visual indicator to show where the top clip area is
+        // This is a separate sprite, not part of the mask
+        let debugTopClipVisual = SKSpriteNode(color: UIColor.cyan.withAlphaComponent(0.3), size: CGSize(
+            width: bouquetRect.width * 1.2,
+            height: bouquetRect.height * 0.9
+        ))
+        debugTopClipVisual.position = CGPoint(
+            x: bouquetRect.midX,
+            y: bouquetRect.midY + bouquetRect.height * 0.66
+        )
+        debugTopClipVisual.zPosition = 14  // Just below the crop node
+        debugTopClipVisual.name = "debugTopClipArea"
+        addChild(debugTopClipVisual)
+
+        // DEBUG: Add visual indicator for right clip area
+        let debugRightClipVisual = SKSpriteNode(color: UIColor.green.withAlphaComponent(0.3), size: CGSize(
+            width: bouquetRect.width * 0.4,
+            height: bouquetRect.height * 0.2
+        ))
+        debugRightClipVisual.position = CGPoint(
+            x: bouquetRect.midX + bouquetRect.width * 0.45,
+            y: bouquetRect.midY + bouquetRect.height * 0.285
+        )
+        debugRightClipVisual.zPosition = 14
+        debugRightClipVisual.name = "debugRightClipArea"
+        addChild(debugRightClipVisual)
         
         // Container for flowers (inside the crop node)
         bouquetFlowersContainer = SKNode()
@@ -331,33 +332,55 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         inventoryScrollNode.zPosition = 5
         inventoryCropNode.addChild(inventoryScrollNode)
         addChild(inventoryCropNode)
-
-        // Add a pink background for the inventory area that extends full screen height
-        let inventoryBackground = SKShapeNode(rect: CGRect(
-            x: inventoryRect.minX,
-            y: 0,  // Start from bottom of screen
-            width: inventoryRect.width,
-            height: size.height  // Full screen height
-        ), cornerRadius: 10)
-        // Soft pink color matching the screenshot
-        inventoryBackground.fillColor = UIColor(red: 1.0, green: 0.92, blue: 0.92, alpha: 0.95)
-        inventoryBackground.strokeColor = UIColor(red: 1.0, green: 0.85, blue: 0.85, alpha: 0.5)
-        inventoryBackground.lineWidth = 1
-        inventoryBackground.zPosition = 3
-        addChild(inventoryBackground)
+        
+        // Title background
+        let titleBoxWidth = inventoryRect.width + 60
+        let titleBoxHeight: CGFloat = 40
+        let titleBackground = SKShapeNode(
+            rectOf: CGSize(width: titleBoxWidth, height: titleBoxHeight),
+            cornerRadius: 10
+        )
+        titleBackground.fillColor = .white
+        titleBackground.strokeColor = .borderInventory
+        titleBackground.lineWidth = 3
+        titleBackground.position = CGPoint(
+            x: inventoryRect.midX,
+            y: inventoryRect.maxY + 10
+        )
+        titleBackground.zPosition = 9
+        addChild(titleBackground)
+        
+        
+        
+        // Title label above inventory
+        let titleLabel = SKLabelNode(text: "Choose The Flowers")
+        titleLabel.fontName = GaeguTypography.boldFontName
+        titleLabel.fontSize = FontSize.title3
+        titleLabel.fontColor = .black
+        titleLabel.position = CGPoint(
+            x: inventoryRect.midX,
+            y: inventoryRect.maxY + 10
+        )
+        titleLabel.verticalAlignmentMode = .center
+        titleLabel.zPosition = 10
+        addChild(titleLabel)
 
         // Get available flowers from database
         let availableFlowers = FlowerDatabase.shared.availableFlowers
 
-        let flowerSize = CGSize(width: 80, height: 80)
-        let verticalSpacing: CGFloat = 100
+        let flowerSize = CGSize(width: 90, height: 90)
+        let verticalSpacing: CGFloat = 140
 
         // Calculate max scroll offset
         let totalHeight = CGFloat(availableFlowers.count) * verticalSpacing
         maxScrollOffset = max(0, totalHeight - inventoryRect.height + 100)
 
-        // Removed scroll indicators as requested
-        
+        // padding and layout constants
+        let padding: CGFloat = 10
+//        let spacingBetweenFlowerLabel: CGFloat = 5
+        let labelBackgroundHeight: CGFloat = 35
+        let cardCornerRadius: CGFloat = 15
+
         for (index, flowerData) in availableFlowers.enumerated() {
             // Map flower name to asset name
             let imageName = getFlowerImageName(for: flowerData.flowerName)
@@ -365,18 +388,51 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             flower.inventoryIndex = index
             
             // Position in vertical list
-            let yPos = inventoryRect.height - 50 - CGFloat(index) * verticalSpacing
+            let yPos = inventoryRect.height - 80 - CGFloat(index) * verticalSpacing
             flower.position = CGPoint(x: 0, y: yPos)
             flower.originalPosition = flower.position
-            flower.zPosition = 5
-            
-            // Add label below flower
+            flower.zPosition = 6
+
             let label = SKLabelNode(text: flowerData.flowerName)
             label.fontName = GaeguTypography.regularFontName
-            label.fontSize = FontSize.caption1
-            label.fontColor = .darkGray
-            label.position = CGPoint(x: 0, y: -flowerSize.height / 2 - 15)
-            label.zPosition = 1
+            label.fontSize = FontSize.title2
+            label.fontColor = .white
+            
+            // Calculate frame size (flower area + label area)
+            let cardWidth = flowerSize.width + (padding * 2)
+            let cardHeight = flowerSize.height  + labelBackgroundHeight
+            let frameSize = CGSize(width: cardWidth, height: cardHeight)
+            
+            // Create main card frame
+            let frame = SKShapeNode(rectOf: frameSize, cornerRadius: cardCornerRadius)
+            frame.fillColor = .white
+            frame.strokeColor = .borderInventory
+            frame.lineWidth = 3
+            frame.position = CGPoint(x: 0, y: -10)
+            frame.zPosition = -2
+            
+            // Create colored background for label
+            let labelBgWidth = cardWidth - 2
+            let labelBackground = SKShapeNode(rectOf: CGSize(width: labelBgWidth, height: labelBackgroundHeight), cornerRadius: cardCornerRadius / 2
+            )
+            labelBackground.fillColor = .borderInventory
+            labelBackground.strokeColor = .clear
+            labelBackground.position = CGPoint(
+                x: 0,
+                y: -(cardHeight / 2) + (labelBackgroundHeight / 2) - 9 // pos bottom
+            )
+            labelBackground.zPosition = 10
+            
+            label.position = CGPoint(
+                x: 0,
+                y: -(cardHeight / 2) + (labelBackgroundHeight / 2) - 14 // center in label background
+            )
+            label.fontSize = FontSize.headline
+            label.fontColor = .white
+            label.zPosition = 11
+
+            flower.addChild(frame)
+            flower.addChild(labelBackground)
             flower.addChild(label)
             
             inventoryScrollNode.addChild(flower)
@@ -544,6 +600,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                     // We'll decide whether to drag or scroll based on movement
                     potentialFlowerToDrag = flower
                     selectedFlower = flower
+                    
                     return
                 }
             }
@@ -788,6 +845,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        
         draggedFlowerCopy?.removeFromParent()
         draggedFlowerCopy = nil
         selectedFlower = nil
@@ -1023,7 +1081,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             ]))
         }
     }
-    
+
     // MARK: - Public Methods
     func setStoryRequirements(_ requirements: StoryFlowerRequirements) {
         self.storyRequirements = requirements

@@ -69,7 +69,7 @@ struct BouquetView: View {
                         }
                     })
                     .transition(.opacity)
-                    .zIndex(1)
+                    .zIndex(999)
                 }
             }
         }

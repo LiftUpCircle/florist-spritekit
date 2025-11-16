@@ -17,7 +17,7 @@ struct MainMenuView: View {
         NavigationStack(path: $flowCoordinator.navigationPath) {
             ZStack {
                 // Background image
-                Image("Background")
+                Image("MainMenuBackground")
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .ignoresSafeArea()

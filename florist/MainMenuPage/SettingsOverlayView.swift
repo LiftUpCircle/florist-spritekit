@@ -33,7 +33,7 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
         guard let touch = touches.first else { return }
 
         if let controller = settingsOverlayController {
-            controller.handleTouchBegan(touch)
+            _ = controller.handleTouchBegan(touch)
         }
     }
 
@@ -41,7 +41,7 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
         guard let touch = touches.first else { return }
 
         if let controller = settingsOverlayController {
-            controller.handleTouchMoved(touch)
+            _ = controller.handleTouchMoved(touch)
         }
     }
 
@@ -49,7 +49,7 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
         guard let touch = touches.first else { return }
 
         if let controller = settingsOverlayController {
-            controller.handleTouchEnded(touch)
+            _ = controller.handleTouchEnded(touch)
         }
     }
 
@@ -115,6 +115,6 @@ struct SettingsOverlayView: View {
 }
 
 #Preview {
-    @State var isPresented = true
+    @Previewable @State var isPresented = true
     return SettingsOverlayView(isPresented: $isPresented)
 }

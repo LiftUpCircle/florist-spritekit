@@ -26,19 +26,17 @@ struct FlowerBookView: View {
                 if !viewModel.flowers.isEmpty, let currentFlower = viewModel.currentFlower {
                     HStack(spacing: 0) {
                         
-                        FlowerSidebarView(
-                            flowers: viewModel.flowers,
-                            currentIndex: viewModel.currentFlowerIndex,
-                            onFlowerSelected: { index in
-                                viewModel.selectFlower(at: index)
-                            }
-                        )
-                        .frame(width: geometry.size.width * 0.18, height: geometry.size.height)
-                        .padding(.leading, geometry.size.width * 0.02)
+//                        FlowerSidebarView(
+//                            flowers: viewModel.flowers,
+//                            currentIndex: viewModel.currentFlowerIndex,
+//                            onFlowerSelected: { index in
+//                                viewModel.selectFlower(at: index)
+//                            }
+//                        )
+//                        .frame(width: geometry.size.width * 0.18, height: geometry.size.height)
+//                        .padding(.leading, geometry.size.width * 0.02)
                         
-                        Spacer()
-                        
-                        
+                        Spacer()           
                         ZStack {
                             
                             Image("FlowerBook")

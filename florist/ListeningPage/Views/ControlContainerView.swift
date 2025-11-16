@@ -10,28 +10,26 @@ import SwiftUI
 struct ControlContainerView: View {
     let onSettingsTap: () -> Void
     let onLogTap: () -> Void
-    
+
     var body: some View {
-        HStack(spacing: 12) {
+        VStack(spacing: 12) {
+            Button(action: onLogTap) {
+                Image("ConversationLogButton")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 60, height: 60)
+            }
+            .accessibilityLabel("Conversation History")
+            .accessibilityHint("Opens a list of all previous dialogue in the story")
+
             Button(action: onSettingsTap) {
-                Image(systemName: "gearshape.fill")
-                    .font(.title3Gaegu)
-                    .foregroundColor(.white)
-                    .padding(12)
-                    .background(Circle().fill(Color.black.opacity(0.6)))
+                Image("SettingButton")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 60, height: 60)
             }
             .accessibilityLabel("Settings")
-            .accessibilityHint("Opens settings to adjust text speed and auto-advance options")
-            
-            Button(action: onLogTap) {
-                Image(systemName: "book.fill")
-                    .font(.title3Gaegu)
-                    .foregroundColor(.white)
-                    .padding(12)
-                    .background(Circle().fill(Color.black.opacity(0.6)))
-            }
-            .accessibilityLabel("Dialogue History")
-            .accessibilityHint("Opens a list of all previous dialogue in the story")
+            .accessibilityHint("Opens settings menu")
         }
     }
 }

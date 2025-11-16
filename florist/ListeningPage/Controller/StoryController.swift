@@ -271,7 +271,24 @@ class StoryController: ObservableObject {
     func openSettings() {
         showSettings = true
     }
-    
+
+    /// Skips the current story and marks it as complete
+    func skipStory() {
+        guard let storyData = storyData else { return }
+        guard !isStoryComplete else { return }
+
+        // Jump to the last scene index
+        currentSceneIndex = storyData.scenes.count
+
+        // Mark story as complete
+        isStoryComplete = true
+
+        // Mark story as complete in persistence
+        Task {
+            await markCurrentStoryComplete()
+        }
+    }
+
     // MARK: - Persistence Methods
     
     /// Saves the current story progress to persistent storage
