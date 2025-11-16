@@ -10,39 +10,77 @@ import SwiftUI
 struct DialogueHistoryView: View {
     @Environment(\.dismiss) var dismiss
     let entries: [DialogueEntry]
-    
+
     var body: some View {
-        NavigationView {
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 16) {
-                    ForEach(entries) { entry in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(entry.characterName)
-                                .font(.bodyGaegu)
-                            Text(entry.dialogue)
-                                .font(.bodyGaegu)
-                        }
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.gray.opacity(0.1))
-                        .cornerRadius(8)
-                        .accessibilityElement(children: .combine)
-                        .accessibilityLabel("\(entry.characterName) said: \(entry.dialogue)")
+        ZStack(alignment: .topLeading) {
+            // Background
+            Color("DialogueTextbox")
+                .ignoresSafeArea()
+
+            VStack(alignment: .leading, spacing: 0) {
+                // Header
+                HStack {
+                    Text("Conversation History")
+                        .font(.title2Gaegu)
+                        .foregroundColor(.black)
+                        .padding(.leading, 20)
+
+                    Spacer()
+
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(.gray)
                     }
+                    .padding(.trailing, 20)
                 }
-                .padding()
-            }
-            .accessibilityLabel("Dialogue history list")
-            .navigationTitle("Dialogue History")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
+                .padding(.top, 50)
+                .padding(.bottom, 20)
+
+                // Scrollable dialogue history
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 16) {
+                        ForEach(entries) { entry in
+                            HistoryDialogueBox(
+                                characterName: entry.characterName,
+                                dialogue: entry.dialogue
+                            )
+                        }
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
                 }
             }
         }
+    }
+}
+
+// History dialogue box without the triangle indicator
+struct HistoryDialogueBox: View {
+    let characterName: String
+    let dialogue: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(characterName)
+                .font(.bodyGaegu)
+                .fontWeight(.semibold)
+                .foregroundColor(.primary)
+
+            Text(dialogue)
+                .font(.bodyGaegu)
+                .foregroundColor(.primary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color("DialogueTextbox"))
+                .stroke(Color("DialogueTextboxBorder"), lineWidth: 5)
+        )
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(characterName) said: \(dialogue)")
     }
 }
 

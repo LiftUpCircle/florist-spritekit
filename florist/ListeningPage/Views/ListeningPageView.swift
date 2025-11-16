@@ -166,8 +166,12 @@ struct ListeningPageView: View {
         .sheet(isPresented: $controller.showDialogueHistory) {
             DialogueHistoryView(entries: controller.dialogueHistory)
         }
-        .sheet(isPresented: $controller.showSettings) {
-            StorySettingsView()
+        .overlay {
+            if controller.showSettings {
+                SettingsOverlayView(isPresented: $controller.showSettings)
+                    .transition(.opacity)
+                    .zIndex(100)
+            }
         }
         .alert("Error", isPresented: $controller.showError) {
             Button("OK", role: .cancel) { }
