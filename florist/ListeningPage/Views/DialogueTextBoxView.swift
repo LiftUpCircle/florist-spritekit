@@ -19,11 +19,19 @@ struct DialogueTextboxView: View {
     @StateObject private var typewriter = TypewriterViewModel()
     @State private var processedDialogue: String = ""
     @State private var showTriangle = false
-    
+
+    // Display name with "(you)" indicator for Maria
+    private var displayName: String {
+        if characterName.lowercased().contains("maria") {
+            return "\(characterName) (you)"
+        }
+        return characterName
+    }
+
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack(alignment: .leading, spacing: 8) {
-                Text(characterName)
+                Text(displayName)
                     .font(.bodyGaegu)
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
