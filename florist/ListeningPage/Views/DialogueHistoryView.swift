@@ -60,9 +60,17 @@ struct HistoryDialogueBox: View {
     let characterName: String
     let dialogue: String
 
+    // Display name with "(you)" indicator for Maria
+    private var displayName: String {
+        if characterName.lowercased().contains("maria") {
+            return "\(characterName) (you)"
+        }
+        return characterName
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(characterName)
+            Text(displayName)
                 .font(.bodyGaegu)
                 .fontWeight(.semibold)
                 .foregroundColor(.primary)
