@@ -396,6 +396,11 @@ class SettingsOverlay: SKNode {
     }
     
     func show(in scene: SKScene) {
+        // Remove from current parent if already added
+        if parent != nil {
+            removeFromParent()
+        }
+
         alpha = 0.0
         scene.addChild(self)
         run(SKAction.fadeIn(withDuration: 0.3))
