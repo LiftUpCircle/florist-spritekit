@@ -25,15 +25,15 @@ struct BookContentView: View {
                                 Image(imageName)
                                     .resizable()
                                     .aspectRatio(contentMode: .fit)
-                                    .frame(width: geometry.size.width * 0.25,
-                                           height: geometry.size.width * 0.25)
+                                    .frame(width: geometry.size.width * 0.35,
+                                           height: geometry.size.width * 0.35)
                             }
                             
-                            Text(flower.flowerName)
-                                .font(.custom("Georgia", size: 30))
-                                .foregroundColor(Color(red: 0.4, green: 0.25, blue: 0.2))
-                                .fontWeight(.bold)
-                                .italic()
+//                            Text(flower.flowerName)
+//                                .font(.custom("Georgia", size: 30))
+//                                .foregroundColor(Color(red: 0.4, green: 0.25, blue: 0.2))
+//                                .fontWeight(.bold)
+//                                .italic()
                             
                             
                             if canGoPrevious {
@@ -47,7 +47,7 @@ struct BookContentView: View {
                         }
                         .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.5, alignment: .topLeading)
                     }
-                    .offset(x: 100, y: -20)
+                    .offset(x: 35, y: -20)
                 }
                 
                 
@@ -103,9 +103,9 @@ struct BookContentView: View {
     
     private func getFlowerImageName(for flowerName: String) -> String? {
         switch flowerName {
-        case "Rose": return "Rose"
-        case "Jasmine": return "Jasmine"
-        case "Lavender": return "Lavender"
+        case "Rose": return "RoseBook"
+        case "Jasmine": return "JasmineBook"
+        case "Lavender": return "LavenderBook"
         case "Hibiscus": return "Hibicus"
         default: return nil
         }
