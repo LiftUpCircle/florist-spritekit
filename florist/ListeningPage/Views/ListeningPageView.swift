@@ -214,7 +214,7 @@ struct ListeningPageView: View {
             // Start listening BGM
             SettingsManager.shared.playMusic(named: "listeningBGM", loops: -1)
         }
-        .onChange(of: controller.isStoryComplete) { isComplete in
+        .onChange(of: controller.isStoryComplete) { _, isComplete in
             if isComplete {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     flowCoordinator.navigateToBouquet(storyId: storyId)

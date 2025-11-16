@@ -67,7 +67,7 @@ class StoryManager {
 
         // Load the individual story file
         let filename = storyEntry.file.replacingOccurrences(of: ".json", with: "")
-        var storyData = try loadStoryFromFile(filename)
+        let storyData = try loadStoryFromFile(filename)
 
         // Override the story ID with the order key for persistence
         // We need to create a new StoryData with the order key as ID

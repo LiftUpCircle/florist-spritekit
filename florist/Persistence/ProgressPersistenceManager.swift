@@ -88,7 +88,7 @@ final class ProgressPersistenceManager {
     private func ensureContext() throws -> ModelContext {
         guard let context = modelContext else {
             let error = ProgressPersistenceError.modelContainerNotAvailable
-            print("❌ \(error.localizedDescription ?? "Model container not available")")
+            print("❌ \(error.localizedDescription)")
             throw error
         }
         return context
@@ -215,7 +215,7 @@ final class ProgressPersistenceManager {
             try validateSceneIndex(sceneIndex, for: storyId)
             try validateDialogueHistory(dialogueHistory)
         } catch {
-            print("❌ Save validation failed: \(error.localizedDescription ?? "Unknown error")")
+            print("❌ Save validation failed: \(error.localizedDescription)")
             throw error
         }
         
@@ -238,7 +238,7 @@ final class ProgressPersistenceManager {
                     try await self.performSaveWithTiming(storyId: storyId, sceneIndex: sceneIndex, dialogueHistory: dialogueHistory, context: context)
                 } catch {
                     // Log error but don't throw - silent failure for auto-save
-                    print("❌ Auto-save failed for story '\(storyId)' at scene \(sceneIndex): \(error.localizedDescription ?? "Unknown error")")
+                    print("❌ Auto-save failed for story '\(storyId)' at scene \(sceneIndex): \(error.localizedDescription)")
                 }
             }.value
         }
@@ -363,23 +363,23 @@ final class ProgressPersistenceManager {
         
         try validateStoryId(storyId)
         let context = try ensureContext()
-        
+
         print("📖 Loading progress for story '\(storyId)'")
-        
-        // Perform load operation on background thread
-        let result: StoryProgress? = try await Task.detached(priority: .userInitiated) {
+
+        // Perform load operation on background thread, return persistentModelID instead of object
+        let resultID: PersistentIdentifier? = try await Task.detached(priority: .userInitiated) {
             do {
                 let descriptor = FetchDescriptor<StoryProgress>(
                     predicate: #Predicate { $0.storyId == storyId }
                 )
-                
+
                 let results = try context.fetch(descriptor)
-                
+
                 guard let progress = results.first else {
                     print("ℹ️ No saved progress found for story '\(storyId)'")
-                    return nil
+                    return nil as PersistentIdentifier?
                 }
-                
+
                 // Validate the loaded data
                 guard await self.validateProgressData(progress) else {
                     print("❌ Loaded progress data is corrupted for story '\(storyId)', deleting it")
@@ -388,9 +388,9 @@ final class ProgressPersistenceManager {
                     try context.save()
                     throw ProgressPersistenceError.corruptedData
                 }
-                
+
                 print("✅ Successfully loaded progress for story '\(storyId)': scene \(progress.currentSceneIndex), \(progress.dialogueHistory.count) dialogue entries")
-                return progress
+                return progress.persistentModelID
             } catch let error as ProgressPersistenceError {
                 throw error
             } catch {
@@ -398,6 +398,14 @@ final class ProgressPersistenceManager {
                 throw ProgressPersistenceError.loadFailed(underlying: error)
             }
         }.value
+
+        // Fetch the actual object using the ID on main actor
+        let result: StoryProgress?
+        if let id = resultID {
+            result = context.model(for: id) as? StoryProgress
+        } else {
+            result = nil
+        }
         
         let latency = CFAbsoluteTimeGetCurrent() - startTime
         lastLoadLatency = latency
