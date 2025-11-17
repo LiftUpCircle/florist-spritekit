@@ -17,7 +17,7 @@ class FlowerNode: SKSpriteNode {
     
     init(flower: Flower, imageName: String, size: CGSize) {
         self.flowerData = flower
-
+        
         // Try to load the flower image from assets
         if let texture = SKTexture(imageNamed: imageName) as SKTexture? {
             super.init(texture: texture, color: .clear, size: size)
@@ -25,15 +25,15 @@ class FlowerNode: SKSpriteNode {
             // Fallback to colored sprite if image not found
             super.init(texture: nil, color: flower.flowerColor, size: size)
         }
-
+        
         self.name = "flower_\(flower.flowerName)"
         isUserInteractionEnabled = false
     }
-
+    
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     // Required initializer for SKSpriteNode subclass (needed for copy())
     override init(texture: SKTexture?, color: UIColor, size: CGSize) {
         // Default flower data - this will be overridden when copying
@@ -73,39 +73,39 @@ class FlowerNode: SKSpriteNode {
 
 // MARK: - Game Scene
 class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDelegate {
-
+    
     // Background
     private var backgroundSprite: SKSpriteNode!
-
+    
     // Settings overlay
     private var settingsOverlayController: SettingsOverlayController?
-
+    
     // UI Areas
     private var inventoryScrollNode: SKNode!
     private var inventoryCropNode: SKCropNode!
-
+    
     // Bouquet images
     private var bouquetBackNode: SKSpriteNode!
     private var bouquetFrontNode: SKSpriteNode!
     private var bouquetFlowersContainer: SKNode!
     private var bouquetPlacementArea: SKSpriteNode! // Invisible physics body for placement area
-
+    
     // Inventory flowers (original templates)
     private var inventoryFlowers: [FlowerNode] = []
     private var inventoryScrollOffset: CGFloat = 0
     private var maxScrollOffset: CGFloat = 0
-
+    
     // Placed flowers (freeform placement)
     private var placedFlowers: [FlowerNode] = []
     private let maxFlowers = 30 // Increased limit for freeform placement
-
+    
     // Drag state
     private var selectedFlower: FlowerNode?
     private var isDraggingFromInventory: Bool = false
     private var draggedFlowerCopy: FlowerNode?
     private var isValidPlacement: Bool = false
     private var placementIndicator: SKShapeNode! // Visual feedback for placement
-
+    
     // Scroll state
     private var isScrolling: Bool = false
     private var scrollStartY: CGFloat = 0
@@ -139,17 +139,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     override func didMove(to view: SKView) {
         // Load default story requirements for testing
         storyRequirements = StoryRequirementsDatabase.shared.getRequirements(for: "story_default")
-
+        
         // Set up physics
         physicsWorld.contactDelegate = self
         physicsWorld.gravity = CGVector(dx: 0, dy: 0) // No gravity for this game
-
+        
         setupBackground()
         setupLayout()
         setupBouquet()
         setupInventory()
         setupButtons()
-
+        
         // Start gameplay BGM
         SettingsManager.shared.playMusic(named: "gameplayLoopBGM", loops: -1)
     }
@@ -170,7 +170,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     private func setupLayout() {
         let padding: CGFloat = 20
-
+        
         // Left side: Inventory (1 column, scrollable)
         let inventoryWidth: CGFloat = 120
         let titleHeight: CGFloat = 40
@@ -181,7 +181,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             width: inventoryWidth,
             height: inventoryHeight
         )
-
+        
         // Center: Bouquet area
         let bouquetSize: CGFloat = min(400, size.height * 0.75)
         bouquetRect = CGRect(
@@ -191,8 +191,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             height: bouquetSize
         )
     }
-
-
+    
+    
     private func setupBouquet() {
         // Bouquet back image and placement area
         if let backTexture = SKTexture(imageNamed: "BouquetBack") as SKTexture? {
@@ -201,14 +201,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             bouquetBackNode.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.7)
             bouquetBackNode.zPosition = 10
             addChild(bouquetBackNode)
-
+            
             // Create invisible placement area with physics body from BACK texture
             bouquetPlacementArea = SKSpriteNode(texture: backTexture)
             bouquetPlacementArea.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
             bouquetPlacementArea.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.7)
             bouquetPlacementArea.zPosition = 11
             bouquetPlacementArea.alpha = 0.0
-
+            
             bouquetPlacementArea.physicsBody = SKPhysicsBody(texture: backTexture, size: bouquetPlacementArea.size)
             bouquetPlacementArea.physicsBody?.isDynamic = false
             bouquetPlacementArea.physicsBody?.categoryBitMask = 0x1
@@ -217,7 +217,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             bouquetPlacementArea.name = "bouquetArea"
             addChild(bouquetPlacementArea)
         }
-
+        
         // Create a crop node to mask the flowers
         let flowersCropNode = SKCropNode()
         flowersCropNode.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
@@ -227,7 +227,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         // 1. Bottom zone: follows bouquet shape for natural petal draping
         // 2. Top zone: large rectangle for full petal visibility
         let compositeMaskNode = SKNode()
-
+        
         // Bottom zone: Use the original bouquet texture for the lower portion
         if let backTexture = SKTexture(imageNamed: "BouquetBack") as SKTexture? {
             let bouquetMaskBottom = SKSpriteNode(texture: backTexture)
@@ -235,7 +235,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             bouquetMaskBottom.position = CGPoint(x: 0, y: 0)
             compositeMaskNode.addChild(bouquetMaskBottom)
         }
-
+        
         // Top zone: Large rectangular area for unrestricted petal display
         // This prevents early clipping of flowers placed at the top
         // TEMPORARY: Using cyan color for visualization
@@ -245,7 +245,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         ))
         topClipArea.position = CGPoint(x: 0, y: bouquetRect.height * 0.66)  // Position above bouquet center
         compositeMaskNode.addChild(topClipArea)
-
+        
         // Right side zone: Extra clipping area for right-side flowers
         // This fixes the asymmetry issue
         let rightClipArea = SKSpriteNode(color: .green, size: CGSize(
@@ -257,9 +257,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             y: bouquetRect.height * 0.285   // Slightly above center
         )
         compositeMaskNode.addChild(rightClipArea)
-
+        
         flowersCropNode.maskNode = compositeMaskNode
-
+        
         // DEBUG: Add visual indicator to show where the top clip area is
         // This is a separate sprite, not part of the mask
         let debugTopClipVisual = SKSpriteNode(color: UIColor.cyan.withAlphaComponent(0.3), size: CGSize(
@@ -273,7 +273,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         debugTopClipVisual.zPosition = 14  // Just below the crop node
         debugTopClipVisual.name = "debugTopClipArea"
         addChild(debugTopClipVisual)
-
+        
         // DEBUG: Add visual indicator for right clip area
         let debugRightClipVisual = SKSpriteNode(color: UIColor.green.withAlphaComponent(0.3), size: CGSize(
             width: bouquetRect.width * 0.4,
@@ -291,7 +291,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         bouquetFlowersContainer = SKNode()
         flowersCropNode.addChild(bouquetFlowersContainer)
         addChild(flowersCropNode)
-
+        
         // Bouquet front image (visual only, no physics)
         if let frontTexture = SKTexture(imageNamed: "BouquetFront") as SKTexture? {
             bouquetFrontNode = SKSpriteNode(texture: frontTexture)
@@ -300,7 +300,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             bouquetFrontNode.zPosition = 20
             addChild(bouquetFrontNode)
         }
-
+        
         // Create placement indicator (initially hidden)
         placementIndicator = SKShapeNode(circleOfRadius: 30)
         placementIndicator.strokeColor = .clear
@@ -315,7 +315,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         inventoryCropNode = SKCropNode()
         inventoryCropNode.position = CGPoint(x: inventoryRect.midX, y: inventoryRect.midY)
         inventoryCropNode.zPosition = 4
-
+        
         // Create mask shape for the inventory area
         let maskNode = SKShapeNode(rect: CGRect(
             x: -inventoryRect.width / 2,
@@ -325,7 +325,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         ))
         maskNode.fillColor = .white
         inventoryCropNode.maskNode = maskNode
-
+        
         // Create scroll container
         inventoryScrollNode = SKNode()
         inventoryScrollNode.position = CGPoint(x: 0, y: -inventoryRect.height / 2)
@@ -364,23 +364,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         titleLabel.verticalAlignmentMode = .center
         titleLabel.zPosition = 10
         addChild(titleLabel)
-
+        
         // Get available flowers from database
         let availableFlowers = FlowerDatabase.shared.availableFlowers
-
-        let flowerSize = CGSize(width: 90, height: 90)
+        
+        let flowerSize = CGSize(width: 100, height: 100)
         let verticalSpacing: CGFloat = 140
-
+        
         // Calculate max scroll offset
         let totalHeight = CGFloat(availableFlowers.count) * verticalSpacing
         maxScrollOffset = max(0, totalHeight - inventoryRect.height + 100)
-
+        
         // padding and layout constants
         let padding: CGFloat = 10
-//        let spacingBetweenFlowerLabel: CGFloat = 5
+        //        let spacingBetweenFlowerLabel: CGFloat = 5
         let labelBackgroundHeight: CGFloat = 35
         let cardCornerRadius: CGFloat = 15
-
+        
         for (index, flowerData) in availableFlowers.enumerated() {
             // Map flower name to asset name
             let imageName = getFlowerImageName(for: flowerData.flowerName)
@@ -392,15 +392,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             flower.position = CGPoint(x: 0, y: yPos)
             flower.originalPosition = flower.position
             flower.zPosition = 6
-
+            
             let label = SKLabelNode(text: flowerData.flowerName)
             label.fontName = GaeguTypography.regularFontName
             label.fontSize = FontSize.title2
             label.fontColor = .white
             
             // Calculate frame size (flower area + label area)
-            let cardWidth = flowerSize.width + (padding * 2)
-            let cardHeight = flowerSize.height  + labelBackgroundHeight
+            let cardWidth = flowerSize.width + (padding * 2) - 20
+            let cardHeight = flowerSize.height  + labelBackgroundHeight - 15
             let frameSize = CGSize(width: cardWidth, height: cardHeight)
             
             // Create main card frame
@@ -410,6 +410,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             frame.lineWidth = 3
             frame.position = CGPoint(x: 0, y: -10)
             frame.zPosition = -2
+            frame.name = "cardFrame"
             
             // Create colored background for label
             let labelBgWidth = cardWidth - 2
@@ -430,7 +431,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             label.fontSize = FontSize.headline
             label.fontColor = .white
             label.zPosition = 11
-
+            
             flower.addChild(frame)
             flower.addChild(labelBackground)
             flower.addChild(label)
@@ -557,16 +558,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
-
+        
         // Check if settings overlay is handling the touch
         if let settingsController = settingsOverlayController {
             if settingsController.handleTouchBegan(touch) {
                 return
             }
         }
-
+        
         let touchedNodes = nodes(at: location)
-
+        
         // Check if touching a button
         for node in touchedNodes {
             if node.name == "resetButton" {
@@ -583,7 +584,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 return
             }
         }
-
+        
         // Check if we're touching within the inventory area
         if inventoryRect.contains(location) {
             // Store initial touch position
@@ -591,7 +592,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             scrollStartY = location.y
             initialScrollOffset = inventoryScrollOffset
             gestureDecided = false
-
+            
             // Check if we touched an inventory flower
             let inventoryLocation = touch.location(in: inventoryScrollNode)
             for flower in inventoryFlowers {
@@ -601,10 +602,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                     potentialFlowerToDrag = flower
                     selectedFlower = flower
                     
+//                    animateCardShrink(flower: flower)
+                    
                     return
                 }
             }
-
+            
             // If no flower was touched, this is definitely a scroll
             isScrolling = true
             gestureDecided = true
@@ -643,45 +646,52 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
-
+        
         // Check if settings overlay is handling the touch
         if let settingsController = settingsOverlayController {
             if settingsController.handleTouchMoved(touch) {
                 return
             }
         }
-
+        
         let location = touch.location(in: self)
-
+        
         // If we haven't decided the gesture type yet
         if !gestureDecided && potentialFlowerToDrag != nil {
             let deltaX = abs(location.x - touchStartLocation.x)
             let deltaY = abs(location.y - touchStartLocation.y)
-
+            
             // Check if movement exceeds threshold
             if deltaX > scrollThreshold || deltaY > scrollThreshold {
                 if deltaY > deltaX * 1.5 {
                     // Vertical movement - treat as scroll
                     isScrolling = true
                     gestureDecided = true
-
+                    
+                    if let flower = potentialFlowerToDrag {
+                            animateCardRestore(flower: flower)
+                        }
+                    
                     // Visual feedback: slightly fade the inventory during scroll
                     inventoryScrollNode.run(SKAction.fadeAlpha(to: 0.7, duration: 0.1))
                 } else {
                     // Horizontal or diagonal movement - treat as drag
                     gestureDecided = true
-
+                    
                     // Create the flower copy for dragging
                     if let flower = potentialFlowerToDrag {
+                        
+                        animateCardShrink(flower: flower)
+                        
                         let imageName = getFlowerImageName(for: flower.flowerData.flowerName)
                         draggedFlowerCopy = FlowerNode(flower: flower.flowerData, imageName: imageName, size: flower.size)
                         draggedFlowerCopy!.position = location
                         draggedFlowerCopy!.zPosition = 200
                         draggedFlowerCopy!.setScale(1.0)
                         addChild(draggedFlowerCopy!)
-
+                        
                         isDraggingFromInventory = true
-
+                        
                         // Haptic feedback
                         let generator = UIImpactFeedbackGenerator(style: .light)
                         generator.impactOccurred()
@@ -690,15 +700,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 potentialFlowerToDrag = nil
             }
         }
-
+        
         // Handle scrolling if we're in scroll mode
         if isScrolling {
             let deltaY = location.y - scrollStartY
             let newOffset = initialScrollOffset + deltaY  // Changed from - to + to fix inversion
-
+            
             // Apply scroll with bounds checking
             inventoryScrollOffset = min(max(0, newOffset), maxScrollOffset)
-
+            
             // Update inventory position within the crop node
             inventoryScrollNode.position = CGPoint(
                 x: 0,
@@ -706,15 +716,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             )
             return
         }
-
+        
         // Handle dragging flower
         guard let draggedFlower = draggedFlowerCopy else { return }
         draggedFlower.position = location
-
+        
         // Check if the current position is valid using physics
         isValidPlacement = false
         placementIndicator.isHidden = true
-
+        
         // Check if we're over the bouquet area and not exceeding max flowers
         if placedFlowers.count < maxFlowers || !isDraggingFromInventory {
             // Use physics to check if we're inside the bouquet shape
@@ -722,17 +732,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             if let body = physicsWorld.body(at: physicsPoint),
                body == bouquetPlacementArea.physicsBody {
                 isValidPlacement = true
-
+                
                 // Show placement indicator
                 placementIndicator.position = location
                 placementIndicator.fillColor = UIColor.green.withAlphaComponent(0.3)
                 placementIndicator.isHidden = false
-
+                
                 // Check for overlap with existing flowers
                 let containerLocation = bouquetFlowersContainer.convert(location, from: self)
                 for existingFlower in placedFlowers {
                     let distance = hypot(containerLocation.x - existingFlower.position.x,
-                                       containerLocation.y - existingFlower.position.y)
+                                         containerLocation.y - existingFlower.position.y)
                     if distance < 40 { // Minimum spacing between flowers
                         placementIndicator.fillColor = UIColor.yellow.withAlphaComponent(0.3)
                         break
@@ -756,18 +766,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
-
+        
+        // Restore card scale we didnt drag
+        if let flower = potentialFlowerToDrag, !gestureDecided {
+            animateCardRestore(flower: flower)
+        }
+        
         // Check if settings overlay is handling the touch
         if let settingsController = settingsOverlayController {
             if settingsController.handleTouchEnded(touch) {
                 return
             }
         }
-
+        
         // Reset gesture state
         potentialFlowerToDrag = nil
         gestureDecided = false
-
+        
         // End scrolling if we were scrolling
         if isScrolling {
             isScrolling = false
@@ -775,38 +790,42 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             inventoryScrollNode.run(SKAction.fadeAlpha(to: 1.0, duration: 0.1))
             return
         }
-
+        
         // Handle flower placement
         guard let draggedFlower = draggedFlowerCopy else { return }
         let location = touch.location(in: self)
         placementIndicator.isHidden = true
-
+        
         // Check if we can place the flower using physics validation
         if isValidPlacement && (placedFlowers.count < maxFlowers || !isDraggingFromInventory) {
             // Place the flower at the exact position (freeform placement)
+            if isDraggingFromInventory, let flower = selectedFlower {
+                    animateCardRestore(flower: flower)
+            }
+            
             draggedFlower.removeFromParent()
-
+            
             // Convert position to container coordinates
             let containerLocation = bouquetFlowersContainer.convert(location, from: self)
             draggedFlower.position = containerLocation
-
+            
             // Dynamic z-ordering based on y-position (flowers at bottom appear in front)
             let normalizedY = (containerLocation.y + 150) / 300 // Normalize to 0-1 range
             let zPosition = (1 - normalizedY) * 5 // Higher z for lower flowers, but within container bounds
             draggedFlower.zPosition = zPosition
-
+            
             // Scale based on distance from center for depth effect
             let distanceFromCenter = hypot(containerLocation.x, containerLocation.y)
             let scaleFactor = 0.7 + (1 - min(distanceFromCenter / 150, 1)) * 0.3
             draggedFlower.setScale(scaleFactor)
-
+            
             bouquetFlowersContainer.addChild(draggedFlower)
             placedFlowers.append(draggedFlower)
-
+            
             // Success feedback
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.success)
-
+            
             // Gentle placement animation
             let bounce = SKAction.sequence([
                 SKAction.scale(to: scaleFactor * 1.1, duration: 0.1),
@@ -814,10 +833,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             ])
             let rotate = SKAction.rotate(byAngle: CGFloat.random(in: -0.1...0.1), duration: 0.2)
             draggedFlower.run(SKAction.group([bounce, rotate]))
-
+            
             updateButtonStates()
         } else {
             // Invalid placement - return flower with animation
+            if isDraggingFromInventory, let flower = selectedFlower {
+                    animateCardRestore(flower: flower)
+                }
+            
             if isDraggingFromInventory {
                 // Animate back to inventory
                 let fadeOut = SKAction.fadeOut(withDuration: 0.2)
@@ -831,12 +854,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 // It was from bouquet, just remove
                 draggedFlower.removeFromParent()
             }
-
+            
             // Error feedback
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.error)
         }
-
+        
         // Reset drag state
         draggedFlowerCopy = nil
         selectedFlower = nil
@@ -852,7 +875,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         isDraggingFromInventory = false
         isValidPlacement = false
         placementIndicator.isHidden = true
-
+        
         if isScrolling {
             inventoryScrollNode.run(SKAction.fadeAlpha(to: 1.0, duration: 0.1))
         }
@@ -913,10 +936,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         if let requirements = storyRequirements {
             let result = requirements.validate(bouquet: bouquetFlowers)
             showValidationResult(result)
-
+            
             // Call callback if set
             onBouquetWrapped?(result)
-
+            
             // If successful match, capture and save bouquet image
             switch result {
             case .perfectMatch, .goodMatch:
@@ -933,6 +956,48 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 break // Don't save failed bouquets
             }
         }
+    }
+    
+    private func animateCardShrink(flower: FlowerNode) {
+        // Find the frame (background) child
+        guard let frame = flower.children.first(where: { $0.name == "cardFrame" || $0 is SKShapeNode }) as? SKShapeNode else {
+            return
+        }
+        
+        // Shrink and fade the card
+        let shrink = SKAction.scale(to: 0.65, duration: 0.15)
+        let fade = SKAction.fadeAlpha(to: 0.5, duration: 0.15)
+        frame.run(SKAction.group([shrink, fade]))
+        
+        // Make the flower image pop up slightly
+        let flowerPopUp = SKAction.sequence([
+            SKAction.scale(to: 1.15, duration: 0.1),
+            SKAction.moveBy(x: 0, y: 10, duration: 0.1)
+        ])
+        flower.run(flowerPopUp)
+        
+        // Haptic feedback
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+    }
+    
+    private func animateCardRestore(flower: FlowerNode) {
+        // Find the frame (background) child
+        guard let frame = flower.children.first(where: { $0.name == "cardFrame" || $0 is SKShapeNode }) as? SKShapeNode else {
+            return
+        }
+        
+        // Restore card size and opacity
+        let grow = SKAction.scale(to: 1.0, duration: 0.15)
+        let fadeIn = SKAction.fadeAlpha(to: 1.0, duration: 0.15)
+        frame.run(SKAction.group([grow, fadeIn]))
+        
+        // Restore flower position
+        let flowerRestore = SKAction.sequence([
+            SKAction.scale(to: 1.0, duration: 0.1),
+            SKAction.move(to: flower.originalPosition, duration: 0.1)
+        ])
+        flower.run(flowerRestore)
     }
     
     private func handleBookButton() {
@@ -954,13 +1019,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         // Haptic feedback
         let generator = UIImpactFeedbackGenerator(style: .light)
         generator.impactOccurred()
-
+        
         // Animate button press
         settingButton.run(SKAction.sequence([
             SKAction.scale(to: 0.9, duration: 0.1),
             SKAction.scale(to: 1.0, duration: 0.1)
         ]))
-
+        
         // Show settings overlay
         if settingsOverlayController == nil {
             settingsOverlayController = SettingsOverlayController(scene: self)
@@ -968,32 +1033,32 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         } else {
             settingsOverlayController?.show(in: self)
         }
-
+        
         // Notify that settings are now open
         onSettingsStateChanged?(true)
     }
-
+    
     // MARK: - SettingsOverlayControllerDelegate
     func settingsOverlayDidClose() {
         // Notify that settings are now closed
         onSettingsStateChanged?(false)
     }
-
+    
     func settingsOverlayDidTapRateGame() {
         // Handle rate game action
         print("Rate game tapped")
     }
-
+    
     func settingsOverlayDidTapSubscriptions() {
         // Handle subscriptions action
         print("Subscriptions tapped")
     }
-
+    
     func settingsOverlayDidTapContactUs() {
         // Handle contact us action
         print("Contact us tapped")
     }
-
+    
     func settingsOverlayDidTapPrivacy() {
         // Handle privacy action
         print("Privacy tapped")
@@ -1003,26 +1068,26 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         var message: String
         var color: UIColor
         var hapticType: UINotificationFeedbackGenerator.FeedbackType
-
+        
         switch result {
         case .perfectMatch:
             message = "Perfect Match!"
             color = UIColor(red: 0.2, green: 0.8, blue: 0.3, alpha: 1.0)
             hapticType = .success
-
+            
             // Add sparkle effect
             addSparkleEffect()
-
+            
         case .goodMatch:
             message = "Good Match!"
             color = UIColor(red: 0.3, green: 0.6, blue: 0.8, alpha: 1.0)
             hapticType = .success
-
+            
         case .failure(let failureMessage, let missingEmotions):
             message = "\(failureMessage)"
             color = UIColor(red: 0.9, green: 0.6, blue: 0.3, alpha: 1.0)
             hapticType = .warning
-
+            
             print("Missing emotions: \(missingEmotions.joined(separator: ", "))")
         }
         
@@ -1081,16 +1146,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             ]))
         }
     }
-
+    
     // MARK: - Public Methods
     func setStoryRequirements(_ requirements: StoryFlowerRequirements) {
         self.storyRequirements = requirements
     }
-
+    
     func getCurrentBouquet() -> [Flower] {
         return placedFlowers.map { $0.flowerData }
     }
-
+    
     /// Capture a snapshot of the bouquet area (back + flowers + front)
     /// Returns a UIImage of just the bouquet portion (no background, no UI)
     func captureBouquetSnapshot() -> UIImage? {
@@ -1098,21 +1163,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             print("❌ Cannot capture snapshot: view is nil")
             return nil
         }
-
+        
         print("📸 Starting bouquet snapshot capture")
         print("📸 Total flowers to capture: \(placedFlowers.count)")
-
+        
         // Get the bouquet center position
         let bouquetCenter = CGPoint(
             x: bouquetBackNode.position.x,
             y: bouquetBackNode.position.y
         )
         print("📸 Bouquet center: \(bouquetCenter)")
-
+        
         // Create a clean container for ONLY bouquet elements centered at bouquet position
         let snapshotContainer = SKNode()
         snapshotContainer.position = bouquetCenter
-
+        
         // Add bouquet back (base layer) - position relative to container center
         if let backCopy = bouquetBackNode.copy() as? SKSpriteNode {
             backCopy.position = CGPoint.zero // Center in container
@@ -1120,11 +1185,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             snapshotContainer.addChild(backCopy)
             print("✅ Added bouquet back at center")
         }
-
+        
         // Add all placed flowers with positions relative to bouquet center
         for (index, flower) in placedFlowers.enumerated() {
             let flowerCopy = flower.createCopy()
-
+            
             // Flowers are in bouquetFlowersContainer coordinate space
             // Convert to scene coordinates first, then make relative to bouquet center
             let flowerWorldPos = bouquetFlowersContainer.convert(flower.position, to: self)
@@ -1143,7 +1208,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             print("   World pos: \(flowerWorldPos)")
             print("   Relative to bouquet: \(flowerCopy.position)")
         }
-
+        
         // Add bouquet front (top layer) - position relative to container center
         if let frontCopy = bouquetFrontNode.copy() as? SKSpriteNode {
             frontCopy.position = CGPoint.zero // Center in container
@@ -1151,10 +1216,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             snapshotContainer.addChild(frontCopy)
             print("✅ Added bouquet front at center")
         }
-
+        
         // Temporarily add to scene
         addChild(snapshotContainer)
-
+        
         // Calculate the bounds to capture (centered on container)
         // Smaller crop area = larger bouquet in final image
         let snapshotSize = CGSize(width: 250, height: 250)
@@ -1164,15 +1229,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             width: snapshotSize.width,
             height: snapshotSize.height
         )
-
+        
         print("📸 Snapshot rect: \(snapshotRect)")
-
+        
         // Capture texture from the container
         let texture = view.texture(from: snapshotContainer, crop: snapshotRect)
-
+        
         // Remove temporary container
         snapshotContainer.removeFromParent()
-
+        
         // Convert to UIImage
         if let cgImage = texture?.cgImage() {
             let image = UIImage(cgImage: cgImage)
@@ -1180,7 +1245,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             print("✅ Flowers included: \(placedFlowers.count)")
             return image
         }
-
+        
         print("❌ Failed to create UIImage from texture")
         return nil
     }
@@ -1193,7 +1258,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
               body == bouquetPlacementArea.physicsBody else {
             return false
         }
-
+        
         // Check minimum spacing with other flowers
         let minSpacing: CGFloat = 35 // Minimum distance between flower centers
         for flower in placedFlowers {
@@ -1203,22 +1268,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 return false
             }
         }
-
+        
         return true
     }
-
+    
     private func sortFlowersByDepth() {
         // Sort flowers in container by their y-position for proper layering
         let sortedFlowers = placedFlowers.sorted { flower1, flower2 in
             return flower1.position.y > flower2.position.y
         }
-
+        
         // Update z-positions based on sort order (keep within 0-5 range)
         for (index, flower) in sortedFlowers.enumerated() {
             flower.zPosition = CGFloat(index) * 0.1 // Small increments to maintain order
         }
     }
-
+    
     // MARK: - Update
     override func update(_ currentTime: TimeInterval) {
         // Future: Add animations if needed
