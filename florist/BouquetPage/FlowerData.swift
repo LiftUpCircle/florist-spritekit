@@ -37,40 +37,63 @@ struct StoryFlowerRequirements {
     
     // Check if bouquet satisfies requirements
     func validate(bouquet: [Flower]) -> ValidationResult {
+        print("\n🌺 Validating bouquet for story: \(storyId)")
+        print("📋 Requirements:")
+        for req in requirements {
+            print("   - \(req.emotion): \(req.minimumCount)-\(req.idealCount) (flower: \(req.flower.flowerName))")
+        }
+
         var satisfiedRequirements: [String: Int] = [:]
         var perfectMatches: [String: Bool] = [:]
-        
+
         // Count flowers by emotion
+        print("🌸 Bouquet contents:")
         for flower in bouquet {
             satisfiedRequirements[flower.emotion, default: 0] += 1
+            print("   - \(flower.flowerName) (\(flower.emotion))")
         }
-        
+
+        print("📊 Emotion counts in bouquet:")
+        for (emotion, count) in satisfiedRequirements {
+            print("   - \(emotion): \(count)")
+        }
+
         var allMatch = true
         var allPerfect = true
         var missingEmotions: [String] = []
-        
+
+        print("🔍 Checking requirements:")
         for requirement in requirements {
             let count = satisfiedRequirements[requirement.emotion] ?? 0
-            
+
             if count < requirement.minimumCount {
                 allMatch = false
                 allPerfect = false
                 missingEmotions.append(requirement.emotion)
+                print("   ❌ \(requirement.emotion): has \(count), needs min \(requirement.minimumCount)")
             } else if count < requirement.idealCount {
                 allPerfect = false
                 perfectMatches[requirement.emotion] = false
+                print("   ⚠️ \(requirement.emotion): has \(count), ideal is \(requirement.idealCount)")
             } else {
                 perfectMatches[requirement.emotion] = true
+                print("   ✅ \(requirement.emotion): has \(count), perfect!")
             }
         }
-        
+
+        let result: ValidationResult
         if !allMatch {
-            return .failure(message: "Hmm, something's missing...", missingEmotions: missingEmotions)
+            result = .failure(message: "Hmm, something's missing...", missingEmotions: missingEmotions)
+            print("🚫 Result: FAILURE - missing emotions: \(missingEmotions)")
         } else if allPerfect {
-            return .perfectMatch
+            result = .perfectMatch
+            print("🌟 Result: PERFECT MATCH!")
         } else {
-            return .goodMatch
+            result = .goodMatch
+            print("👍 Result: GOOD MATCH")
         }
+
+        return result
     }
     
     enum ValidationResult {

@@ -12,7 +12,7 @@
       "requirements": [
         {
           "emotion": "Love",
-          "minimumCount": 2,
+          "minimumCount": 1,
           "idealCount": 4
         }
       ]
@@ -29,15 +29,9 @@
       "requirements": [
         {
           "emotion": "Serenity",
-          "minimumCount": 2,
-          "idealCount": 3
-        },
-        {
-          "emotion": "Hope",
           "minimumCount": 1,
-          "idealCount": 2
-        }
-      ]
+          "idealCount": 3
+        }      ]
     },
     "urutan3": {
       "id": "story_michael",
@@ -51,13 +45,8 @@
       "requirements": [
         {
           "emotion": "Joy",
-          "minimumCount": 2,
-          "idealCount": 3
-        },
-        {
-          "emotion": "Hope",
           "minimumCount": 1,
-          "idealCount": 2
+          "idealCount": 3
         }
       ]
     }

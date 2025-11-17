@@ -137,8 +137,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     // MARK: - Scene Setup
     override func didMove(to view: SKView) {
-        // Load default story requirements for testing
-        storyRequirements = StoryRequirementsDatabase.shared.getRequirements(for: "story_default")
+        // Don't load default requirements here - they will be set by BouquetViewController
+        // storyRequirements will be set via setStoryRequirements()
 
         // Set up physics
         physicsWorld.contactDelegate = self
