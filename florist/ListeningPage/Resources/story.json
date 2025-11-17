@@ -7,7 +7,15 @@
       "characterName": "Robert Adikusuma",
       "title": "Robert's Bouquet",
       "unlocked": true,
-      "order": 1
+      "order": 1,
+      "hintText": "The same kind I used to give her... something that showing love",
+      "requirements": [
+        {
+          "emotion": "Love",
+          "minimumCount": 1,
+          "idealCount": 4
+        }
+      ]
     },
     "urutan2": {
       "id": "story_abigail",
@@ -16,7 +24,14 @@
       "characterName": "Abigail Surya Kencana",
       "title": "Abigail's Hope",
       "unlocked": true,
-      "order": 2
+      "order": 2,
+      "hintText": "The kind that feels safe... quiet but not sad",
+      "requirements": [
+        {
+          "emotion": "Serenity",
+          "minimumCount": 1,
+          "idealCount": 3
+        }      ]
     },
     "urutan3": {
       "id": "story_michael",
@@ -25,7 +40,15 @@
       "characterName": "Michael Kosasih",
       "title": "Michael's Gift",
       "unlocked": true,
-      "order": 3
+      "order": 3,
+      "hintText": "Something yellow... so you don't forget to smile",
+      "requirements": [
+        {
+          "emotion": "Joy",
+          "minimumCount": 1,
+          "idealCount": 3
+        }
+      ]
     }
   }
 }

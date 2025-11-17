@@ -50,6 +50,7 @@ struct BouquetView: View {
                             typingSpeed: 0.03,
                             shouldCompleteTyping: false,
                             maxWidth: min(400, geometry.size.width - 200),
+                            showTriangleIndicator: false,  // Hide triangle in BouquetPage
                             onTypingComplete: {},
                             onTap: {}
                         )
