@@ -37,40 +37,63 @@ struct StoryFlowerRequirements {
     
     // Check if bouquet satisfies requirements
     func validate(bouquet: [Flower]) -> ValidationResult {
+        print("\n🌺 Validating bouquet for story: \(storyId)")
+        print("📋 Requirements:")
+        for req in requirements {
+            print("   - \(req.emotion): \(req.minimumCount)-\(req.idealCount) (flower: \(req.flower.flowerName))")
+        }
+
         var satisfiedRequirements: [String: Int] = [:]
         var perfectMatches: [String: Bool] = [:]
-        
+
         // Count flowers by emotion
+        print("🌸 Bouquet contents:")
         for flower in bouquet {
             satisfiedRequirements[flower.emotion, default: 0] += 1
+            print("   - \(flower.flowerName) (\(flower.emotion))")
         }
-        
+
+        print("📊 Emotion counts in bouquet:")
+        for (emotion, count) in satisfiedRequirements {
+            print("   - \(emotion): \(count)")
+        }
+
         var allMatch = true
         var allPerfect = true
         var missingEmotions: [String] = []
-        
+
+        print("🔍 Checking requirements:")
         for requirement in requirements {
             let count = satisfiedRequirements[requirement.emotion] ?? 0
-            
+
             if count < requirement.minimumCount {
                 allMatch = false
                 allPerfect = false
                 missingEmotions.append(requirement.emotion)
+                print("   ❌ \(requirement.emotion): has \(count), needs min \(requirement.minimumCount)")
             } else if count < requirement.idealCount {
                 allPerfect = false
                 perfectMatches[requirement.emotion] = false
+                print("   ⚠️ \(requirement.emotion): has \(count), ideal is \(requirement.idealCount)")
             } else {
                 perfectMatches[requirement.emotion] = true
+                print("   ✅ \(requirement.emotion): has \(count), perfect!")
             }
         }
-        
+
+        let result: ValidationResult
         if !allMatch {
-            return .failure(message: "Hmm, something's missing...", missingEmotions: missingEmotions)
+            result = .failure(message: "Hmm, something's missing...", missingEmotions: missingEmotions)
+            print("🚫 Result: FAILURE - missing emotions: \(missingEmotions)")
         } else if allPerfect {
-            return .perfectMatch
+            result = .perfectMatch
+            print("🌟 Result: PERFECT MATCH!")
         } else {
-            return .goodMatch
+            result = .goodMatch
+            print("👍 Result: GOOD MATCH")
         }
+
+        return result
     }
     
     enum ValidationResult {
@@ -108,243 +131,145 @@ class FlowerDatabase {
     }
 }
 
+// MARK: - JSON Structures for Story Loading
+
+struct StoryJSONData: Codable {
+    let stories: [String: StoryRequirementData]
+}
+
+struct StoryRequirementData: Codable {
+    let id: String
+    let file: String
+    let characterId: String
+    let characterName: String
+    let title: String
+    let unlocked: Bool
+    let order: Int
+    let hintText: String?
+    let requirements: [RequirementJSONData]?
+}
+
+struct RequirementJSONData: Codable {
+    let emotion: String
+    let minimumCount: Int
+    let idealCount: Int
+}
+
 // MARK: - Sample Story Requirements
 
 class StoryRequirementsDatabase {
     static let shared = StoryRequirementsDatabase()
-    
+    private var cachedRequirements: [String: StoryFlowerRequirements] = [:]
+
+    init() {
+        loadStoriesFromJSON()
+        // Keep fallback requirements for compatibility
+        loadFallbackRequirements()
+    }
+
+    private func loadStoriesFromJSON() {
+        // Load story.json the same way StoryManager does - without subdirectory
+        guard let url = Bundle.main.url(forResource: "story", withExtension: "json") else {
+            print("❌ Could not find story.json file")
+            print("📁 Bundle path: \(Bundle.main.bundlePath)")
+            return
+        }
+
+        print("📄 Found story.json at: \(url.path)")
+
+        do {
+            let data = try Data(contentsOf: url)
+            print("📊 Loaded \(data.count) bytes from story.json")
+            let decoder = JSONDecoder()
+            let storyJSON = try decoder.decode(StoryJSONData.self, from: data)
+
+            print("📖 Found \(storyJSON.stories.count) stories in JSON")
+
+            for (key, storyData) in storyJSON.stories {
+                print("🔍 Processing story key: '\(key)', id: '\(storyData.id)'")
+                print("   - Has requirements: \(storyData.requirements != nil)")
+                print("   - Has hintText: \(storyData.hintText != nil)")
+
+                if let requirements = storyData.requirements,
+                   let hintText = storyData.hintText {
+
+                    var flowerRequirements: [FlowerRequirement] = []
+
+                    for req in requirements {
+                        print("   - Processing requirement: \(req.emotion) (\(req.minimumCount)-\(req.idealCount))")
+                        if let flower = FlowerDatabase.shared.getFlower(byEmotion: req.emotion) {
+                            let flowerReq = FlowerRequirement(
+                                emotion: req.emotion,
+                                minimumCount: req.minimumCount,
+                                idealCount: req.idealCount,
+                                flower: flower
+                            )
+                            flowerRequirements.append(flowerReq)
+                        } else {
+                            print("   ⚠️ Could not find flower for emotion: \(req.emotion)")
+                        }
+                    }
+
+                    let storyReq = StoryFlowerRequirements(
+                        storyId: storyData.id,
+                        requirements: flowerRequirements,
+                        hintText: hintText
+                    )
+
+                    // Cache with multiple keys for compatibility:
+                    // 1. The key from story.json (e.g., "urutan1")
+                    cachedRequirements[key] = storyReq
+                    print("   ✓ Cached as '\(key)'")
+                    // 2. The story ID (e.g., "story_robert")
+                    cachedRequirements[storyData.id] = storyReq
+                    print("   ✓ Cached as '\(storyData.id)'")
+                    // 3. The story ID with _1 suffix (e.g., "story_robert_1")
+                    cachedRequirements["\(storyData.id)_1"] = storyReq
+                    print("   ✓ Cached as '\(storyData.id)_1'")
+                } else {
+                    print("   ⚠️ Skipping story - missing requirements or hintText")
+                }
+            }
+
+            print("✅ Loaded \(cachedRequirements.count) story requirements from story.json")
+        } catch {
+            print("❌ Error loading story requirements from JSON: \(error)")
+        }
+    }
+
+    private func loadFallbackRequirements() {
+        // Keep a default fallback requirement for cases where story.json doesn't have requirements
+        let defaultRequirement = StoryFlowerRequirements(
+            storyId: "story_default",
+            requirements: [
+                FlowerRequirement(
+                    emotion: "Love",
+                    minimumCount: 1,
+                    idealCount: 3,
+                    flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
+                )
+            ],
+            hintText: "Express your feelings with flowers"
+        )
+
+        // Add default if not already loaded from JSON
+        if cachedRequirements["story_default"] == nil {
+            cachedRequirements["story_default"] = defaultRequirement
+        }
+    }
+
     func getRequirements(for storyId: String) -> StoryFlowerRequirements? {
-        // Sample story requirements using available flowers
-        let sampleRequirements: [String: StoryFlowerRequirements] = [
-            // Robert's Story - Love and Memory
-            "story_robert_1": StoryFlowerRequirements(
-                storyId: "story_robert_1",
-                requirements: [
-                    FlowerRequirement(
-                        emotion: "Love",
-                        minimumCount: 2,
-                        idealCount: 4,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
-                    )
-                ],
-                hintText: "The same kind I used to give her... something that feels alive"
-            ),
-            // Abigail's Story - Serenity, Hope, and Forgiveness
-            "story_abigail_1": StoryFlowerRequirements(
-                storyId: "story_abigail_1",
-                requirements: [
-                    FlowerRequirement(
-                        emotion: "Serenity",
-                        minimumCount: 2,
-                        idealCount: 3,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Serenity")!
-                    ),
-                    FlowerRequirement(
-                        emotion: "Hope",
-                        minimumCount: 1,
-                        idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Hope")!
-                    )
-                ],
-                hintText: "The kind that feels safe... quiet but not sad"
-            ),
-            // Michael's Story - Joy and Hope
-            "story_michael_1": StoryFlowerRequirements(
-                storyId: "story_michael_1",
-                requirements: [
-                    FlowerRequirement(
-                        emotion: "Joy",
-                        minimumCount: 2,
-                        idealCount: 3,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Joy")!
-                    ),
-                    FlowerRequirement(
-                        emotion: "Hope",
-                        minimumCount: 1,
-                        idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Hope")!
-                    )
-                ],
-                hintText: "Something yellow... so you don't forget to smile"
-            ),
-            // Backward compatibility - default story
-            "story": StoryFlowerRequirements(
-                storyId: "story",
-                requirements: [
-                    FlowerRequirement(
-                        emotion: "Serenity",
-                        minimumCount: 2,
-                        idealCount: 3,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Serenity")!
-                    ),
-                    FlowerRequirement(
-                        emotion: "Hope",
-                        minimumCount: 1,
-                        idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Hope")!
-                    )
-                ],
-                hintText: "Something with serenity and hope for a new beginning"
-            ),
-            "story_1": StoryFlowerRequirements(
-                storyId: "story_1",
-                requirements: [
-                    FlowerRequirement(
-                        emotion: "Love",
-                        minimumCount: 1,
-                        idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
-                    ),
-                    FlowerRequirement(
-                        emotion: "Joy",
-                        minimumCount: 1,
-                        idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Joy")!
-                    )
-                ],
-                hintText: "I felt so much love and joy today"
-            ),
-            "story_2": StoryFlowerRequirements(
-                storyId: "story_2",
-                requirements: [
-                    FlowerRequirement(
-                        emotion: "Serenity",
-                        minimumCount: 2,
-                        idealCount: 3,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Serenity")!
-                    ),
-                    FlowerRequirement(
-                        emotion: "Purity",
-                        minimumCount: 1,
-                        idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Purity")!
-                    )
-                ],
-                hintText: "I need serenity and purity in my life"
-            ),
-            "story_3": StoryFlowerRequirements(
-                storyId: "story_3",
-                requirements: [
-                    FlowerRequirement(
-                        emotion: "Joy",
-                        minimumCount: 2,
-                        idealCount: 4,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Joy")!
-                    )
-                ],
-                hintText: "Today is a day full of joy and celebration"
-            ),
-            "story_4": StoryFlowerRequirements(
-                storyId: "story_4",
-                requirements: [
-                    FlowerRequirement(
-                        emotion: "Love",
-                        minimumCount: 2,
-                        idealCount: 3,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
-                    ),
-                    FlowerRequirement(
-                        emotion: "Purity",
-                        minimumCount: 1,
-                        idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Purity")!
-                    )
-                ],
-                hintText: "A bouquet of love and purity for the wedding"
-            ),
-            "story_5": StoryFlowerRequirements(
-                storyId: "story_5",
-                requirements: [
-                    FlowerRequirement(
-                        emotion: "Serenity",
-                        minimumCount: 1,
-                        idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Serenity")!
-                    ),
-                    FlowerRequirement(
-                        emotion: "Joy",
-                        minimumCount: 1,
-                        idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Joy")!
-                    ),
-                    FlowerRequirement(
-                        emotion: "Love",
-                        minimumCount: 1,
-                        idealCount: 1,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
-                    )
-                ],
-                hintText: "I need serenity, joy, and a little love"
-            ),
-            "story_wedding": StoryFlowerRequirements(
-                storyId: "story_wedding",
-                requirements: [
-                    FlowerRequirement(
-                        emotion: "Love",
-                        minimumCount: 1,
-                        idealCount: 3,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
-                    ),
-                    FlowerRequirement(
-                        emotion: "Purity",
-                        minimumCount: 1,
-                        idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Purity")!
-                    )
-                ],
-                hintText: "For a wedding, filled with love and purity"
-            ),
-            "story_peace": StoryFlowerRequirements(
-                storyId: "story_peace",
-                requirements: [
-                    FlowerRequirement(
-                        emotion: "Serenity",
-                        minimumCount: 1,
-                        idealCount: 4,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Serenity")!
-                    ),
-                    FlowerRequirement(
-                        emotion: "Purity",
-                        minimumCount: 1,
-                        idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Purity")!
-                    )
-                ],
-                hintText: "Something to bring serenity and peace"
-            ),
-            "story_celebration": StoryFlowerRequirements(
-                storyId: "story_celebration",
-                requirements: [
-                    FlowerRequirement(
-                        emotion: "Joy",
-                        minimumCount: 1,
-                        idealCount: 4,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Joy")!
-                    ),
-                    FlowerRequirement(
-                        emotion: "Love",
-                        minimumCount: 1,
-                        idealCount: 2,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
-                    )
-                ],
-                hintText: "A celebration of joy and love"
-            ),
-            // Default/Test story
-            "story_default": StoryFlowerRequirements(
-                storyId: "story_default",
-                requirements: [
-                    FlowerRequirement(
-                        emotion: "Love",
-                        minimumCount: 1,
-                        idealCount: 3,
-                        flower: FlowerDatabase.shared.getFlower(byEmotion: "Love")!
-                    )
-                ],
-                hintText: "Express your love with flowers"
-            )
-        ]
-        
-        return sampleRequirements[storyId] ?? sampleRequirements["story_default"]
+        print("🔍 Getting requirements for storyId: '\(storyId)'")
+        print("📚 Available story IDs in cache: \(cachedRequirements.keys.sorted())")
+
+        // First try to get from cached requirements (loaded from JSON)
+        if let requirements = cachedRequirements[storyId] {
+            print("✅ Found requirements for '\(storyId)' with hint: '\(requirements.hintText)'")
+            return requirements
+        }
+
+        print("⚠️ No requirements found for '\(storyId)', using default")
+        // Return default requirements as fallback
+        return cachedRequirements["story_default"]
     }
 }

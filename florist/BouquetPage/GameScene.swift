@@ -137,9 +137,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     // MARK: - Scene Setup
     override func didMove(to view: SKView) {
-        // Load default story requirements for testing
-        storyRequirements = StoryRequirementsDatabase.shared.getRequirements(for: "story_default")
-        
+        // Don't load default requirements here - they will be set by BouquetViewController
+        // storyRequirements will be set via setStoryRequirements()
+      
         // Set up physics
         physicsWorld.contactDelegate = self
         physicsWorld.gravity = CGVector(dx: 0, dy: 0) // No gravity for this game
@@ -259,33 +259,33 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         compositeMaskNode.addChild(rightClipArea)
         
         flowersCropNode.maskNode = compositeMaskNode
-        
-        // DEBUG: Add visual indicator to show where the top clip area is
-        // This is a separate sprite, not part of the mask
-        let debugTopClipVisual = SKSpriteNode(color: UIColor.cyan.withAlphaComponent(0.3), size: CGSize(
-            width: bouquetRect.width * 1.2,
-            height: bouquetRect.height * 0.9
-        ))
-        debugTopClipVisual.position = CGPoint(
-            x: bouquetRect.midX,
-            y: bouquetRect.midY + bouquetRect.height * 0.66
-        )
-        debugTopClipVisual.zPosition = 14  // Just below the crop node
-        debugTopClipVisual.name = "debugTopClipArea"
-        addChild(debugTopClipVisual)
-        
-        // DEBUG: Add visual indicator for right clip area
-        let debugRightClipVisual = SKSpriteNode(color: UIColor.green.withAlphaComponent(0.3), size: CGSize(
-            width: bouquetRect.width * 0.4,
-            height: bouquetRect.height * 0.2
-        ))
-        debugRightClipVisual.position = CGPoint(
-            x: bouquetRect.midX + bouquetRect.width * 0.45,
-            y: bouquetRect.midY + bouquetRect.height * 0.285
-        )
-        debugRightClipVisual.zPosition = 14
-        debugRightClipVisual.name = "debugRightClipArea"
-        addChild(debugRightClipVisual)
+
+//        // DEBUG: Add visual indicator to show where the top clip area is
+//        // This is a separate sprite, not part of the mask
+//        let debugTopClipVisual = SKSpriteNode(color: UIColor.cyan.withAlphaComponent(0.3), size: CGSize(
+//            width: bouquetRect.width * 1.2,
+//            height: bouquetRect.height * 0.9
+//        ))
+//        debugTopClipVisual.position = CGPoint(
+//            x: bouquetRect.midX,
+//            y: bouquetRect.midY + bouquetRect.height * 0.66
+//        )
+//        debugTopClipVisual.zPosition = 14  // Just below the crop node
+//        debugTopClipVisual.name = "debugTopClipArea"
+//        addChild(debugTopClipVisual)
+//
+//        // DEBUG: Add visual indicator for right clip area
+//        let debugRightClipVisual = SKSpriteNode(color: UIColor.green.withAlphaComponent(0.3), size: CGSize(
+//            width: bouquetRect.width * 0.4,
+//            height: bouquetRect.height * 0.2
+//        ))
+//        debugRightClipVisual.position = CGPoint(
+//            x: bouquetRect.midX + bouquetRect.width * 0.45,
+//            y: bouquetRect.midY + bouquetRect.height * 0.285
+//        )
+//        debugRightClipVisual.zPosition = 14
+//        debugRightClipVisual.name = "debugRightClipArea"
+//        addChild(debugRightClipVisual)
         
         // Container for flowers (inside the crop node)
         bouquetFlowersContainer = SKNode()
