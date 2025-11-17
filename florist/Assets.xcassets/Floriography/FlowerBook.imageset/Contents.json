@@ -1,17 +1,17 @@
 {
   "images" : [
     {
-      "filename" : "Character Book.png",
+      "filename" : "FlowerBook.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "Character Book 1.png",
+      "filename" : "FlowerBook 1.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
     {
-      "filename" : "Character Book 2.png",
+      "filename" : "FlowerBook 2.png",
       "idiom" : "universal",
       "scale" : "3x"
     }

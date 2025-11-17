@@ -11,8 +11,9 @@ struct MainMenuView: View {
     @StateObject private var controller = MainMenuViewController()
     @StateObject private var flowCoordinator = GameFlowCoordinator()
     @State private var showSettings = false
+    @State private var showMemoriesBook = false
     @State private var savedProgress: StoryProgress?
-    
+
     var body: some View {
         NavigationStack(path: $flowCoordinator.navigationPath) {
             ZStack {
@@ -21,17 +22,19 @@ struct MainMenuView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .ignoresSafeArea()
-                
+
                 // Main content
                 VStack {
                     Spacer()
                     // Top area with Memories button
                     HStack {
                         Spacer()
-                        
+
                         // Memories button
                         Button(action: {
-                            flowCoordinator.navigateToMemories()
+                            withAnimation {
+                                showMemoriesBook = true
+                            }
                         }) {
                             Image("MemoriesButton")
                                 .resizable()
@@ -131,6 +134,17 @@ struct MainMenuView: View {
                     SettingsOverlayView(isPresented: $showSettings)
                         .transition(.opacity)
                         .zIndex(100)
+                }
+
+                // Memories book overlay
+                if showMemoriesBook {
+                    MemoriesBookView {
+                        withAnimation {
+                            showMemoriesBook = false
+                        }
+                    }
+                    .transition(.opacity)
+                    .zIndex(100)
                 }
             }
             .navigationBarHidden(true)
