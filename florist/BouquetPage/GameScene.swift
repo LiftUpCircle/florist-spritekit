@@ -177,9 +177,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         let inventoryHeight = size.height - 80 - titleHeight
         inventoryRect = CGRect(
             x: padding + 40,
-            y: 20 + titleHeight,
+            y: 0,
             width: inventoryWidth,
-            height: inventoryHeight
+            height: size.height - titleHeight - 20
         )
         
         // Center: Bouquet area
