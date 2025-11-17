@@ -21,7 +21,7 @@ struct CharacterSpriteView: View {
             if imageExists {
                 Image(spriteName)
                     .resizable()
-                    .scaledToFit()
+                    .aspectRatio(contentMode: .fit)
                     .accessibilityLabel("Character sprite")
                     .accessibilityHidden(true)
             } else {
