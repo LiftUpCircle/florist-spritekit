@@ -145,23 +145,35 @@ class StoryRequirementsDatabase {
     }
 
     private func loadStoriesFromJSON() {
-        guard let url = Bundle.main.url(forResource: "story", withExtension: "json", subdirectory: "ListeningPage/Resources") else {
+        // Load story.json the same way StoryManager does - without subdirectory
+        guard let url = Bundle.main.url(forResource: "story", withExtension: "json") else {
             print("❌ Could not find story.json file")
+            print("📁 Bundle path: \(Bundle.main.bundlePath)")
             return
         }
 
+        print("📄 Found story.json at: \(url.path)")
+
         do {
             let data = try Data(contentsOf: url)
+            print("📊 Loaded \(data.count) bytes from story.json")
             let decoder = JSONDecoder()
             let storyJSON = try decoder.decode(StoryJSONData.self, from: data)
 
-            for (_, storyData) in storyJSON.stories {
+            print("📖 Found \(storyJSON.stories.count) stories in JSON")
+
+            for (key, storyData) in storyJSON.stories {
+                print("🔍 Processing story key: '\(key)', id: '\(storyData.id)'")
+                print("   - Has requirements: \(storyData.requirements != nil)")
+                print("   - Has hintText: \(storyData.hintText != nil)")
+
                 if let requirements = storyData.requirements,
                    let hintText = storyData.hintText {
 
                     var flowerRequirements: [FlowerRequirement] = []
 
                     for req in requirements {
+                        print("   - Processing requirement: \(req.emotion) (\(req.minimumCount)-\(req.idealCount))")
                         if let flower = FlowerDatabase.shared.getFlower(byEmotion: req.emotion) {
                             let flowerReq = FlowerRequirement(
                                 emotion: req.emotion,
@@ -170,6 +182,8 @@ class StoryRequirementsDatabase {
                                 flower: flower
                             )
                             flowerRequirements.append(flowerReq)
+                        } else {
+                            print("   ⚠️ Could not find flower for emotion: \(req.emotion)")
                         }
                     }
 
@@ -179,9 +193,18 @@ class StoryRequirementsDatabase {
                         hintText: hintText
                     )
 
-                    // Cache with both the story ID and ID_1 format for compatibility
+                    // Cache with multiple keys for compatibility:
+                    // 1. The key from story.json (e.g., "urutan1")
+                    cachedRequirements[key] = storyReq
+                    print("   ✓ Cached as '\(key)'")
+                    // 2. The story ID (e.g., "story_robert")
                     cachedRequirements[storyData.id] = storyReq
+                    print("   ✓ Cached as '\(storyData.id)'")
+                    // 3. The story ID with _1 suffix (e.g., "story_robert_1")
                     cachedRequirements["\(storyData.id)_1"] = storyReq
+                    print("   ✓ Cached as '\(storyData.id)_1'")
+                } else {
+                    print("   ⚠️ Skipping story - missing requirements or hintText")
                 }
             }
 
@@ -213,11 +236,16 @@ class StoryRequirementsDatabase {
     }
 
     func getRequirements(for storyId: String) -> StoryFlowerRequirements? {
+        print("🔍 Getting requirements for storyId: '\(storyId)'")
+        print("📚 Available story IDs in cache: \(cachedRequirements.keys.sorted())")
+
         // First try to get from cached requirements (loaded from JSON)
         if let requirements = cachedRequirements[storyId] {
+            print("✅ Found requirements for '\(storyId)' with hint: '\(requirements.hintText)'")
             return requirements
         }
 
+        print("⚠️ No requirements found for '\(storyId)', using default")
         // Return default requirements as fallback
         return cachedRequirements["story_default"]
     }
