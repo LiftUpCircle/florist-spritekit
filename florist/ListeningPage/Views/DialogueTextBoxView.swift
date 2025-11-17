@@ -13,8 +13,28 @@ struct DialogueTextboxView: View {
     let typingSpeed: Double
     let shouldCompleteTyping: Bool
     let maxWidth: CGFloat
+    let showTriangleIndicator: Bool
     let onTypingComplete: () -> Void
     let onTap: () -> Void
+
+    // Convenience initializer with default showTriangleIndicator = true
+    init(characterName: String,
+         dialogue: String,
+         typingSpeed: Double,
+         shouldCompleteTyping: Bool,
+         maxWidth: CGFloat,
+         showTriangleIndicator: Bool = true,
+         onTypingComplete: @escaping () -> Void,
+         onTap: @escaping () -> Void) {
+        self.characterName = characterName
+        self.dialogue = dialogue
+        self.typingSpeed = typingSpeed
+        self.shouldCompleteTyping = shouldCompleteTyping
+        self.maxWidth = maxWidth
+        self.showTriangleIndicator = showTriangleIndicator
+        self.onTypingComplete = onTypingComplete
+        self.onTap = onTap
+    }
     
     @StateObject private var typewriter = TypewriterViewModel()
     @State private var processedDialogue: String = ""
@@ -61,9 +81,9 @@ struct DialogueTextboxView: View {
                     .stroke(Color("DialogueTextboxBorder"), lineWidth: 5)
             )
             
-            
-            // Blinking triangle indicator
-            if typewriter.isTypingComplete {
+
+            // Blinking triangle indicator (only show if showTriangleIndicator is true)
+            if showTriangleIndicator && typewriter.isTypingComplete {
                 Image(systemName: "play.fill")
                     .font(.bodyGaegu)
                     .foregroundColor(.primary)
