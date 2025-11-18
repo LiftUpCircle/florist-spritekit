@@ -134,12 +134,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     var onBouquetCompleted: ((UIImage, String) -> Void)? // Callback with image and storyId
     var onBookButtonTapped: (() -> Void)?
     var onSettingsStateChanged: ((Bool) -> Void)?
+
+    // Tutorial manager (handles both drag tutorial and book tooltip)
+    private var tutorialManager: BouquetTutorialManager?
+
+    // Long press detection for tooltips
+    private var touchStartTime: TimeInterval = 0
+    private var touchedNode: SKNode?
+    private var longPressTimer: Timer?
     
     // MARK: - Scene Setup
     override func didMove(to view: SKView) {
         // Don't load default requirements here - they will be set by BouquetViewController
         // storyRequirements will be set via setStoryRequirements()
-      
+
+        // Initialize tutorial manager (handles both drag tutorial and book tooltip)
+        tutorialManager = BouquetTutorialManager(scene: self)
+
         // Set up physics
         physicsWorld.contactDelegate = self
         physicsWorld.gravity = CGVector(dx: 0, dy: 0) // No gravity for this game
@@ -149,9 +160,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         setupBouquet()
         setupInventory()
         setupButtons()
-        
+
         // Start gameplay BGM
         SettingsManager.shared.playMusic(named: "gameplayLoopBGM", loops: -1)
+
+        // Show tutorial after a short delay if user hasn't dragged a flower yet
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            guard let self = self else { return }
+            self.tutorialManager?.showTutorialIfNeeded(
+                inventoryFlowers: self.inventoryFlowers,
+                inventoryScrollNode: self.inventoryScrollNode,
+                bouquetRect: self.bouquetRect
+            )
+        }
     }
     
     private func setupBackground() {
@@ -174,7 +195,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         // Left side: Inventory (1 column, scrollable)
         let inventoryWidth: CGFloat = 120
         let titleHeight: CGFloat = 40
-        let inventoryHeight = size.height - 80 - titleHeight
+        let _ = size.height - 80 - titleHeight
         inventoryRect = CGRect(
             x: padding + 40,
             y: 0,
@@ -553,7 +574,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             wrapButton.alpha = 0.5
         }
     }
-    
+
     // MARK: - Touch Handling
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
@@ -577,7 +598,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 handleWrapButton()
                 return
             } else if node.name == "bookButton" {
-                handleBookButton()
+                // Store touch info for potential long press
+                touchStartTime = Date().timeIntervalSince1970
+                touchedNode = node
+
+                // Start long press timer for tooltip
+                longPressTimer?.invalidate()
+                longPressTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+                    // Show temporary tooltip on long press
+                    if let bookButton = self?.bookButton {
+                        self?.tutorialManager?.showTemporaryBookTooltip(bookButton: bookButton, duration: 2.0)
+                    }
+                }
+
+                // Don't handle the button tap yet - wait for touchesEnded
                 return
             } else if node.name == "settingButton" {
                 handleSettingButton()
@@ -602,8 +636,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                     potentialFlowerToDrag = flower
                     selectedFlower = flower
                     
-//                    animateCardShrink(flower: flower)
-                    
+                    animateCardPress(flower: flower)
                     return
                 }
             }
@@ -677,21 +710,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 } else {
                     // Horizontal or diagonal movement - treat as drag
                     gestureDecided = true
-                    
+
+                    // Hide tutorial and tooltip when user starts dragging
+                    tutorialManager?.hideTutorial()
+                    tutorialManager?.hideBookTooltip()
+
                     // Create the flower copy for dragging
                     if let flower = potentialFlowerToDrag {
-                        
+
                         animateCardShrink(flower: flower)
-                        
+
                         let imageName = getFlowerImageName(for: flower.flowerData.flowerName)
                         draggedFlowerCopy = FlowerNode(flower: flower.flowerData, imageName: imageName, size: flower.size)
                         draggedFlowerCopy!.position = location
                         draggedFlowerCopy!.zPosition = 200
                         draggedFlowerCopy!.setScale(1.0)
                         addChild(draggedFlowerCopy!)
-                        
+
                         isDraggingFromInventory = true
-                        
+
                         // Haptic feedback
                         let generator = UIImpactFeedbackGenerator(style: .light)
                         generator.impactOccurred()
@@ -766,19 +803,39 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
-        
+
+        // Cancel long press timer
+        longPressTimer?.invalidate()
+        longPressTimer = nil
+
+        // Check if we were touching the book button
+        if touchedNode?.name == "bookButton" {
+            let location = touch.location(in: self)
+            let touchedNodes = nodes(at: location)
+
+            // Only handle tap if still on the book button
+            for node in touchedNodes {
+                if node.name == "bookButton" {
+                    handleBookButton()
+                    break
+                }
+            }
+            touchedNode = nil
+            return
+        }
+
         // Restore card scale we didnt drag
         if let flower = potentialFlowerToDrag, !gestureDecided {
             animateCardRestore(flower: flower)
         }
-        
+
         // Check if settings overlay is handling the touch
         if let settingsController = settingsOverlayController {
             if settingsController.handleTouchEnded(touch) {
                 return
             }
         }
-        
+
         // Reset gesture state
         potentialFlowerToDrag = nil
         gestureDecided = false
@@ -821,7 +878,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             
             bouquetFlowersContainer.addChild(draggedFlower)
             placedFlowers.append(draggedFlower)
-            
+
+            // Mark that the user has successfully dragged a flower to the bouquet
+            if isDraggingFromInventory {
+                tutorialManager?.markTutorialCompleted()
+
+                // Notify tutorial manager that a flower was placed (for book tooltip)
+                tutorialManager?.onFlowerPlaced(bookButton: bookButton)
+            }
+
             // Success feedback
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.success)
@@ -868,7 +933,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
+        // Cancel long press timer
+        longPressTimer?.invalidate()
+        longPressTimer = nil
+        touchedNode = nil
+
         draggedFlowerCopy?.removeFromParent()
         draggedFlowerCopy = nil
         selectedFlower = nil
@@ -981,6 +1050,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         generator.impactOccurred()
     }
     
+    private func animateCardPress(flower: FlowerNode) {
+        guard let frame = flower.children.first(where:  { $0.name == "cardFrame" || $0 is SKShapeNode }) as? SKShapeNode
+        else {
+            return
+        }
+        
+        // Slightly shrink the card to indicate press
+        let shrink = SKAction.scale(to: 0.95, duration: 0.1)
+        let dim = SKAction.fadeAlpha(to: 0.8, duration: 0.1)
+        frame.run(SKAction.group([shrink, dim]))
+        
+        // Haptic feedback
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+    }
+    
     private func animateCardRestore(flower: FlowerNode) {
         // Find the frame (background) child
         guard let frame = flower.children.first(where: { $0.name == "cardFrame" || $0 is SKShapeNode }) as? SKShapeNode else {
@@ -1001,16 +1086,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     }
     
     private func handleBookButton() {
+        // Notify tutorial manager that book button was pressed
+        tutorialManager?.onBookButtonPressed()
+
         // Haptic feedback
         let generator = UIImpactFeedbackGenerator(style: .light)
         generator.impactOccurred()
-        
+
         // Animate button press
         bookButton.run(SKAction.sequence([
             SKAction.scale(to: 0.9, duration: 0.1),
             SKAction.scale(to: 1.0, duration: 0.1)
         ]))
-        
+
         // Call callback if set
         onBookButtonTapped?()
     }
@@ -1177,7 +1265,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         // Create a clean container for ONLY bouquet elements centered at bouquet position
         let snapshotContainer = SKNode()
         snapshotContainer.position = bouquetCenter
-        
+
         // Add bouquet back (base layer) - position relative to container center
         if let backCopy = bouquetBackNode.copy() as? SKSpriteNode {
             backCopy.position = CGPoint.zero // Center in container
@@ -1185,11 +1273,48 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             snapshotContainer.addChild(backCopy)
             print("✅ Added bouquet back at center")
         }
-        
-        // Add all placed flowers with positions relative to bouquet center
+
+        // Create a clipping mask for flowers to stay within bouquet bounds
+        let cropNode = SKCropNode()
+
+        // Create composite mask (same as in Bouquet Page)
+        let compositeMaskNode = SKNode()
+
+        // Bottom part: Use actual bouquet texture shape
+        let backTexture = SKTexture(imageNamed: "BouquetBack")
+        let bouquetMaskBottom = SKSpriteNode(texture: backTexture)
+        bouquetMaskBottom.size = bouquetBackNode.size
+        bouquetMaskBottom.position = CGPoint.zero
+        compositeMaskNode.addChild(bouquetMaskBottom)
+
+        // Top part: Allow flowers to extend upward freely
+        let bouquetHeight = bouquetBackNode.size.height
+        let bouquetWidth = bouquetBackNode.size.width
+        let topClipArea = SKSpriteNode(color: .white, size: CGSize(
+            width: bouquetWidth * 0.85,  // Slightly wider than bouquet for top flowers
+            height: bouquetHeight * 0.9  // Generous height for top flowers
+        ))
+        topClipArea.position = CGPoint(x: 0, y: bouquetHeight * 0.66)  // Position above bouquet center
+        compositeMaskNode.addChild(topClipArea)
+
+        // Right side extension to allow flowers on the right
+        let rightClipArea = SKSpriteNode(color: .white, size: CGSize(
+            width: bouquetWidth * 0.4,  // Width of the extension
+            height: bouquetHeight * 0.2  // Height coverage
+        ))
+        rightClipArea.position = CGPoint(
+            x: bouquetWidth * 0.45,  // Position on the right side
+            y: bouquetHeight * 0.285   // Slightly above center
+        )
+        compositeMaskNode.addChild(rightClipArea)
+
+        cropNode.maskNode = compositeMaskNode
+        cropNode.zPosition = 1
+
+        // Add all placed flowers to the crop node (they will be clipped)
         for (index, flower) in placedFlowers.enumerated() {
             let flowerCopy = flower.createCopy()
-            
+
             // Flowers are in bouquetFlowersContainer coordinate space
             // Convert to scene coordinates first, then make relative to bouquet center
             let flowerWorldPos = bouquetFlowersContainer.convert(flower.position, to: self)
@@ -1202,13 +1327,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             flowerCopy.xScale = flower.xScale
             flowerCopy.yScale = flower.yScale
             flowerCopy.alpha = flower.alpha
-            snapshotContainer.addChild(flowerCopy)
+            cropNode.addChild(flowerCopy)
             print("✅ Added flower \(index + 1): \(flower.flowerData.flowerName)")
             print("   Original container pos: \(flower.position)")
             print("   World pos: \(flowerWorldPos)")
             print("   Relative to bouquet: \(flowerCopy.position)")
         }
-        
+
+        // Add the crop node containing all clipped flowers
+        snapshotContainer.addChild(cropNode)
+
         // Add bouquet front (top layer) - position relative to container center
         if let frontCopy = bouquetFrontNode.copy() as? SKSpriteNode {
             frontCopy.position = CGPoint.zero // Center in container

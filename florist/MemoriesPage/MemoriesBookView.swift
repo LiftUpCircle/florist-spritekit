@@ -151,8 +151,8 @@ struct MemoriesBookContentView: View {
                     }
                 }
             }
-            .frame(maxWidth: 250, maxHeight: .infinity)
-            .padding(.leading, 20)
+            .frame(maxWidth: 250, maxHeight: .infinity, alignment: .leading)
+            .padding(.leading, 18)
             .padding(.trailing, 80)
             .padding(.vertical, 40)
         }
@@ -167,11 +167,10 @@ struct BouquetMemoryRow: View {
         VStack(alignment: .leading, spacing: 4) {
             // Title
             Text(memory.title)
-                .font(.caption)
-                .fontWeight(.semibold)
+                .font(.custom("Gaegu-Bold", size: 14))
                 .foregroundColor(.black)
                 .lineLimit(1)
-            
+
             // Bouquet image
             if let savedBouquet = memory.savedBouquet,
                let bouquetImage = BouquetImageManager.shared.loadBouquetImage(filename: savedBouquet.imageFileName) {
@@ -190,18 +189,17 @@ struct BouquetMemoryRow: View {
             // Description
             VStack(alignment: .leading, spacing: 2) {
                 Text(memory.description)
-                    .font(.system(size: 10))
+                    .font(.custom("Gaegu-Regular", size: 12))
                     .foregroundColor(.gray)
-                    .lineLimit(3)
 
                 if let savedBouquet = memory.savedBouquet {
                     Text("Created: \(formattedDate(savedBouquet.dateCreated))")
-                        .font(.system(size: 9))
+                        .font(.custom("Gaegu-Light", size: 10))
                         .foregroundColor(.gray)
                 }
             }
             .padding(8)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(width: 175, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color.white.opacity(0.8))

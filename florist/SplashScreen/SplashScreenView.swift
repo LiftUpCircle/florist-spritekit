@@ -27,7 +27,7 @@ struct SplashScreenView: View {
                     Text(String(letters[index]))
                         .font(.largeTitleGaegu)
                         .fontWeight(.bold)
-                        .foregroundColor(.primary)
+                        .foregroundColor(.black)
                         .offset(y: letterOffsets[index])
                 }
             }

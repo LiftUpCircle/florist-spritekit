@@ -175,6 +175,15 @@ struct MainMenuView: View {
             .statusBar(hidden: true)
             .environmentObject(flowCoordinator)
         }
+        .overlay {
+            // Loading screen overlay - placed outside NavigationStack
+            if flowCoordinator.showLoadingScreen {
+                TransitionLoadingView()
+                    .zIndex(999)
+                    .transition(.opacity)
+                    .animation(.easeInOut(duration: 0.3), value: flowCoordinator.showLoadingScreen)
+            }
+        }
     }
     
     private func handleMenuSelection(_ item: MainMenuModel.MenuItem) {
