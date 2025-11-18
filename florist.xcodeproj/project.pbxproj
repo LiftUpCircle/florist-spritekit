@@ -7,16 +7,16 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		D24C70EB2EB064B500A7C924 /* florist.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = florist.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D24C70EB2EB064B500A7C924 /* Dear Bouquet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Dear Bouquet.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		61254CD32EC2D252002D9868 /* Exceptions for "florist" folder in "florist" target */ = {
+		61254CD32EC2D252002D9868 /* Exceptions for "florist" folder in "Dear Bouquet" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = D24C70EA2EB064B500A7C924 /* florist */;
+			target = D24C70EA2EB064B500A7C924 /* Dear Bouquet */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -24,7 +24,7 @@
 		D24C70ED2EB064B500A7C924 /* florist */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				61254CD32EC2D252002D9868 /* Exceptions for "florist" folder in "florist" target */,
+				61254CD32EC2D252002D9868 /* Exceptions for "florist" folder in "Dear Bouquet" target */,
 			);
 			path = florist;
 			sourceTree = "<group>";
@@ -53,7 +53,7 @@
 		D24C70EC2EB064B500A7C924 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D24C70EB2EB064B500A7C924 /* florist.app */,
+				D24C70EB2EB064B500A7C924 /* Dear Bouquet.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -61,9 +61,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D24C70EA2EB064B500A7C924 /* florist */ = {
+		D24C70EA2EB064B500A7C924 /* Dear Bouquet */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D24C71022EB064B600A7C924 /* Build configuration list for PBXNativeTarget "florist" */;
+			buildConfigurationList = D24C71022EB064B600A7C924 /* Build configuration list for PBXNativeTarget "Dear Bouquet" */;
 			buildPhases = (
 				D24C70E72EB064B500A7C924 /* Sources */,
 				D24C70E82EB064B500A7C924 /* Frameworks */,
@@ -76,11 +76,11 @@
 			fileSystemSynchronizedGroups = (
 				D24C70ED2EB064B500A7C924 /* florist */,
 			);
-			name = florist;
+			name = "Dear Bouquet";
 			packageProductDependencies = (
 			);
 			productName = florist;
-			productReference = D24C70EB2EB064B500A7C924 /* florist.app */;
+			productReference = D24C70EB2EB064B500A7C924 /* Dear Bouquet.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -112,7 +112,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D24C70EA2EB064B500A7C924 /* florist */,
+				D24C70EA2EB064B500A7C924 /* Dear Bouquet */,
 			);
 		};
 /* End PBXProject section */
@@ -269,6 +269,8 @@
 				DEVELOPMENT_TEAM = Q3MLBX8LNJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = florist/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Dear Bouquet";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -303,6 +305,8 @@
 				DEVELOPMENT_TEAM = Q3MLBX8LNJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = florist/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Dear Bouquet";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.games";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -339,7 +343,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D24C71022EB064B600A7C924 /* Build configuration list for PBXNativeTarget "florist" */ = {
+		D24C71022EB064B600A7C924 /* Build configuration list for PBXNativeTarget "Dear Bouquet" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D24C71032EB064B600A7C924 /* Debug */,
