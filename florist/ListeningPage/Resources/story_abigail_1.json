@@ -9,7 +9,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
       "characterName": "Maria",
-      "dialogue": "Welcome, dear. You look… like someone who's been thinking too much.",
+      "dialogue": "Welcome, dear. You look… like you mind has been walking in circles.",
       "spritePosition": "center"
     },
     {
@@ -17,23 +17,23 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
       "characterName": "Abigail",
-      "dialogue": "You could say that. Could you help me make a bouquet, Maria? It's for my mom.",
+      "dialogue": "Maybe it has.",
       "spritePosition": "right"
     },
     {
       "id": "abigail_003",
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
-      "characterName": "Maria",
-      "dialogue": "Of course. A special occasion?",
+      "characterName": "Abigail",
+      "dialogue": "Maria... could you help me make a bouquet?\n It's for my mom.",
       "spritePosition": "center"
     },
     {
       "id": "abigail_004",
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
-      "characterName": "Abigail",
-      "dialogue": "Not really. I just… haven't been home much lately. And I heard my father's company will soon start construction around here.",
+      "characterName": "Maria",
+      "dialogue": "Of couse. Is it her birthday?",
       "spritePosition": "right"
     },
     {
@@ -41,15 +41,15 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
       "characterName": "Abigail",
-      "dialogue": "I guess I wanted to bring her something before that happens.",
+      "dialogue": "No...\n Not this time.",
       "spritePosition": "right"
     },
     {
       "id": "abigail_006",
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
-      "characterName": "Maria",
-      "dialogue": "That's thoughtful of you.",
+      "characterName": "Abigail",
+      "dialogue": "I haven't been home much lately.\n And I heard the company,\n my father's company will start construction around this area soon",
       "spritePosition": "center"
     },
     {
@@ -57,23 +57,23 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
       "characterName": "Abigail",
-      "dialogue": "Maybe if I bring her flowers, she'll talk to him. She's the only one he really listens to.",
+      "dialogue": "They want to clear the old blocks.\n Including this street.\n Including... your shop.",
       "spritePosition": "right"
     },
     {
       "id": "abigail_008",
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
-      "characterName": "Abigail",
-      "dialogue": "I don't know if it'll change anything — but it feels wrong not to try.",
+      "characterName": "Maria",
+      "dialogue": "Ah.. i see..",
       "spritePosition": "right"
     },
     {
       "id": "abigail_009",
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
-      "characterName": "Maria",
-      "dialogue": "It's never wrong to remind people what beauty looks like. What kind of flowers does she like?",
+      "characterName": "Abigail",
+      "dialogue": "I tried talking to him, but he won't listen to me.\n Not about this.",
       "spritePosition": "center"
     },
     {
@@ -81,7 +81,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
       "characterName": "Abigail",
-      "dialogue": "She likes… the ones that make the room feel quiet. Not sad quiet — the kind that feels safe.",
+      "dialogue": "He only really listens to my mom.",
       "spritePosition": "right"
     },
     {
@@ -89,15 +89,39 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
       "characterName": "Abigail",
-      "dialogue": "When I was little, she'd open the window, and the smell would fill the whole house. I remember that most when things get noisy.",
+      "dialogue": "So I thought...\n Maybe if i bring her something beautiful, she'll understand how much this place matters,\n how much you matter,\n and how much this shop still holds people together.",
       "spritePosition": "right"
     },
     {
       "id": "abigail_012",
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
+      "characterName": "Abigail",
+      "dialogue": "I don't know if it will change anything.\n But it feels wrong not to try.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "abigail_012",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "abigail",
       "characterName": "Maria",
-      "dialogue": "Then let's make something that feels like that.",
+      "dialogue": "It's never wrong to follow the tug of your heart.\n What kind of flowers does your mother like?",
+      "spritePosition": "center"
+    },
+    {
+      "id": "abigail_012",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "abigail",
+      "characterName": "Abigail",
+      "dialogue": "She likes the ones that look like they're glowing...\n Simple, but impossible to ignore.\n The kind that makes a room feel warmer.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "abigail_012",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "abigail",
+      "characterName": "Maria",
+      "dialogue": "Then let's make something that speaks gently, but shines brightly.",
       "spritePosition": "center"
     }
   ]

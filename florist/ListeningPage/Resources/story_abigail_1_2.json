@@ -1,0 +1,64 @@
+{
+  "id": "story_abigail_1_2",
+  "title": "Abigail's Hope",
+  "characterId": "abigail",
+  "characterName": "Abigail Surya Kencana",
+  "scenes": [
+    {
+      "id": "abigail_001_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "abigail",
+      "characterName": "Abigail",
+      "dialogue": "It's... beautiful.\n She'll understand this. I know she will.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "abigail_002_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "abigail",
+      "characterName": "Abigail",
+      "dialogue": "And maybe... maybe my dad will too.\n Or at least... he'll pause long enough to think.",
+      "spritePosition": "right"
+    },
+    {
+      "id": "abigail_003_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "abigail",
+      "characterName": "Maria",
+      "dialogue": "Even if he doesn't, your mother will know what you meant.\n And sometimes, that's enough to shift someone's heart",
+      "spritePosition": "center"
+    },
+    {
+      "id": "abigail_004_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "abigail",
+      "characterName": "Abigail",
+      "dialogue": "You always find a way to make everything feel lighter",
+      "spritePosition": "right"
+    },
+    {
+      "id": "abigail_005_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "abigail",
+      "characterName": "Maria",
+      "dialogue": "Maybe that's just what flowers do.\n Or maybe... it's what you needed to hear",
+      "spritePosition": "right"
+    },
+    {
+      "id": "abigail_006_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "abigail",
+      "characterName": "Abigail",
+      "dialogue": "Thank you, Maria.\n I'll bring these to her today, before anything begins.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "abigail_007_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "abigail",
+      "characterName": "Maria",
+      "dialogue": "After all these years, I didn't think good bye would feel like this.",
+      "spritePosition": "center"
+    }
+  ]
+}
