@@ -14,95 +14,59 @@ struct BookContentView: View {
     let canGoPrevious: Bool
     let canGoNext: Bool
     
+    @State private var dragOffset: CGFloat = 0
+    
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 HStack(spacing: 0) {
-                    ZStack(alignment: .topLeading) {
-                        ZStack(alignment: .topLeading) {
-                            VStack(alignment: .leading, spacing: 20) {
-                                if let imageName = getFlowerImageName(for: flower.flowerName) {
-                                    Image(imageName)
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(width: geometry.size.width * 0.45,
-                                               height: geometry.size.width * 0.45)
-                                }
-                                //                            Text(flower.flowerName)
-                                //                                .font(.custom("Georgia", size: 30))
-                                //                                .foregroundColor(Color(red: 0.4, green: 0.25, blue: 0.2))
-                                //                                .fontWeight(.bold)
-                                //                                .italic()
-                                //                            if canGoPrevious {
-                                //                                Button(action: onPrevious) {
-                                //                                    Image(systemName: "chevron.left")
-                                //                                        .font(.system(size: 24, weight: .bold))
-                                //                                        .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.3))
-                                //                                }
-                                //                                .padding(.top, 10)
-                                //                            }
-                            }
-                            .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.5, alignment: .topLeading)
+                    
+                    // LEFT SIDE - Flower Image
+                    VStack(spacing: 18) {
+                        Text("Flower")
+                            .font(.title2Gaegu)
+                            .foregroundColor(Color(red: 0.3, green: 0.2, blue: 0.2))
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .offset(y: -10)
+                        
+                        if let imageName = getFlowerImageName(for: flower.flowerName) {
+                            Image(imageName)
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: geometry.size.width * 0.45,
+                                       height: geometry.size.width * 0.45)
+                                .offset(x: -18, y: -30)
                         }
-                        .offset(x: -10, y: -42)
                     }
+                    .frame(width: geometry.size.width * 0.5, alignment: .center)
                     
                     
-                    ZStack {
-                        VStack(alignment: .leading, spacing: 0) {
-                            Spacer()
-                            
-                            HStack(spacing: 0) {
-                                VStack(alignment: .leading, spacing: 28) {
-                                    ForEach(Array(getHighlightedFlowerDescriptions(for: flower.flowerName).enumerated()), id: \.offset) { index, attributedDescription in
-                                        Text(attributedDescription)
-                                            .font(.footnoteGaegu)
-                                            .foregroundColor(Color(red: 0.3, green: 0.2, blue: 0.2))
-                                            .lineSpacing(3)
-                                            .multilineTextAlignment(.center)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                            .padding(.horizontal, 15)
-                                            .padding(.vertical, 10)
-                                            .background(
-                                                ZStack {
-                                                    RoundedRectangle(cornerRadius: 10)
-                                                        .fill(Color(red: 1.0, green: 0.95, blue: 0.9))
-                                                    RoundedRectangle(cornerRadius: 10)
-                                                        .stroke(Color(red: 0.8, green: 0.7, blue: 0.6), lineWidth: 2)
-                                                }
-                                            )
-                                            .rotationEffect(.degrees(Double.random(in: -3...3)))
-                                    }
-                                }
-                                .frame(
-                                    width: geometry.size.width * 0.4,
-                                    height: geometry.size.height * 0.65,
-                                    alignment: .leading
+                    // RIGHT SIDE - Flower Descriptions
+                    VStack(alignment: .leading, spacing: 24) {
+                        ForEach(Array(getHighlightedFlowerDescriptions(for: flower.flowerName).enumerated()), id: \.offset) { index, attributedDescription in
+                            Text(attributedDescription)
+                                .font(.footnoteGaegu)
+                                .foregroundColor(Color(red: 0.3, green: 0.2, blue: 0.2))
+                                .lineSpacing(3)
+                                .multilineTextAlignment(.center)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .padding(.horizontal, 15)
+                                .padding(.vertical, 10)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(Color(red: 1.0, green: 0.95, blue: 0.9))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .stroke(Color(red: 0.8, green: 0.7, blue: 0.6), lineWidth: 2)
+                                        )
                                 )
-                                .offset(x: 115, y: -20)
-                                .id(flower.id)
-                                .transition(.opacity.combined(with: .move(edge: .trailing)))
-                                
-                                Spacer()
-                            }
-                            .padding(.top, geometry.size.height * 0.08)
-                            
-                            Spacer()
-                            //                        HStack {
-                            //                            Spacer()
-                            //                            if canGoNext {
-                            //                                Button(action: onNext) {
-                            //                                    Image(systemName: "chevron.right")
-                            //                                        .font(.system(size: 24, weight: .bold))
-                            //                                        .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.3))
-                            //                                }
-                            //                                .padding(.trailing, geometry.size.width * 0.1)
-                            //                                .padding(.bottom, geometry.size.height * 0.1)
-                            //                            }
-                            //                        }
+                                .rotationEffect(.degrees(Double.random(in: -3...3)))
                         }
-                        .frame(width: geometry.size.width * 0.5)
                     }
+                    .frame(width: geometry.size.width * 0.4, alignment: .leading)
+                    .offset(x: 20, y: -10)
+                    .id(flower.id)
+                    .transition(.opacity.combined(with: .move(edge: .trailing)))
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
                 
@@ -142,7 +106,6 @@ struct BookContentView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
-            
         }
     }
     
