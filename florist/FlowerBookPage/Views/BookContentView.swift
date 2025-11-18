@@ -25,8 +25,8 @@ struct BookContentView: View {
                                     Image(imageName)
                                         .resizable()
                                         .aspectRatio(contentMode: .fit)
-                                        .frame(width: geometry.size.width * 0.35,
-                                               height: geometry.size.width * 0.35)
+                                        .frame(width: geometry.size.width * 0.45,
+                                               height: geometry.size.width * 0.45)
                                 }
                                 //                            Text(flower.flowerName)
                                 //                                .font(.custom("Georgia", size: 30))
@@ -44,7 +44,7 @@ struct BookContentView: View {
                             }
                             .frame(width: geometry.size.width * 0.3, height: geometry.size.height * 0.5, alignment: .topLeading)
                         }
-                        .offset(x: 35, y: -15)
+                        .offset(x: -10, y: -42)
                     }
                     
                     
@@ -54,9 +54,9 @@ struct BookContentView: View {
                             
                             HStack(spacing: 0) {
                                 VStack(alignment: .leading, spacing: 28) {
-                                    ForEach(getFlowerDescriptions(for: flower.flowerName), id: \.self) { description in
-                                        Text(description)
-                                            .font(.custom("Georgia", size: 10))
+                                    ForEach(Array(getHighlightedFlowerDescriptions(for: flower.flowerName).enumerated()), id: \.offset) { index, attributedDescription in
+                                        Text(attributedDescription)
+                                            .font(.footnoteGaegu)
                                             .foregroundColor(Color(red: 0.3, green: 0.2, blue: 0.2))
                                             .lineSpacing(3)
                                             .multilineTextAlignment(.center)
@@ -71,7 +71,7 @@ struct BookContentView: View {
                                                         .stroke(Color(red: 0.8, green: 0.7, blue: 0.6), lineWidth: 2)
                                                 }
                                             )
-                                            .rotationEffect(.degrees(Double.random(in: -5...5)))
+                                            .rotationEffect(.degrees(Double.random(in: -3...3)))
                                     }
                                 }
                                 .frame(
@@ -79,7 +79,7 @@ struct BookContentView: View {
                                     height: geometry.size.height * 0.65,
                                     alignment: .leading
                                 )
-                                .offset(x: 110, y: -20)
+                                .offset(x: 115, y: -20)
                                 .id(flower.id)
                                 .transition(.opacity.combined(with: .move(edge: .trailing)))
                                 
@@ -113,8 +113,13 @@ struct BookContentView: View {
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.3))
+                                .background(
+                                    Circle()
+                                        .fill(Color.white)
+                                        .frame(width: 44, height: 44)
+                                )
                         }
-                        .padding(.leading, 15)
+                        .padding(.leading, -20)
                     }
                     
                     Spacer()
@@ -125,13 +130,17 @@ struct BookContentView: View {
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.3))
+                                .background(
+                                    Circle()
+                                        .fill(Color.white)
+                                        .frame(width: 44, height: 44)
+                                )
                         }
-                        .padding(.trailing, 15)
+                        .padding(.trailing, -5)
                     }
                     
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                //                .offset(y: 140)
             }
             
         }
@@ -153,42 +162,80 @@ struct BookContentView: View {
         switch flowerName {
         case "Rose":
             return [
-                "Pink roses symbolize gentle emotions, appreciation, and grace.",
-                "Yellow roses represent happiness, friendship, and positive energy.",
-                "White roses stand for purity, sincerity, and new beginnings."
+                "Symbolizes deep bonds and devoted love.",
+                "Layers of petals represent layered affection.",
+                "For proposals, anniversaries, and true partnership."
             ]
         case "Jasmine":
             return [
-                "Jasmine represents purity, innocence, and grace.",
-                "Often associated with spiritual ceremonies and sacred moments.",
-                "Its delicate fragrance brings peace and tranquility to any space."
+                "Represents purity, innocence, and fresh starts.",
+                "Sacred in Indonesia for its sweet, sincere fragrance.",
+                "Given for new beginnings or expressing pure intentions."
             ]
         case "Lavender":
             return [
-                "Lavender brings serenity, calmness, and peace of mind.",
-                "Known for its soothing properties and ability to reduce stress.",
-                "Symbolizes devotion, grace, and elegance in floriography."
+                "Symbolizes calm, quiet, and serenity.",
+                "Known for its soothing, stress-reducing aroma.",
+                "Given to wish peace or simply say \"take a rest.\""
             ]
         case "Carnation":
             return [
-                "Carnations symbolize joy, fascination, and distinction.",
-                "Pink carnations represent gratitude and admiration.",
-                "White carnations signify pure love and good luck."
+                "The flower of joy, cheerfulness, and affection.",
+                "A sturdy, long-lasting bloom for simple happiness.",
+                "For celebration, cheering someone up, or acts of kindness."
             ]
         case "Lily":
             return [
-                "Lilies represent hope, purity, and renewal.",
-                "White lilies symbolize modesty and virginity.",
-                "Often used in celebrations and solemn occasions."
+                "Represents hope, new beginnings, and quiet dignity.",
+                "Elegant shape evokes grace and optimism.",
+                "For fresh starts or to inspire hope in someone."
             ]
         case "Tulip":
             return [
-                "Tulips symbolize elegance, grace, and perfect love.",
-                "Yellow tulips represent cheerfulness and sunshine.",
-                "Red tulips are a declaration of love."
+                "Represents elegance, grace, and refined beauty.",
+                "Its delicate cup holds deep, personal feelings.",
+                "The classic flower for expressing sincere emotions."
             ]
         default:
             return ["A beautiful flower with special meaning."]
+        }
+    }
+    
+    private func getKeywords(for flowerName: String) -> [String] {
+        switch flowerName {
+        case "Rose":
+            return ["love", "deep bonds", "devoted love", "layered affection", "proposals", "anniversaries", "true partnership"]
+        case "Jasmine":
+            return ["purity", "innocence", "fresh starts", "sacred", "sweet", "sincere fragrance", "new beginnings", "pure intentions"]
+        case "Lavender":
+            return ["serenity", "calm", "quiet", "soothing", "stress-reducing", "peace", "take a rest"]
+        case "Carnation":
+            return ["joy", "cheerfulness", "affection", "sturdy", "long-lasting", "simple happiness", "celebration", "acts of kindness"]
+        case "Lily":
+            return ["hope", "new beginnings", "quiet dignity", "elegant", "grace", "optimism", "fresh starts", "inspire hope"]
+        case "Tulip":
+            return ["elegance", "grace", "refined beauty", "delicate cup", "deep", "personal feelings", "sincere emotions"]
+        default:
+            return []
+        }
+    }
+    
+    private func getHighlightedFlowerDescriptions(for flowerName: String) -> [AttributedString] {
+        let descriptions = getFlowerDescriptions(for: flowerName)
+        let keywords = getKeywords(for: flowerName)
+        
+        return descriptions.map { description in
+            var attributedString = AttributedString(description)
+            
+            // Highlight each keyword
+            for keyword in keywords {
+                if let range = attributedString.range(of: keyword, options: .caseInsensitive) {
+                    attributedString[range].foregroundColor = Color(red: 0.8, green: 0.5, blue: 0.3)
+                    attributedString[range].font = .calloutGaegu.bold()
+                }
+            }
+            
+            return attributedString
         }
     }
 }
