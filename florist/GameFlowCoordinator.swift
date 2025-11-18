@@ -126,14 +126,21 @@ class GameFlowCoordinator: ObservableObject {
     func onBouquetComplete(for storyId: String? = nil) {
         let currentStory = storyId ?? currentStoryId
 
-        // Check if current story has a second part
+        // Check if current story has a second part by naming convention
         do {
             let storyIndex = try StoryManager.shared.loadStoryIndex()
-            if let story = storyIndex.stories[currentStory],
-               story.hasSecondPart == true,
-               let secondPartId = story.secondPartId {
 
-                // DON'T mark story complete yet - it has a second part!
+            // Infer second part ID from naming convention
+            // Pattern: character_arc_part (e.g., robert_1_1 → robert_1_2, robert_2_1 → robert_2_2)
+            var secondPartId = currentStory
+            if currentStory.hasSuffix("_1") {
+                // Replace last "_1" with "_2"
+                secondPartId = String(currentStory.dropLast(2)) + "_2"
+            }
+
+            // Check if the second part exists in the story index
+            if secondPartId != currentStory && storyIndex.stories[secondPartId] != nil {
+                // Second part exists! DON'T mark story complete yet
                 // Get character name from story ID
                 let characterName = getCharacterName(from: currentStory)
 

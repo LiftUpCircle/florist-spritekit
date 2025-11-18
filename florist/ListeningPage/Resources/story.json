@@ -26,9 +26,7 @@
           "minimumCount": 1,
           "idealCount": 4
         }
-      ],
-      "hasSecondPart": true,
-      "secondPartId": "robert_1_2"
+      ]
     },
     "robert_1_2": {
       "id": "story_robert_1_2",
@@ -56,9 +54,7 @@
           "minimumCount": 1,
           "idealCount": 3
         }
-      ],
-      "hasSecondPart": true,
-      "secondPartId": "abigail_1_2"
+      ]
     },
     "abigail_1_2": {
       "id": "story_abigail_1_2",
@@ -86,9 +82,7 @@
           "minimumCount": 1,
           "idealCount": 3
         }
-      ],
-      "hasSecondPart": true,
-      "secondPartId": "michael_1_2"
+      ]
     },
     "michael_1_2": {
       "id": "story_michael_1_2",

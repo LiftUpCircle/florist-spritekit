@@ -33,9 +33,7 @@ struct StoryIndexEntry: Codable {
     let hintText: String?
     let requirements: [StoryFlowerRequirement]?
 
-    // Fields for two-part stories
-    let hasSecondPart: Bool?
-    let secondPartId: String?
+    // Field to identify second part stories
     let isSecondPart: Bool?
 }
 
