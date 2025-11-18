@@ -1,0 +1,48 @@
+{
+  "id": "story_michael_1_2",
+  "title": "Michael's Gift",
+  "characterId": "michael",
+  "characterName": "Michael Kosasih",
+  "scenes": [
+    {
+      "id": "michael_001_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michael",
+      "characterName": "Michael",
+      "dialogue": "It's so pretty!\n I think it looks like sunshine.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "michael_002_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michael",
+      "characterName": "Michael",
+      "dialogue": "You promise you'll visit me and Mama after this?",
+      "spritePosition": "right"
+    },
+    {
+      "id": "michael_003_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michael",
+      "characterName": "Maria",
+      "dialogue": "I promise",
+      "spritePosition": "center"
+    },
+    {
+      "id": "michael_004_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michael",
+      "characterName": "Michael",
+      "dialogue": "Okay! Bye, Grandma Maria!",
+      "spritePosition": "right"
+    },
+    {
+      "id": "michael_005_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michael",
+      "characterName": "Maria",
+      "dialogue": "Good bye and thank you Michael!",
+      "spritePosition": "center"
+    }
+  ]
+}

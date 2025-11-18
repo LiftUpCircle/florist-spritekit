@@ -9,7 +9,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "robert",
       "characterName": "Maria",
-      "dialogue": "Robert! You're early.",
+      "dialogue": "Robert! \nYou're early.",
       "spritePosition": "center"
     },
     {
@@ -17,7 +17,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "robert",
       "characterName": "Robert",
-      "dialogue": "I figured I'd come before you get busy. Didn't want you closing shop without me picking up one last bouquet.",
+      "dialogue": "I figured I'd come before you get busy. \nDidn't want you closing shop without me picking up one last bouquet.",
       "spritePosition": "right"
     },
     {
@@ -33,7 +33,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "robert",
       "characterName": "Robert",
-      "dialogue": "Not really. I still put them by the window every week. The same kind I used to give my wife.",
+      "dialogue": "Not really. \nI still put them by the window every week.",
       "spritePosition": "right"
     },
     {
@@ -41,23 +41,23 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "robert",
       "characterName": "Robert",
-      "dialogue": "She's been gone for a few years now, but… I guess old habits never die. Or maybe I just miss her.",
+      "dialogue": "The same kind I used to give my wife.",
       "spritePosition": "right"
     },
     {
       "id": "robert_006",
       "backgroundImage": "BackgroundNew",
       "characterSprite": "robert",
-      "characterName": "Maria",
-      "dialogue": "She wouldn't want you to be sad, Robert. She used to light up every time you walked in with flowers.",
-      "spritePosition": "center"
+      "characterName": "Robert",
+      "dialogue": "She's been gone for a few years now, but… \nI guess old habits never die.",
+      "spritePosition": "right"
     },
     {
       "id": "robert_007",
       "backgroundImage": "BackgroundNew",
       "characterSprite": "robert",
       "characterName": "Robert",
-      "dialogue": "Yeah… she always said the scent followed me home. Sometimes, when I pass this street, I swear I still catch it.",
+      "dialogue": "Or maybe I just miss her...",
       "spritePosition": "right"
     },
     {
@@ -65,19 +65,59 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "robert",
       "characterName": "Maria",
-      "dialogue": "That's because you never stopped bringing her along with you.",
+      "dialogue": "She wouldn't want you to be sad, Robert.",
       "spritePosition": "center"
     },
     {
       "id": "robert_009",
       "backgroundImage": "BackgroundNew",
       "characterSprite": "robert",
-      "characterName": "Robert",
-      "dialogue": "Maybe. I just thought… one more bouquet couldn't hurt. Something that feels like the way mornings used to.",
-      "spritePosition": "right"
+      "characterName": "Maria",
+      "dialogue": "She used to light up every time you walked in with flowers.",
+      "spritePosition": "center"
     },
     {
       "id": "robert_010",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Robert",
+      "dialogue": "Yeah… she always said the scent followed me home.",
+      "spritePosition": "right"
+    },
+    {
+      "id": "robert_011",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Robert",
+      "dialogue": "Sometimes, when I pass this street, I swear I still catch it.",
+      "spritePosition": "right"
+    },
+    {
+      "id": "robert_012",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Maria",
+      "dialogue": "That's because you never stopped bringing her along with you.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "robert_013",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Robert",
+      "dialogue": "Maybe. I just thought… one more bouquet couldn't hurt.",
+      "spritePosition": "right"
+    },
+    {
+      "id": "robert_014",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Robert",
+      "dialogue": "Something that feels like the way mornings used to.",
+      "spritePosition": "right"
+    },
+    {
+      "id": "robert_015",
       "backgroundImage": "BackgroundNew",
       "characterSprite": "robert",
       "characterName": "Maria",
