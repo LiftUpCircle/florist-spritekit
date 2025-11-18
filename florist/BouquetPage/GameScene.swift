@@ -195,7 +195,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         // Left side: Inventory (1 column, scrollable)
         let inventoryWidth: CGFloat = 120
         let titleHeight: CGFloat = 40
-        let inventoryHeight = size.height - 80 - titleHeight
+        let _ = size.height - 80 - titleHeight
         inventoryRect = CGRect(
             x: padding + 40,
             y: 0,
@@ -1265,7 +1265,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         // Create a clean container for ONLY bouquet elements centered at bouquet position
         let snapshotContainer = SKNode()
         snapshotContainer.position = bouquetCenter
-        
+
         // Add bouquet back (base layer) - position relative to container center
         if let backCopy = bouquetBackNode.copy() as? SKSpriteNode {
             backCopy.position = CGPoint.zero // Center in container
@@ -1273,11 +1273,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             snapshotContainer.addChild(backCopy)
             print("✅ Added bouquet back at center")
         }
-        
-        // Add all placed flowers with positions relative to bouquet center
+
+        // Create a clipping mask for flowers to stay within bouquet bounds
+        let cropNode = SKCropNode()
+
+        // Use the actual BouquetBack texture as the mask (same as placement area)
+        let backTexture = SKTexture(imageNamed: "BouquetBack")
+        let maskNode = SKSpriteNode(texture: backTexture)
+        // Use the same size as bouquetBackNode (70% of bouquet rect)
+        maskNode.size = bouquetBackNode.size
+        maskNode.position = CGPoint.zero
+        cropNode.maskNode = maskNode
+        cropNode.zPosition = 1
+
+        // Add all placed flowers to the crop node (they will be clipped)
         for (index, flower) in placedFlowers.enumerated() {
             let flowerCopy = flower.createCopy()
-            
+
             // Flowers are in bouquetFlowersContainer coordinate space
             // Convert to scene coordinates first, then make relative to bouquet center
             let flowerWorldPos = bouquetFlowersContainer.convert(flower.position, to: self)
@@ -1290,13 +1302,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             flowerCopy.xScale = flower.xScale
             flowerCopy.yScale = flower.yScale
             flowerCopy.alpha = flower.alpha
-            snapshotContainer.addChild(flowerCopy)
+            cropNode.addChild(flowerCopy)
             print("✅ Added flower \(index + 1): \(flower.flowerData.flowerName)")
             print("   Original container pos: \(flower.position)")
             print("   World pos: \(flowerWorldPos)")
             print("   Relative to bouquet: \(flowerCopy.position)")
         }
-        
+
+        // Add the crop node containing all clipped flowers
+        snapshotContainer.addChild(cropNode)
+
         // Add bouquet front (top layer) - position relative to container center
         if let frontCopy = bouquetFrontNode.copy() as? SKSpriteNode {
             frontCopy.position = CGPoint.zero // Center in container
