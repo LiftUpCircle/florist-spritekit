@@ -134,12 +134,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     var onBouquetCompleted: ((UIImage, String) -> Void)? // Callback with image and storyId
     var onBookButtonTapped: (() -> Void)?
     var onSettingsStateChanged: ((Bool) -> Void)?
+
+    // Tutorial properties
+    private var tutorialHandNode: SKSpriteNode?
+    private var hasDraggedFlowerToBouquet: Bool = false
+    private var isTutorialShowing: Bool = false
+    private let tutorialKey = "BouquetDragTutorialCompleted"
     
     // MARK: - Scene Setup
     override func didMove(to view: SKView) {
         // Don't load default requirements here - they will be set by BouquetViewController
         // storyRequirements will be set via setStoryRequirements()
-      
+
+        // Load tutorial completion state from UserDefaults
+        hasDraggedFlowerToBouquet = UserDefaults.standard.bool(forKey: tutorialKey)
+
         // Set up physics
         physicsWorld.contactDelegate = self
         physicsWorld.gravity = CGVector(dx: 0, dy: 0) // No gravity for this game
@@ -149,9 +158,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         setupBouquet()
         setupInventory()
         setupButtons()
-        
+
         // Start gameplay BGM
         SettingsManager.shared.playMusic(named: "gameplayLoopBGM", loops: -1)
+
+        // Show tutorial after a short delay if user hasn't dragged a flower yet
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            self?.showTutorialIfNeeded()
+        }
     }
     
     private func setupBackground() {
@@ -553,7 +567,92 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             wrapButton.alpha = 0.5
         }
     }
-    
+
+    // MARK: - Tutorial Methods
+    private func showTutorialIfNeeded() {
+        // Only show tutorial if user hasn't dragged a flower to the bouquet yet
+        guard !hasDraggedFlowerToBouquet && !isTutorialShowing else { return }
+
+        // Check if we have flowers in inventory
+        guard !inventoryFlowers.isEmpty else { return }
+
+        isTutorialShowing = true
+        createTutorialAnimation()
+    }
+
+    private func createTutorialAnimation() {
+        // Create hand icon node
+        if let handTexture = SKTexture(imageNamed: "handIconTutorial") as SKTexture? {
+            tutorialHandNode = SKSpriteNode(texture: handTexture)
+            tutorialHandNode?.size = CGSize(width: 80, height: 80)
+            tutorialHandNode?.zPosition = 300 // Above everything else
+            tutorialHandNode?.alpha = 0.0
+
+            // Get the position of the first flower in inventory
+            guard let firstFlower = inventoryFlowers.first else { return }
+
+            // Convert flower position to world coordinates
+            let startPos = inventoryScrollNode.convert(firstFlower.position, to: self)
+
+            // Calculate end position (center of bouquet area)
+            let endPos = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
+
+            // Add the hand to the scene
+            if let handNode = tutorialHandNode {
+                handNode.position = startPos
+                addChild(handNode)
+
+                // Create the tutorial animation sequence
+                let fadeIn = SKAction.fadeIn(withDuration: 0.3)
+
+                // Create dragging animation
+                let moveToEnd = SKAction.move(to: endPos, duration: 2.0)
+                moveToEnd.timingMode = .easeInEaseOut
+
+                // Add some scaling for emphasis
+                let scaleUp = SKAction.scale(to: 1.1, duration: 0.5)
+                let scaleDown = SKAction.scale(to: 0.9, duration: 0.5)
+                let scaleSequence = SKAction.sequence([scaleUp, scaleDown])
+
+                // Fade out at the end
+                let fadeOut = SKAction.fadeOut(withDuration: 0.3)
+
+                // Wait and return to start
+                let wait = SKAction.wait(forDuration: 0.5)
+                let moveBack = SKAction.move(to: startPos, duration: 0.0)
+
+                // Complete animation sequence
+                let animationSequence = SKAction.sequence([
+                    fadeIn,
+                    SKAction.group([moveToEnd, scaleSequence]),
+                    fadeOut,
+                    wait,
+                    moveBack
+                ])
+
+                // Repeat the animation 3 times
+                let repeatAction = SKAction.repeat(animationSequence, count: 3)
+
+                // Run the animation and clean up after
+                handNode.run(repeatAction) { [weak self] in
+                    self?.tutorialHandNode?.removeFromParent()
+                    self?.tutorialHandNode = nil
+                    self?.isTutorialShowing = false
+                }
+            }
+        }
+    }
+
+    private func hideTutorial() {
+        // Remove tutorial if it's showing
+        if isTutorialShowing {
+            tutorialHandNode?.removeAllActions()
+            tutorialHandNode?.removeFromParent()
+            tutorialHandNode = nil
+            isTutorialShowing = false
+        }
+    }
+
     // MARK: - Touch Handling
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
@@ -677,21 +776,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 } else {
                     // Horizontal or diagonal movement - treat as drag
                     gestureDecided = true
-                    
+
+                    // Hide tutorial when user starts dragging
+                    hideTutorial()
+
                     // Create the flower copy for dragging
                     if let flower = potentialFlowerToDrag {
-                        
+
                         animateCardShrink(flower: flower)
-                        
+
                         let imageName = getFlowerImageName(for: flower.flowerData.flowerName)
                         draggedFlowerCopy = FlowerNode(flower: flower.flowerData, imageName: imageName, size: flower.size)
                         draggedFlowerCopy!.position = location
                         draggedFlowerCopy!.zPosition = 200
                         draggedFlowerCopy!.setScale(1.0)
                         addChild(draggedFlowerCopy!)
-                        
+
                         isDraggingFromInventory = true
-                        
+
                         // Haptic feedback
                         let generator = UIImpactFeedbackGenerator(style: .light)
                         generator.impactOccurred()
@@ -821,7 +923,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             
             bouquetFlowersContainer.addChild(draggedFlower)
             placedFlowers.append(draggedFlower)
-            
+
+            // Mark that the user has successfully dragged a flower to the bouquet
+            if isDraggingFromInventory && !hasDraggedFlowerToBouquet {
+                hasDraggedFlowerToBouquet = true
+                UserDefaults.standard.set(true, forKey: tutorialKey) // Save to UserDefaults
+                hideTutorial() // Hide tutorial if it's still showing
+            }
+
             // Success feedback
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.success)
