@@ -22,6 +22,7 @@ class GameFlowCoordinator: ObservableObject {
     @Published var navigationPath = NavigationPath()
     @Published var showBouquetSavedToast = false
     @Published var toastMessage = ""
+    @Published var showLoadingScreen = false
 
     private let progressManager = GameProgressManager.shared
 
@@ -39,7 +40,27 @@ class GameFlowCoordinator: ObservableObject {
     }
 
     func navigateToBouquet(storyId: String) {
-        navigationPath.append(GamePage.bouquet(storyId: storyId))
+        print("🔄 navigateToBouquet called for storyId: \(storyId)")
+
+        // Show loading screen with animation
+        withAnimation(.easeIn(duration: 0.3)) {
+            showLoadingScreen = true
+            print("✅ Loading screen set to true")
+        }
+
+        // Wait for loading screen to be fully visible, then navigate
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            print("⏱️ Navigating to bouquet page...")
+            self?.navigationPath.append(GamePage.bouquet(storyId: storyId))
+
+            // Hide loading screen after navigation and view loads
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    self?.showLoadingScreen = false
+                    print("❌ Loading screen set to false")
+                }
+            }
+        }
     }
 
     func navigateToMemories() {
@@ -71,9 +92,31 @@ class GameFlowCoordinator: ObservableObject {
     // Automatically continue to next story
     private func continueToNextStory() {
         if progressManager.hasMoreStories {
+            print("🔄 continueToNextStory called")
+
+            // Show loading screen with animation
+            withAnimation(.easeIn(duration: 0.3)) {
+                showLoadingScreen = true
+                print("✅ Loading screen set to true for next story")
+            }
+
             // Move to next story
             progressManager.moveToNextStory()
-            navigateToListening(storyId: currentStoryId)
+
+            // Wait for loading screen to be fully visible, then navigate
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                guard let self = self else { return }
+                print("⏱️ Navigating to next listening page...")
+                self.navigationPath.append(GamePage.listening(storyId: self.currentStoryId))
+
+                // Hide loading screen after navigation and view loads
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        self.showLoadingScreen = false
+                        print("❌ Loading screen set to false after next story")
+                    }
+                }
+            }
         } else {
             // All stories complete, return to main menu
             print("🎉 All stories completed!")
