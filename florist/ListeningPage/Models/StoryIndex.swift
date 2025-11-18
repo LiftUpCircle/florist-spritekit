@@ -32,6 +32,11 @@ struct StoryIndexEntry: Codable {
     let skipBouquet: Bool?
     let hintText: String?
     let requirements: [StoryFlowerRequirement]?
+
+    // Fields for two-part stories
+    let hasSecondPart: Bool?
+    let secondPartId: String?
+    let isSecondPart: Bool?
 }
 
 /// Represents a flower requirement from story.json

@@ -202,9 +202,9 @@ struct ListeningPageView: View {
             controller.setFlowCoordinator(flowCoordinator)
 
             // Map story ID to order key or load directly
-            // storyId can be: "urutan1", "urutan2", "urutan3" for new structure
+            // storyId can be: "robert_1_1", "abigail_1_1", etc. for new structure
             // or "story" for legacy/default loading
-            if storyId.starts(with: "urutan") {
+            if storyId.contains("_") {
                 controller.loadStoryByOrder(storyId)
             } else {
                 // Default behavior - loads the current story from the index
@@ -222,8 +222,9 @@ struct ListeningPageView: View {
                     if let storyEntry = storyIndex.stories[storyId],
                        storyEntry.skipBouquet == true {
                         // Skip bouquet, go directly to next story
+                        // Pass the storyId so we know which story just completed
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            flowCoordinator.onStoryCompleteNoBouquet()
+                            flowCoordinator.onStoryCompleteNoBouquet(for: storyId)
                         }
                     } else {
                         // Normal flow - go to bouquet
