@@ -9,7 +9,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "Maria",
       "characterName": "Maria",
-      "dialogue": "Another morning.\n Another day to open the shop.",
+      "dialogue": "Another morning.\nAnother day to open the shop.",
       "spritePosition": "center"
     },
     {
@@ -25,7 +25,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "Maria",
       "characterName": "Maria",
-      "dialogue": "After forty years.\n Forty years of lilies, tulips, celebrations, apologies, and fragile goodbyes.\n Forty years of watching this little street grow… and now watching it be taken away.",
+      "dialogue": "After forty years.\nForty years of lilies, tulips, celebrations, apologies, and fragile goodbyes.\nForty years of watching this little street grow… and now watching it be taken away.",
       "spritePosition": "center"
     },
     {
@@ -33,7 +33,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "Maria",
       "characterName": "Maria",
-      "dialogue": "Tomorrow they'll take down the sign.\n This place becomes a blueprint.\n A number on someone's development plan.",
+      "dialogue": "Tomorrow they'll take down the sign.\nThis place becomes a blueprint.\nA number on someone's development plan.",
       "spritePosition": "center"
     },
     {
@@ -41,7 +41,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "Maria",
       "characterName": "Maria",
-      "dialogue": "But today...\n I'll keep the door open.",
+      "dialogue": "But today...\nI'll keep the door open.",
       "spritePosition": "center"
     },
     {

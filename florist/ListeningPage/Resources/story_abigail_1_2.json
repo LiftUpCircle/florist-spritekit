@@ -9,7 +9,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
       "characterName": "Abigail",
-      "dialogue": "It's... beautiful.\n She'll understand this. I know she will.",
+      "dialogue": "It's... beautiful.\nShe'll understand this. I know she will.",
       "spritePosition": "center"
     },
     {
@@ -17,7 +17,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
       "characterName": "Abigail",
-      "dialogue": "And maybe... maybe my dad will too.\n Or at least... he'll pause long enough to think.",
+      "dialogue": "And maybe... maybe my dad will too.\nOr at least... he'll pause long enough to think.",
       "spritePosition": "right"
     },
     {
@@ -25,7 +25,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
       "characterName": "Maria",
-      "dialogue": "Even if he doesn't, your mother will know what you meant.\n And sometimes, that's enough to shift someone's heart",
+      "dialogue": "Even if he doesn't, your mother will know what you meant.\nAnd sometimes, that's enough to shift someone's heart",
       "spritePosition": "center"
     },
     {
@@ -41,7 +41,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
       "characterName": "Maria",
-      "dialogue": "Maybe that's just what flowers do.\n Or maybe... it's what you needed to hear",
+      "dialogue": "Maybe that's just what flowers do.\nOr maybe... it's what you needed to hear",
       "spritePosition": "right"
     },
     {
@@ -49,7 +49,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
       "characterName": "Abigail",
-      "dialogue": "Thank you, Maria.\n I'll bring these to her today, before anything begins.",
+      "dialogue": "Thank you, Maria.\nI'll bring these to her today, before anything begins.",
       "spritePosition": "center"
     },
     {
