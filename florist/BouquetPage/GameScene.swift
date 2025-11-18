@@ -135,15 +135,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     var onBookButtonTapped: (() -> Void)?
     var onSettingsStateChanged: ((Bool) -> Void)?
 
-    // Tutorial manager
+    // Tutorial manager (handles both drag tutorial and book tooltip)
     private var tutorialManager: BouquetTutorialManager?
+
+    // Long press detection for tooltips
+    private var touchStartTime: TimeInterval = 0
+    private var touchedNode: SKNode?
+    private var longPressTimer: Timer?
     
     // MARK: - Scene Setup
     override func didMove(to view: SKView) {
         // Don't load default requirements here - they will be set by BouquetViewController
         // storyRequirements will be set via setStoryRequirements()
 
-        // Initialize tutorial manager
+        // Initialize tutorial manager (handles both drag tutorial and book tooltip)
         tutorialManager = BouquetTutorialManager(scene: self)
 
         // Set up physics
@@ -593,7 +598,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 handleWrapButton()
                 return
             } else if node.name == "bookButton" {
-                handleBookButton()
+                // Store touch info for potential long press
+                touchStartTime = Date().timeIntervalSince1970
+                touchedNode = node
+
+                // Start long press timer for tooltip
+                longPressTimer?.invalidate()
+                longPressTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+                    // Show temporary tooltip on long press
+                    if let bookButton = self?.bookButton {
+                        self?.tutorialManager?.showTemporaryBookTooltip(bookButton: bookButton, duration: 2.0)
+                    }
+                }
+
+                // Don't handle the button tap yet - wait for touchesEnded
                 return
             } else if node.name == "settingButton" {
                 handleSettingButton()
@@ -694,8 +712,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                     // Horizontal or diagonal movement - treat as drag
                     gestureDecided = true
 
-                    // Hide tutorial when user starts dragging
+                    // Hide tutorial and tooltip when user starts dragging
                     tutorialManager?.hideTutorial()
+                    tutorialManager?.hideBookTooltip()
 
                     // Create the flower copy for dragging
                     if let flower = potentialFlowerToDrag {
@@ -785,19 +804,39 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
-        
+
+        // Cancel long press timer
+        longPressTimer?.invalidate()
+        longPressTimer = nil
+
+        // Check if we were touching the book button
+        if touchedNode?.name == "bookButton" {
+            let location = touch.location(in: self)
+            let touchedNodes = nodes(at: location)
+
+            // Only handle tap if still on the book button
+            for node in touchedNodes {
+                if node.name == "bookButton" {
+                    handleBookButton()
+                    break
+                }
+            }
+            touchedNode = nil
+            return
+        }
+
         // Restore card scale we didnt drag
         if let flower = potentialFlowerToDrag, !gestureDecided {
             animateCardRestore(flower: flower)
         }
-        
+
         // Check if settings overlay is handling the touch
         if let settingsController = settingsOverlayController {
             if settingsController.handleTouchEnded(touch) {
                 return
             }
         }
-        
+
         // Reset gesture state
         potentialFlowerToDrag = nil
         gestureDecided = false
@@ -844,6 +883,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             // Mark that the user has successfully dragged a flower to the bouquet
             if isDraggingFromInventory {
                 tutorialManager?.markTutorialCompleted()
+
+                // Notify tutorial manager that a flower was placed (for book tooltip)
+                tutorialManager?.onFlowerPlaced(bookButton: bookButton)
             }
 
             // Success feedback
@@ -892,7 +934,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
+        // Cancel long press timer
+        longPressTimer?.invalidate()
+        longPressTimer = nil
+        touchedNode = nil
+
         draggedFlowerCopy?.removeFromParent()
         draggedFlowerCopy = nil
         selectedFlower = nil
@@ -1025,16 +1071,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     }
     
     private func handleBookButton() {
+        // Notify tutorial manager that book button was pressed
+        tutorialManager?.onBookButtonPressed()
+
         // Haptic feedback
         let generator = UIImpactFeedbackGenerator(style: .light)
         generator.impactOccurred()
-        
+
         // Animate button press
         bookButton.run(SKAction.sequence([
             SKAction.scale(to: 0.9, duration: 0.1),
             SKAction.scale(to: 1.0, duration: 0.1)
         ]))
-        
+
         // Call callback if set
         onBookButtonTapped?()
     }
