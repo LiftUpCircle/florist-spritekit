@@ -26,4 +26,17 @@ struct StoryIndexEntry: Codable {
     let title: String
     let unlocked: Bool
     let order: Int
+
+    // Optional fields for special story types
+    let isPrologue: Bool?
+    let skipBouquet: Bool?
+    let hintText: String?
+    let requirements: [StoryFlowerRequirement]?
+}
+
+/// Represents a flower requirement from story.json
+struct StoryFlowerRequirement: Codable {
+    let emotion: String
+    let minimumCount: Int
+    let idealCount: Int
 }

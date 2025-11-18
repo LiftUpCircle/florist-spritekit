@@ -216,8 +216,26 @@ struct ListeningPageView: View {
         }
         .onChange(of: controller.isStoryComplete) { _, isComplete in
             if isComplete {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    flowCoordinator.navigateToBouquet(storyId: storyId)
+                // Check if this story should skip bouquet (e.g., prologue)
+                do {
+                    let storyIndex = try StoryManager.shared.loadStoryIndex()
+                    if let storyEntry = storyIndex.stories[storyId],
+                       storyEntry.skipBouquet == true {
+                        // Skip bouquet, go directly to next story
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            flowCoordinator.onStoryCompleteNoBouquet()
+                        }
+                    } else {
+                        // Normal flow - go to bouquet
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            flowCoordinator.navigateToBouquet(storyId: storyId)
+                        }
+                    }
+                } catch {
+                    // Default to normal flow if we can't load story index
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        flowCoordinator.navigateToBouquet(storyId: storyId)
+                    }
                 }
             }
         }

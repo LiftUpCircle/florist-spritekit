@@ -41,7 +41,7 @@ class GameProgressManager: ObservableObject {
         } catch {
             // Fallback to default stories if loading fails
             print("⚠️ Failed to load story index, using defaults: \(error)")
-            allStories = ["urutan1", "urutan2", "urutan3"]
+            allStories = ["prologue", "urutan1", "urutan2", "urutan3"]
         }
     }
 

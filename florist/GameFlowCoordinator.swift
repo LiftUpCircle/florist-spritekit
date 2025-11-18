@@ -50,6 +50,22 @@ class GameFlowCoordinator: ObservableObject {
         navigationPath.append(GamePage.options)
     }
 
+    // Called when a story completes without needing a bouquet (e.g., prologue)
+    func onStoryCompleteNoBouquet() {
+        // Mark story as complete
+        progressManager.completeCurrentStory()
+
+        // Continue to next story
+        if progressManager.hasMoreStories {
+            progressManager.moveToNextStory()
+            navigateToListening(storyId: currentStoryId)
+        } else {
+            // All stories complete, return to main menu
+            print("🎉 All stories completed!")
+            returnToMainMenu()
+        }
+    }
+
     // Called when bouquet is successfully wrapped
     func onBouquetComplete() {
         // Mark story as complete

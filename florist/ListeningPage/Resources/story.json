@@ -1,5 +1,16 @@
 {
   "stories": {
+    "prologue": {
+      "id": "story_prologue",
+      "file": "story_prologue.json",
+      "characterId": "maria",
+      "characterName": "Maria",
+      "title": "Prologue",
+      "unlocked": true,
+      "order": 0,
+      "isPrologue": true,
+      "skipBouquet": true
+    },
     "urutan1": {
       "id": "story_robert",
       "file": "story_robert_1.json",
