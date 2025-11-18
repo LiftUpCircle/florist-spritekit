@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 struct BookContentView: View {
     let flower: Flower
@@ -13,8 +14,6 @@ struct BookContentView: View {
     let onNext: () -> Void
     let canGoPrevious: Bool
     let canGoNext: Bool
-    
-    @State private var dragOffset: CGFloat = 0
     
     var body: some View {
         GeometryReader { geometry in
@@ -73,7 +72,10 @@ struct BookContentView: View {
                 HStack {
                     // Previous Button
                     if canGoPrevious {
-                        Button(action: onPrevious) {
+                        Button(action: {
+                            onPrevious()
+                            playFlippingSound()
+                        }) {
                             Image(systemName: "chevron.left")
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.3))
@@ -90,7 +92,10 @@ struct BookContentView: View {
                     
                     // Next Button
                     if canGoNext {
-                        Button(action: onNext) {
+                        Button(action: {
+                            onNext()
+                            playFlippingSound()
+                        }) {
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 24, weight: .bold))
                                 .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.3))
@@ -106,7 +111,20 @@ struct BookContentView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
+            .onAppear {
+                // Debug: Check if file exists
+//                SoundManager.shared.debugCheckFile(named: "flippingbook")
+                
+                // Preload flipping sound
+                SoundManager.shared.preloadSound(named: "flippingbook")
+            }
         }
+    }
+    
+    // helper function to play flipping sound
+    private func playFlippingSound() {
+        print("🎵 Button pressed - attempting to play flipping sound")
+        SoundManager.shared.playPageFlip(volume: 1.0)
     }
     
     private func getFlowerImageName(for flowerName: String) -> String? {
