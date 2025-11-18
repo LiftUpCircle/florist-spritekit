@@ -636,8 +636,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                     potentialFlowerToDrag = flower
                     selectedFlower = flower
                     
-//                    animateCardShrink(flower: flower)
-                    
+                    animateCardPress(flower: flower)
                     return
                 }
             }
@@ -1045,6 +1044,22 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             SKAction.moveBy(x: 0, y: 10, duration: 0.1)
         ])
         flower.run(flowerPopUp)
+        
+        // Haptic feedback
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
+    }
+    
+    private func animateCardPress(flower: FlowerNode) {
+        guard let frame = flower.children.first(where:  { $0.name == "cardFrame" || $0 is SKShapeNode }) as? SKShapeNode
+        else {
+            return
+        }
+        
+        // Slightly shrink the card to indicate press
+        let shrink = SKAction.scale(to: 0.95, duration: 0.1)
+        let dim = SKAction.fadeAlpha(to: 0.8, duration: 0.1)
+        frame.run(SKAction.group([shrink, dim]))
         
         // Haptic feedback
         let generator = UIImpactFeedbackGenerator(style: .light)
