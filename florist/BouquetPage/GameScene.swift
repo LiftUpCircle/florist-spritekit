@@ -1291,7 +1291,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         let bouquetHeight = bouquetBackNode.size.height
         let bouquetWidth = bouquetBackNode.size.width
         let topClipArea = SKSpriteNode(color: .white, size: CGSize(
-            width: bouquetWidth * 1.2,  // Wider than bouquet for side petals
+            width: bouquetWidth * 0.85,  // Slightly wider than bouquet for top flowers
             height: bouquetHeight * 0.9  // Generous height for top flowers
         ))
         topClipArea.position = CGPoint(x: 0, y: bouquetHeight * 0.66)  // Position above bouquet center
