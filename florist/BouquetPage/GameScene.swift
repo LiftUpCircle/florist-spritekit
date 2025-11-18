@@ -1277,13 +1277,38 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         // Create a clipping mask for flowers to stay within bouquet bounds
         let cropNode = SKCropNode()
 
-        // Use the actual BouquetBack texture as the mask (same as placement area)
+        // Create composite mask (same as in Bouquet Page)
+        let compositeMaskNode = SKNode()
+
+        // Bottom part: Use actual bouquet texture shape
         let backTexture = SKTexture(imageNamed: "BouquetBack")
-        let maskNode = SKSpriteNode(texture: backTexture)
-        // Use the same size as bouquetBackNode (70% of bouquet rect)
-        maskNode.size = bouquetBackNode.size
-        maskNode.position = CGPoint.zero
-        cropNode.maskNode = maskNode
+        let bouquetMaskBottom = SKSpriteNode(texture: backTexture)
+        bouquetMaskBottom.size = bouquetBackNode.size
+        bouquetMaskBottom.position = CGPoint.zero
+        compositeMaskNode.addChild(bouquetMaskBottom)
+
+        // Top part: Allow flowers to extend upward freely
+        let bouquetHeight = bouquetBackNode.size.height
+        let bouquetWidth = bouquetBackNode.size.width
+        let topClipArea = SKSpriteNode(color: .white, size: CGSize(
+            width: bouquetWidth * 1.2,  // Wider than bouquet for side petals
+            height: bouquetHeight * 0.9  // Generous height for top flowers
+        ))
+        topClipArea.position = CGPoint(x: 0, y: bouquetHeight * 0.66)  // Position above bouquet center
+        compositeMaskNode.addChild(topClipArea)
+
+        // Right side extension to allow flowers on the right
+        let rightClipArea = SKSpriteNode(color: .white, size: CGSize(
+            width: bouquetWidth * 0.4,  // Width of the extension
+            height: bouquetHeight * 0.2  // Height coverage
+        ))
+        rightClipArea.position = CGPoint(
+            x: bouquetWidth * 0.45,  // Position on the right side
+            y: bouquetHeight * 0.285   // Slightly above center
+        )
+        compositeMaskNode.addChild(rightClipArea)
+
+        cropNode.maskNode = compositeMaskNode
         cropNode.zPosition = 1
 
         // Add all placed flowers to the crop node (they will be clipped)
