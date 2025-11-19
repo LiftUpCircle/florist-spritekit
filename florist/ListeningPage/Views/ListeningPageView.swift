@@ -73,35 +73,44 @@ struct ListeningPageView: View {
 
                 // Layer 2: Character Sprite (centered)
                 if let scene = controller.currentScene {
-                    ZStack {
-                        // Character Sprite
-                        if let sprite = scene.characterSprite {
-                            CharacterSpriteView(
-                                spriteName: getCharacterAssetName(from: sprite),
-                                position: .center
-                            )
-                            .frame(height: geometry.size.height * 1.8)
-                            .position(x: geometry.size.width / 2, y: geometry.size.height * 0.9)
-                            .clipped()
-                        }
+                    // Character Sprite
+                    if let sprite = scene.characterSprite {
+                        CharacterSpriteView(
+                            spriteName: getCharacterAssetName(from: sprite),
+                            position: .center
+                        )
+                        .frame(height: geometry.size.height * 1.8)
+                        .position(x: geometry.size.width / 2, y: geometry.size.height * 0.9)
+                        .clipped()
+                    }
+                }
 
-                        // Dialogue Box (bottom center, in front of character)
-                        VStack {
-                            Spacer()
+                // Layer 2.5: BackgroundTable (in front of character)
+                if controller.currentScene != nil {
+                    Image("BackgroundTable")
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .clipped()
+                        .accessibilityHidden(true)
+                }
 
-                            DialogueTextboxView(
-                                characterName: scene.characterName,
-                                dialogue: scene.dialogue,
-                                typingSpeed: controller.typingSpeed,
-                                shouldCompleteTyping: controller.shouldCompleteTyping,
-                                maxWidth: geometry.size.width * 0.7,
-                                onTypingComplete: { controller.onTypingComplete() },
-                                onTap: { controller.handleDialogueTap() }
-                            )
-                            .padding(.horizontal, 40)
-                            .padding(.bottom, 30)
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                // Layer 3: Dialogue Box (most front, above table)
+                if let scene = controller.currentScene {
+                    VStack {
+                        Spacer()
+
+                        DialogueTextboxView(
+                            characterName: scene.characterName,
+                            dialogue: scene.dialogue,
+                            typingSpeed: controller.typingSpeed,
+                            shouldCompleteTyping: controller.shouldCompleteTyping,
+                            maxWidth: geometry.size.width * 0.7,
+                            onTypingComplete: { controller.onTypingComplete() },
+                            onTap: { controller.handleDialogueTap() }
+                        )
+                        .padding(.horizontal, 40)
+                        .padding(.bottom, 30)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if controller.showError {
@@ -129,8 +138,8 @@ struct ListeningPageView: View {
                     )
                     .padding(.horizontal, 20)
                 }
-                
-                // Layer 3: Skip Button (top-right)
+
+                // Layer 4: Skip Button (top-right)
                 VStack {
                     HStack {
                         Spacer()
@@ -148,7 +157,7 @@ struct ListeningPageView: View {
                     Spacer()
                 }
 
-                // Layer 4: Control Container (bottom-right)
+                // Layer 5: Control Container (bottom-right)
                 VStack {
                     Spacer()
                     HStack {

@@ -105,6 +105,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     private var draggedFlowerCopy: FlowerNode?
     private var isValidPlacement: Bool = false
     private var placementIndicator: SKShapeNode! // Visual feedback for placement
+    private var dragStartLocation: CGPoint = .zero
+    private var isDraggingBouquetFlower: Bool = false
+    private var originalFlowerIndex: Int = -1
     
     // Scroll state
     private var isScrolling: Bool = false
@@ -122,6 +125,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     private var wrapButton: SKShapeNode!
     private var resetLabel: SKLabelNode!
     private var wrapLabel: SKLabelNode!
+    private var mirrorLeftButton: SKSpriteNode!
+    private var mirrorRightButton: SKSpriteNode!
+    private var currentlySelectedFlowerForMirror: FlowerNode?
     
     // Layout properties
     private var inventoryRect: CGRect!
@@ -551,11 +557,46 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         wrapLabel.verticalAlignmentMode = .center
         wrapLabel.zPosition = 1
         wrapButton.addChild(wrapLabel)
+
+        // Mirror buttons (hidden initially, shown when flower is selected)
+        let mirrorButtonSize: CGFloat = 40
+
+        // Create SF Symbol images for mirror buttons
+        let leftArrowConfig = UIImage.SymbolConfiguration(pointSize: 24, weight: .bold)
+        let rightArrowConfig = UIImage.SymbolConfiguration(pointSize: 24, weight: .bold)
+
+        if let leftArrowImage = UIImage(systemName: "arrowtriangle.backward.fill", withConfiguration: leftArrowConfig),
+           let rightArrowImage = UIImage(systemName: "arrowtriangle.right.fill", withConfiguration: rightArrowConfig) {
+
+            // Create textures from SF Symbol images
+            let leftTexture = SKTexture(image: leftArrowImage)
+            let rightTexture = SKTexture(image: rightArrowImage)
+
+            // Left mirror button
+            mirrorLeftButton = SKSpriteNode(texture: leftTexture)
+            mirrorLeftButton.size = CGSize(width: mirrorButtonSize, height: mirrorButtonSize)
+            mirrorLeftButton.color = .white
+            mirrorLeftButton.colorBlendFactor = 1.0
+            mirrorLeftButton.zPosition = 150
+            mirrorLeftButton.name = "mirrorLeftButton"
+            mirrorLeftButton.isHidden = true
+            addChild(mirrorLeftButton)
+
+            // Right mirror button
+            mirrorRightButton = SKSpriteNode(texture: rightTexture)
+            mirrorRightButton.size = CGSize(width: mirrorButtonSize, height: mirrorButtonSize)
+            mirrorRightButton.color = .white
+            mirrorRightButton.colorBlendFactor = 1.0
+            mirrorRightButton.zPosition = 150
+            mirrorRightButton.name = "mirrorRightButton"
+            mirrorRightButton.isHidden = true
+            addChild(mirrorRightButton)
+        }
     }
     
     private func updateButtonStates() {
         let hasFlowers = !placedFlowers.isEmpty
-        
+
         // Reset button
         if hasFlowers {
             resetButton.fillColor = UIColor(red: 0.9, green: 0.5, blue: 0.5, alpha: 1.0)
@@ -564,7 +605,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             resetButton.fillColor = UIColor.gray.withAlphaComponent(0.5)
             resetButton.alpha = 0.5
         }
-        
+
         // Wrap button
         if hasFlowers {
             wrapButton.fillColor = UIColor(red: 0.5, green: 0.8, blue: 0.6, alpha: 1.0)
@@ -573,6 +614,59 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             wrapButton.fillColor = UIColor.gray.withAlphaComponent(0.5)
             wrapButton.alpha = 0.5
         }
+    }
+
+    private func showMirrorButtons(for flower: FlowerNode) {
+        currentlySelectedFlowerForMirror = flower
+
+        // Convert flower position to scene coordinates
+        let flowerWorldPos = bouquetFlowersContainer.convert(flower.position, to: self)
+
+        // Position buttons on left and right of the flower
+        let buttonOffset: CGFloat = 60
+
+        mirrorLeftButton.position = CGPoint(
+            x: flowerWorldPos.x - buttonOffset,
+            y: flowerWorldPos.y + 40
+        )
+        mirrorLeftButton.isHidden = false
+
+        mirrorRightButton.position = CGPoint(
+            x: flowerWorldPos.x + buttonOffset,
+            y: flowerWorldPos.y + 40
+        )
+        mirrorRightButton.isHidden = false
+    }
+
+    private func hideMirrorButtons() {
+        mirrorLeftButton.isHidden = true
+        mirrorRightButton.isHidden = true
+        currentlySelectedFlowerForMirror = nil
+    }
+
+    private func mirrorFlower(_ flower: FlowerNode, direction: String) {
+        // Left button: mirror to face left (negative xScale)
+        // Right button: mirror to face right (positive xScale)
+        if direction == "left" {
+            // Only flip if currently facing right
+            if flower.xScale > 0 {
+                flower.xScale *= -1
+            }
+        } else if direction == "right" {
+            // Only flip if currently facing left
+            if flower.xScale < 0 {
+                flower.xScale *= -1
+            }
+        }
+
+        // Update button positions if flower is still selected
+        if currentlySelectedFlowerForMirror == flower {
+            showMirrorButtons(for: flower)
+        }
+
+        // Haptic feedback
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.impactOccurred()
     }
 
     // MARK: - Touch Handling
@@ -591,7 +685,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         
         // Check if touching a button
         for node in touchedNodes {
-            if node.name == "resetButton" {
+            if node.name == "mirrorLeftButton" {
+                if let flower = currentlySelectedFlowerForMirror {
+                    mirrorFlower(flower, direction: "left")
+                }
+                return
+            } else if node.name == "mirrorRightButton" {
+                if let flower = currentlySelectedFlowerForMirror {
+                    mirrorFlower(flower, direction: "right")
+                }
+                return
+            } else if node.name == "resetButton" {
                 handleResetButton()
                 return
             } else if node.name == "wrapButton" {
@@ -651,44 +755,67 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         let containerLocation = touch.location(in: bouquetFlowersContainer)
         for (index, flower) in placedFlowers.enumerated() {
             if flower.contains(containerLocation) {
+                // Store touch info but don't start dragging yet
                 selectedFlower = flower
                 isDraggingFromInventory = false
-                
-                // Remove from placed flowers
-                placedFlowers.remove(at: index)
-                
-                // Move to scene for dragging
-                let worldPos = flower.parent!.convert(flower.position, to: self)
-                flower.removeFromParent()
-                flower.position = worldPos
-                flower.zPosition = 200
-                flower.setScale(1.2)
-                addChild(flower)
-                draggedFlowerCopy = flower
-                
-                updateButtonStates()
-                
+                isDraggingBouquetFlower = false
+                dragStartLocation = location
+                originalFlowerIndex = index
+
                 // Haptic feedback
                 let generator = UIImpactFeedbackGenerator(style: .light)
                 generator.impactOccurred()
-                
+
                 return
             }
         }
+
+        // If touched elsewhere (not on buttons or flowers), hide mirror buttons
+        hideMirrorButtons()
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
-        
+
         // Check if settings overlay is handling the touch
         if let settingsController = settingsOverlayController {
             if settingsController.handleTouchMoved(touch) {
                 return
             }
         }
-        
+
         let location = touch.location(in: self)
-        
+
+        // Check if we need to start dragging a bouquet flower
+        if !isDraggingBouquetFlower && selectedFlower != nil && !isDraggingFromInventory {
+            let deltaX = abs(location.x - dragStartLocation.x)
+            let deltaY = abs(location.y - dragStartLocation.y)
+
+            // Check if movement exceeds threshold
+            if deltaX > scrollThreshold || deltaY > scrollThreshold {
+                // Start dragging the bouquet flower
+                if let flower = selectedFlower, originalFlowerIndex >= 0 {
+                    // Hide mirror buttons when starting to drag
+                    hideMirrorButtons()
+
+                    // Remove from placed flowers
+                    placedFlowers.remove(at: originalFlowerIndex)
+
+                    // Move to scene for dragging
+                    let worldPos = flower.parent!.convert(flower.position, to: self)
+                    flower.removeFromParent()
+                    flower.position = worldPos
+                    flower.zPosition = 200
+                    flower.setScale(1.2)
+                    addChild(flower)
+                    draggedFlowerCopy = flower
+                    isDraggingBouquetFlower = true
+
+                    updateButtonStates()
+                }
+            }
+        }
+
         // If we haven't decided the gesture type yet
         if !gestureDecided && potentialFlowerToDrag != nil {
             let deltaX = abs(location.x - touchStartLocation.x)
@@ -717,6 +844,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
 
                     // Create the flower copy for dragging
                     if let flower = potentialFlowerToDrag {
+
+                        // Hide mirror buttons when starting to drag from inventory
+                        hideMirrorButtons()
 
                         animateCardShrink(flower: flower)
 
@@ -847,7 +977,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             inventoryScrollNode.run(SKAction.fadeAlpha(to: 1.0, duration: 0.1))
             return
         }
-        
+
+        // Handle case where bouquet flower was tapped but not dragged
+        if selectedFlower != nil && !isDraggingBouquetFlower && draggedFlowerCopy == nil {
+            // Just show mirror buttons for the tapped flower
+            if let flower = selectedFlower {
+                showMirrorButtons(for: flower)
+            }
+            selectedFlower = nil
+            originalFlowerIndex = -1
+            return
+        }
+
         // Handle flower placement
         guard let draggedFlower = draggedFlowerCopy else { return }
         let location = touch.location(in: self)
@@ -878,6 +1019,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             
             bouquetFlowersContainer.addChild(draggedFlower)
             placedFlowers.append(draggedFlower)
+
+            // Show mirror buttons for the newly placed flower
+            showMirrorButtons(for: draggedFlower)
 
             // Mark that the user has successfully dragged a flower to the bouquet
             if isDraggingFromInventory {
@@ -929,7 +1073,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         draggedFlowerCopy = nil
         selectedFlower = nil
         isDraggingFromInventory = false
+        isDraggingBouquetFlower = false
         isValidPlacement = false
+        originalFlowerIndex = -1
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -942,9 +1088,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         draggedFlowerCopy = nil
         selectedFlower = nil
         isDraggingFromInventory = false
+        isDraggingBouquetFlower = false
         isValidPlacement = false
+        originalFlowerIndex = -1
         placementIndicator.isHidden = true
-        
+
         if isScrolling {
             inventoryScrollNode.run(SKAction.fadeAlpha(to: 1.0, duration: 0.1))
         }
@@ -956,17 +1104,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     // MARK: - Button Handlers
     private func handleResetButton() {
         guard !placedFlowers.isEmpty else { return }
-        
+
+        // Hide mirror buttons
+        hideMirrorButtons()
+
         // Haptic feedback
         let generator = UIImpactFeedbackGenerator(style: .medium)
         generator.impactOccurred()
-        
+
         // Animate button press
         resetButton.run(SKAction.sequence([
             SKAction.scale(to: 0.95, duration: 0.1),
             SKAction.scale(to: 1.0, duration: 0.1)
         ]))
-        
+
         // Remove all flowers
         for flower in placedFlowers {
             let fadeOut = SKAction.fadeOut(withDuration: 0.2)
@@ -977,14 +1128,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 remove
             ]))
         }
-        
+
         placedFlowers.removeAll()
         updateButtonStates()
     }
     
     private func handleWrapButton() {
         guard !placedFlowers.isEmpty else { return }
-        
+
+        // Hide mirror buttons
+        hideMirrorButtons()
+
         // Haptic feedback
         let generator = UIImpactFeedbackGenerator(style: .heavy)
         generator.impactOccurred()
