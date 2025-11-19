@@ -211,9 +211,9 @@ struct ListeningPageView: View {
             controller.setFlowCoordinator(flowCoordinator)
 
             // Map story ID to order key or load directly
-            // storyId can be: "urutan1", "urutan2", "urutan3" for new structure
+            // storyId can be: "robert_1_1", "abigail_1_1", etc. for new structure
             // or "story" for legacy/default loading
-            if storyId.starts(with: "urutan") {
+            if storyId.contains("_") {
                 controller.loadStoryByOrder(storyId)
             } else {
                 // Default behavior - loads the current story from the index
@@ -225,8 +225,27 @@ struct ListeningPageView: View {
         }
         .onChange(of: controller.isStoryComplete) { _, isComplete in
             if isComplete {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    flowCoordinator.navigateToBouquet(storyId: storyId)
+                // Check if this story should skip bouquet (e.g., prologue)
+                do {
+                    let storyIndex = try StoryManager.shared.loadStoryIndex()
+                    if let storyEntry = storyIndex.stories[storyId],
+                       storyEntry.skipBouquet == true {
+                        // Skip bouquet, go directly to next story
+                        // Pass the storyId so we know which story just completed
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            flowCoordinator.onStoryCompleteNoBouquet(for: storyId)
+                        }
+                    } else {
+                        // Normal flow - go to bouquet
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            flowCoordinator.navigateToBouquet(storyId: storyId)
+                        }
+                    }
+                } catch {
+                    // Default to normal flow if we can't load story index
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        flowCoordinator.navigateToBouquet(storyId: storyId)
+                    }
                 }
             }
         }

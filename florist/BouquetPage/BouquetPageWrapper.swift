@@ -26,7 +26,8 @@ struct BouquetPageWrapper: View {
             storyId: storyId, // Pass storyId for saving to memories
             onBouquetComplete: {
                 // Trigger completion (will show toast and auto-continue)
-                flowCoordinator.onBouquetComplete()
+                // Pass the storyId so we know which story just completed
+                flowCoordinator.onBouquetComplete(for: storyId)
             }
         )
         .navigationBarHidden(true)

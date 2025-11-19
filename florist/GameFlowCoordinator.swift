@@ -36,7 +36,27 @@ class GameFlowCoordinator: ObservableObject {
 
 
     func navigateToListening(storyId: String) {
-        navigationPath.append(GamePage.listening(storyId: storyId))
+        print("🔄 navigateToListening called for storyId: \(storyId)")
+
+        // Show loading screen with animation
+        withAnimation(.easeIn(duration: 0.3)) {
+            showLoadingScreen = true
+            print("✅ Loading screen set to true")
+        }
+
+        // Wait for loading screen to be fully visible, then navigate
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            print("⏱️ Navigating to listening page...")
+            self?.navigationPath.append(GamePage.listening(storyId: storyId))
+
+            // Hide loading screen after navigation and view loads
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    self?.showLoadingScreen = false
+                    print("❌ Loading screen set to false")
+                }
+            }
+        }
     }
 
     func navigateToBouquet(storyId: String) {
@@ -71,21 +91,116 @@ class GameFlowCoordinator: ObservableObject {
         navigationPath.append(GamePage.options)
     }
 
+    // Called when a story completes without needing a bouquet (e.g., prologue, second parts)
+    func onStoryCompleteNoBouquet(for storyId: String? = nil) {
+        let completedStory = storyId ?? currentStoryId
+
+        // Check if this is a second part story
+        do {
+            let storyIndex = try StoryManager.shared.loadStoryIndex()
+            if let story = storyIndex.stories[completedStory],
+               story.isSecondPart == true {
+                // This is a second part - now mark the main story as complete and continue
+                progressManager.completeCurrentStory()
+
+                // Continue to next story
+                if progressManager.hasMoreStories {
+                    progressManager.moveToNextStory()
+                    navigateToListening(storyId: currentStoryId)
+                } else {
+                    // All stories complete, return to main menu
+                    print("🎉 All stories completed!")
+                    returnToMainMenu()
+                }
+            } else {
+                // Normal story without bouquet (like prologue)
+                progressManager.completeCurrentStory()
+
+                // Continue to next story
+                if progressManager.hasMoreStories {
+                    progressManager.moveToNextStory()
+                    navigateToListening(storyId: currentStoryId)
+                } else {
+                    // All stories complete, return to main menu
+                    print("🎉 All stories completed!")
+                    returnToMainMenu()
+                }
+            }
+        } catch {
+            print("⚠️ Failed to check story type: \(error)")
+            // Default behavior
+            progressManager.completeCurrentStory()
+
+            if progressManager.hasMoreStories {
+                progressManager.moveToNextStory()
+                navigateToListening(storyId: currentStoryId)
+            } else {
+                print("🎉 All stories completed!")
+                returnToMainMenu()
+            }
+        }
+    }
+
     // Called when bouquet is successfully wrapped
-    func onBouquetComplete() {
-        // Mark story as complete
-        progressManager.completeCurrentStory()
+    // The storyId parameter is passed from the BouquetPageWrapper
+    func onBouquetComplete(for storyId: String? = nil) {
+        let currentStory = storyId ?? currentStoryId
 
-        // Get character name from story ID
-        let characterName = getCharacterName(from: currentStoryId)
+        // Check if current story has a second part by naming convention
+        do {
+            let storyIndex = try StoryManager.shared.loadStoryIndex()
 
-        // Show toast notification
-        toastMessage = "Bouquet for \(characterName) saved to memories!"
-        showBouquetSavedToast = true
+            // Infer second part ID from naming convention
+            // Pattern: character_arc_part (e.g., robert_1_1 → robert_1_2, robert_2_1 → robert_2_2)
+            var secondPartId = currentStory
+            if currentStory.hasSuffix("_1") {
+                // Replace last "_1" with "_2"
+                secondPartId = String(currentStory.dropLast(2)) + "_2"
+            }
 
-        // Automatically continue to next story after delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-            self?.continueToNextStory()
+            // Check if the second part exists in the story index
+            if secondPartId != currentStory && storyIndex.stories[secondPartId] != nil {
+                // Second part exists! DON'T mark story complete yet
+                // Get character name from story ID
+                let characterName = getCharacterName(from: currentStory)
+
+                // Show toast notification
+                toastMessage = "Bouquet for \(characterName) saved to memories!"
+                showBouquetSavedToast = true
+
+                // Navigate to second part of the story after delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                    print("📖 Navigating to second part: \(secondPartId)")
+                    self?.navigateToListening(storyId: secondPartId)
+                }
+            } else {
+                // No second part, proceed normally
+                progressManager.completeCurrentStory()
+
+                // Get character name from story ID
+                let characterName = getCharacterName(from: currentStory)
+
+                // Show toast notification
+                toastMessage = "Bouquet for \(characterName) saved to memories!"
+                showBouquetSavedToast = true
+
+                // Automatically continue to next story after delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                    self?.continueToNextStory()
+                }
+            }
+        } catch {
+            print("⚠️ Failed to check for second part: \(error)")
+            // Default behavior
+            progressManager.completeCurrentStory()
+
+            let characterName = getCharacterName(from: currentStory)
+            toastMessage = "Bouquet for \(characterName) saved to memories!"
+            showBouquetSavedToast = true
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                self?.continueToNextStory()
+            }
         }
     }
 
@@ -148,14 +263,14 @@ class GameFlowCoordinator: ObservableObject {
             print("⚠️ Failed to load story index for character name: \(error)")
         }
 
-        // Fallback for old story IDs or when loading fails
-        if storyId.contains("robert") || storyId == "urutan1" {
-            return "Robert"
-        } else if storyId.contains("abigail") || storyId == "urutan2" {
-            return "Abigail"
-        } else if storyId.contains("michael") || storyId == "urutan3" {
-            return "Michael"
-        }
+//        // Fallback for old story IDs or when loading fails
+//        if storyId.contains("robert") {
+//            return "Robert"
+//        } else if storyId.contains("abigail") {
+//            return "Abigail"
+//        } else if storyId.contains("michael") {
+//            return "Michael"
+//        }
 
         return "this character"
     }

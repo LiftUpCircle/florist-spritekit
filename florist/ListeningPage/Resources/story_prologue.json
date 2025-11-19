@@ -1,0 +1,56 @@
+{
+  "id": "story_prologue",
+  "title": "Prologue",
+  "characterId": "unknown",
+  "characterName": "Maria",
+  "scenes": [
+    {
+      "id": "prologue_001",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "Maria",
+      "characterName": "Maria",
+      "dialogue": "Another morning.\nAnother day to open the shop.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "prologue_002",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "Maria",
+      "characterName": "Maria",
+      "dialogue": "Even if today is the last day...",
+      "spritePosition": "center"
+    },
+    {
+      "id": "prologue_003",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "Maria",
+      "characterName": "Maria",
+      "dialogue": "After forty years.\nForty years of lilies, tulips, celebrations, apologies, and fragile goodbyes.\nForty years of watching this little street grow… and now watching it be taken away.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "prologue_004",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "Maria",
+      "characterName": "Maria",
+      "dialogue": "Tomorrow they'll take down the sign.\nThis place becomes a blueprint.\nA number on someone's development plan.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "prologue_005",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "Maria",
+      "characterName": "Maria",
+      "dialogue": "But today...\nI'll keep the door open.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "prologue_006",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "Maria",
+      "characterName": "Maria",
+      "dialogue": "There's always time for one more story.",
+      "spritePosition": "center"
+    }
+  ]
+}

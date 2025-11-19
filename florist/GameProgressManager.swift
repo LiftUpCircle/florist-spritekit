@@ -33,7 +33,9 @@ class GameProgressManager: ObservableObject {
             let storyIndex = try StoryManager.shared.loadStoryIndex()
 
             // Sort stories by their order field and extract the keys
+            // Exclude second parts from main progression (they're accessed via hasSecondPart flow)
             allStories = storyIndex.stories
+                .filter { $0.value.isSecondPart != true } // Exclude second parts
                 .sorted { $0.value.order < $1.value.order }
                 .map { $0.key }
 
@@ -41,7 +43,7 @@ class GameProgressManager: ObservableObject {
         } catch {
             // Fallback to default stories if loading fails
             print("⚠️ Failed to load story index, using defaults: \(error)")
-            allStories = ["urutan1", "urutan2", "urutan3"]
+//            allStories = ["prologue", "robert_1_1", "abigail_1_1", "michael_1_1"]
         }
     }
 
@@ -50,7 +52,7 @@ class GameProgressManager: ObservableObject {
     /// Get the current story ID
     var currentStoryId: String {
         guard currentStoryIndex < allStories.count else {
-            return allStories.first ?? "urutan1"
+            return allStories.first ?? "robert_1_1"
         }
         return allStories[currentStoryIndex]
     }

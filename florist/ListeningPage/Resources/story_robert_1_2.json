@@ -1,0 +1,64 @@
+{
+  "id": "story_robert_1_2",
+  "title": "Robert's Bouquet",
+  "characterId": "robert",
+  "characterName": "Robert Adikusuma",
+  "scenes": [
+    {
+      "id": "robert_001_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Robert",
+      "dialogue": "Yes... that's it. Feels just like before.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "robert_002_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Maria",
+      "dialogue": "Some things don’t need to change.",
+      "spritePosition": "right"
+    },
+    {
+      "id": "robert_003_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Maria",
+      "dialogue": "Well, no one is truly gone as long as they are remembered.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "robert_004_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Robert",
+      "dialogue": "You’re still saying that, huh?",
+      "spritePosition": "right"
+    },
+    {
+      "id": "robert_005_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Robert",
+      "dialogue": "Guess that’s why people keep coming back here.",
+      "spritePosition": "right"
+    },
+    {
+      "id": "robert_006_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Robert",
+      "dialogue": "Then I’ll come by again tomorrow.",
+      "spritePosition": "right"
+    },
+    {
+      "id": "robert_007_2",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Robert",
+      "dialogue": "Even if the shop isn’t here anymore.",
+      "spritePosition": "right"
+    }
+  ]
+}
