@@ -112,11 +112,8 @@ struct BookContentView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             }
             .onAppear {
-                // Debug: Check if file exists
-//                SoundManager.shared.debugCheckFile(named: "flippingbook")
-                
                 // Preload flipping sound
-                SoundManager.shared.preloadSound(named: "flippingbook")
+                SettingsManager.shared.preloadSound(named: "flippingbook")
             }
         }
     }
@@ -124,7 +121,7 @@ struct BookContentView: View {
     // helper function to play flipping sound
     private func playFlippingSound() {
         print("🎵 Button pressed - attempting to play flipping sound")
-        SoundManager.shared.playPageFlip(volume: 1.0)
+        SettingsManager.shared.playPageFlip()
     }
     
     private func getFlowerImageName(for flowerName: String) -> String? {
