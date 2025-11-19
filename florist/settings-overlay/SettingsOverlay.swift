@@ -25,12 +25,10 @@ class SettingsOverlay: SKNode {
     private var vibrationToggle: ModernToggle!
     
     // Action buttons
-    private var rateGameButton: SKNode!
-    private var subscriptionsButton: SKNode!
-    private var contactUsButton: SKNode!
-    private var privacyButton: SKNode!
+    private var homeButton: SKNode!
     
     var onClose: (() -> Void)?
+    var onHomeButtonTap: (() -> Void)?
     
     override init() {
         super.init()
@@ -230,55 +228,23 @@ class SettingsOverlay: SKNode {
         let buttonHeight = max(40, min(overlayHeight * 0.08, 48))
         let buttonFontSize = max(16, min(overlayWidth * 0.024, 20))
         let buttonCornerRadius: CGFloat = 8
-        let buttonGap: CGFloat = 8
-        
         
         let spacingAfterSeparator = overlayHeight * 0.08
         let separator3Y = overlayHeight * 0.20 - overlayHeight * 0.12 * 2.5
         let topButtonY = separator3Y - spacingAfterSeparator
+        // Use 100% of available width (with some padding)
         let totalAvailableWidth = overlayWidth * 0.80
-        let totalGaps = buttonGap * 2
-        let buttonWidth = (totalAvailableWidth - totalGaps) / 3
+        let buttonWidth = totalAvailableWidth
         
-        
-        let leftButtonX = -overlayWidth * 0.40 + buttonWidth / 2
-        let centerButtonX = leftButtonX + buttonWidth + buttonGap
-        let rightButtonX = centerButtonX + buttonWidth + buttonGap
-        
-     
-        rateGameButton = createActionButton(text: "Rate Game", width: buttonWidth, height: buttonHeight,
+        // Center the button horizontally
+        homeButton = createActionButton(text: "Back to home", width: buttonWidth, height: buttonHeight,
                                            cornerRadius: buttonCornerRadius, fontSize: buttonFontSize)
-        rateGameButton.position = CGPoint(x: leftButtonX, y: topButtonY)
-        rateGameButton.name = "rateGameButton"
-        rateGameButton.zPosition = 1002
-        addChild(rateGameButton)
+        homeButton.position = CGPoint(x: 0, y: topButtonY)
+        homeButton.name = "homeButton"
+        homeButton.zPosition = 1002
+        addChild(homeButton)
         
-        // Subscriptions button (center)
-        subscriptionsButton = createActionButton(text: "Subscriptions", width: buttonWidth, height: buttonHeight,
-                                                 cornerRadius: buttonCornerRadius, fontSize: buttonFontSize)
-        subscriptionsButton.position = CGPoint(x: centerButtonX, y: topButtonY)
-        subscriptionsButton.name = "subscriptionsButton"
-        subscriptionsButton.zPosition = 1002
-        addChild(subscriptionsButton)
-        
-        // Contact Us button
-        contactUsButton = createActionButton(text: "Contact Us", width: buttonWidth, height: buttonHeight,
-                                            cornerRadius: buttonCornerRadius, fontSize: buttonFontSize)
-        contactUsButton.position = CGPoint(x: rightButtonX, y: topButtonY)
-        contactUsButton.name = "contactUsButton"
-        contactUsButton.zPosition = 1002
-        addChild(contactUsButton)
-        
-        let spacingBetweenButtonRows = overlayHeight * 0.06
-        let bottomButtonY = topButtonY - buttonHeight / 2 - spacingBetweenButtonRows - buttonHeight / 2
-        let privacyButtonWidth = overlayWidth * 0.75
-        
-        privacyButton = createActionButton(text: "Privacy policy & Term of use", width: privacyButtonWidth, height: buttonHeight,
-                                          cornerRadius: buttonCornerRadius, fontSize: buttonFontSize)
-        privacyButton.position = CGPoint(x: 0, y: bottomButtonY)
-        privacyButton.name = "privacyButton"
-        privacyButton.zPosition = 1002
-        addChild(privacyButton)
+
     }
     
     private func createActionButton(text: String, width: CGFloat, height: CGFloat, cornerRadius: CGFloat, fontSize: CGFloat) -> SKNode {
@@ -332,18 +298,10 @@ class SettingsOverlay: SKNode {
             case "closeButton":
                 controller.handleCloseTap()
                 return true
-            case "rateGameButton":
-                controller.handleRateGameTap()
+            case "homeButton":
+                controller.handleHomeButtonTap()
                 return true
-            case "subscriptionsButton":
-                controller.handleSubscriptionsTap()
-                return true
-            case "contactUsButton":
-                controller.handleContactUsTap()
-                return true
-            case "privacyButton":
-                controller.handlePrivacyTap()
-                return true
+            
             default:
                 break
             }
@@ -354,20 +312,9 @@ class SettingsOverlay: SKNode {
         while node != nil && node != self {
             if let nodeName = node?.name {
                 switch nodeName {
-                case "closeButton":
-                    controller.handleCloseTap()
-                    return true
-                case "rateGameButton":
-                    controller.handleRateGameTap()
-                    return true
-                case "subscriptionsButton":
-                    controller.handleSubscriptionsTap()
-                    return true
-                case "contactUsButton":
-                    controller.handleContactUsTap()
-                    return true
-                case "privacyButton":
-                    controller.handlePrivacyTap()
+                
+                case "homeButton":
+                    controller.handleHomeButtonTap()
                     return true
                 default:
                     break
@@ -413,6 +360,11 @@ class SettingsOverlay: SKNode {
         ])) {
             self.onClose?()
         }
+    }
+    
+    func closeImmediately() {
+        removeFromParent()
+        onClose?()
     }
     
     func presentInScene(_ scene: SKScene) {
@@ -739,4 +691,3 @@ class ModernToggle: SKNode {
         knobNode.run(moveAction)
     }
 }
-

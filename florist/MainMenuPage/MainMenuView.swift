@@ -131,9 +131,12 @@ struct MainMenuView: View {
                 
                 // Settings overlay
                 if showSettings {
-                    SettingsOverlayView(isPresented: $showSettings)
-                        .transition(.opacity)
-                        .zIndex(100)
+                    SettingsOverlayView(isPresented: $showSettings) {
+                        // Navigate to main menu (we're already on main menu, just ensure we're at root)
+                        flowCoordinator.returnToMainMenu()
+                    }
+                    .transition(.opacity)
+                    .zIndex(100)
                 }
 
                 // Memories book overlay
@@ -171,6 +174,14 @@ struct MainMenuView: View {
             .onAppear {
                 // Start main menu BGM
                 SettingsManager.shared.playMusic(named: "mainMenuBGM", loops: -1)
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .settingsOverlayDidTapHomeButton)) { _ in
+                // Handle notification for navigation to main menu
+                flowCoordinator.returnToMainMenu()
+                // Close settings if open
+                withAnimation {
+                    showSettings = false
+                }
             }
             .statusBar(hidden: true)
             .environmentObject(flowCoordinator)

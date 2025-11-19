@@ -7,12 +7,15 @@
 
 import SpriteKit
 
+// Notification name for home button tap
+extension Notification.Name {
+    static let settingsOverlayDidTapHomeButton = Notification.Name("settingsOverlayDidTapHomeButton")
+}
+
 protocol SettingsOverlayControllerDelegate: AnyObject {
     func settingsOverlayDidClose()
-    func settingsOverlayDidTapRateGame()
-    func settingsOverlayDidTapSubscriptions()
-    func settingsOverlayDidTapContactUs()
-    func settingsOverlayDidTapPrivacy()
+    func settingsOverlayDidTapHomeButton()
+    
 }
 
 class SettingsOverlayController {
@@ -22,6 +25,7 @@ class SettingsOverlayController {
     private var overlay: SettingsOverlay
     private let settingsManager = SettingsManager.shared
     weak var delegate: SettingsOverlayControllerDelegate?
+    var onHomeButtonTap: (() -> Void)?
     
     // MARK: - Initialization
     
@@ -36,6 +40,9 @@ class SettingsOverlayController {
     private func setupOverlayDelegates() {
         overlay.onClose = { [weak self] in
             self?.delegate?.settingsOverlayDidClose()
+        }
+        overlay.onHomeButtonTap = { [weak self] in
+            self?.delegate?.settingsOverlayDidTapHomeButton()
         }
     }
     
@@ -68,24 +75,17 @@ class SettingsOverlayController {
     
     // MARK: - Action Button Handlers
     
-    func handleRateGameTap() {
+    func handleHomeButtonTap() {
         settingsManager.triggerVibration(style: .light)
-        delegate?.settingsOverlayDidTapRateGame()
-    }
-    
-    func handleSubscriptionsTap() {
-        settingsManager.triggerVibration(style: .light)
-        delegate?.settingsOverlayDidTapSubscriptions()
-    }
-    
-    func handleContactUsTap() {
-        settingsManager.triggerVibration(style: .light)
-        delegate?.settingsOverlayDidTapContactUs()
-    }
-    
-    func handlePrivacyTap() {
-        settingsManager.triggerVibration(style: .light)
-        delegate?.settingsOverlayDidTapPrivacy()
+        // Remove overlay immediately without animation to allow navigation
+        overlay.closeImmediately()
+        // Post notification first so observers can handle it
+        // Touch events in SpriteKit are already on main thread
+        NotificationCenter.default.post(name: .settingsOverlayDidTapHomeButton, object: nil, userInfo: ["action": "navigateToMainMenu"])
+        // Call closure if provided (highest priority for direct navigation)
+        onHomeButtonTap?()
+        // Notify delegate (will post notification again if using default implementation)
+        delegate?.settingsOverlayDidTapHomeButton()
     }
     
     func handleCloseTap() {
@@ -128,3 +128,11 @@ class SettingsOverlayController {
     }
 }
 
+// MARK: - Default Implementation
+extension SettingsOverlayControllerDelegate {
+    func settingsOverlayDidTapHomeButton() {
+        // Default implementation - posts notification for views to observe
+        // This ensures the notification is posted even if the delegate doesn't implement this method
+        NotificationCenter.default.post(name: .settingsOverlayDidTapHomeButton, object: nil)
+    }
+}

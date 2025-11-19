@@ -12,6 +12,7 @@ import SpriteKit
 class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
     private var settingsOverlayController: SettingsOverlayController?
     var onDismiss: (() -> Void)?
+    var onHomeButtonTap: (() -> Void)?
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -26,6 +27,9 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
         // Show settings overlay immediately
         settingsOverlayController = SettingsOverlayController(scene: self)
         settingsOverlayController?.delegate = self
+        settingsOverlayController?.onHomeButtonTap = { [weak self] in
+            self?.onHomeButtonTap?()
+        }
     }
 
     // MARK: - Touch Handling
@@ -56,6 +60,11 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
     // MARK: - SettingsOverlayControllerDelegate
     func settingsOverlayDidClose() {
         onDismiss?()
+    }
+    
+    func settingsOverlayDidTapHomeButton() {
+        // Call the home button tap closure
+        onHomeButtonTap?()
     }
 
     func settingsOverlayDidTapRateGame() {
@@ -88,6 +97,7 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
 // MARK: - SwiftUI View Wrapper
 struct SettingsOverlayView: View {
     @Binding var isPresented: Bool
+    var onHomeButtonTap: (() -> Void)?
 
     var body: some View {
         GeometryReader { geometry in
@@ -109,6 +119,14 @@ struct SettingsOverlayView: View {
             withAnimation {
                 isPresented = false
             }
+        }
+        scene.onHomeButtonTap = {
+            // Close settings first
+            withAnimation {
+                isPresented = false
+            }
+            // Then call the navigation closure
+            onHomeButtonTap?()
         }
         return scene
     }

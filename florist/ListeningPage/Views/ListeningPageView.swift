@@ -186,10 +186,19 @@ struct ListeningPageView: View {
         }
         .overlay {
             if controller.showSettings {
-                SettingsOverlayView(isPresented: $controller.showSettings)
-                    .transition(.opacity)
-                    .zIndex(100)
+                SettingsOverlayView(isPresented: $controller.showSettings) {
+                    // Navigate to main menu
+                    flowCoordinator.returnToMainMenu()
+                }
+                .transition(.opacity)
+                .zIndex(100)
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .settingsOverlayDidTapHomeButton)) { _ in
+            // Handle notification for navigation to main menu
+            flowCoordinator.returnToMainMenu()
+            // Close settings if open
+            controller.showSettings = false
         }
         .alert("Error", isPresented: $controller.showError) {
             Button("OK", role: .cancel) { }
