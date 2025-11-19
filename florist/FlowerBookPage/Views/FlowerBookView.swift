@@ -42,8 +42,8 @@ struct FlowerBookView: View {
                             Image("FlowerBook")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(width: min(geometry.size.width * 0.65, 650),
-                                       height: min(geometry.size.height * 0.85, 850))
+                                .frame(width: min(geometry.size.width * 1.1 , 650),
+                                       height: min(geometry.size.height * 0.95, 850))
                             
                             
                             BookContentView(

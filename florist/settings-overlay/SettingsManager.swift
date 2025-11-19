@@ -11,19 +11,25 @@ import AVFoundation
 
 class SettingsManager {
     static let shared = SettingsManager()
-    
+
     private let sfxVolumeKey = "sfxVolume"
     private let musicVolumeKey = "musicVolume"
     private let vibrationEnabledKey = "vibrationEnabled"
     private let subtitlesEnabledKey = "subtitlesEnabled"
     private let cutscenesEnabledKey = "cutscenesEnabled"
-    
-    
-    private var audioPlayer: AVAudioPlayer?
+
+
+    private var audioPlayers: [String: AVAudioPlayer] = [:]
     private var musicPlayer: AVAudioPlayer?
-    
+
     private init() {
-        // initalization kalo ada liat tar
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, options: .mixWithOthers)
+            try AVAudioSession.sharedInstance().setActive(true)
+            print("✅ Audio session configured successfully")
+        } catch {
+            print("❌ Failed to set up audio session: \(error)")
+        }
     }
     
     // MARK: - SFX (Sound Effects) Settings
@@ -31,7 +37,6 @@ class SettingsManager {
     var sfxVolume: Float {
         get {
             if UserDefaults.standard.object(forKey: sfxVolumeKey) == nil {
-                // Default  1.0
                 return 1.0
             }
             return UserDefaults.standard.float(forKey: sfxVolumeKey)
@@ -49,23 +54,58 @@ class SettingsManager {
         sfxVolume = sfxVolume > 0.0 ? 0.0 : 1.0
     }
     
-    func playSound(named fileName: String, ofType type: String = "mp3") {
-        guard sfxVolume > 0.0 else { return }
-        
-        guard let path = Bundle.main.path(forResource: fileName, ofType: type) else {
-            print("Sound file not found: \(fileName).\(type)")
+    // MARK: - Preload & Play Sound Effects
+
+    func preloadSound(named soundName: String, withExtension ext: String = "mp3") {
+        var url = Bundle.main.url(forResource: "AudioResources/SFX/\(soundName)", withExtension: ext)
+
+        if url == nil {
+            url = Bundle.main.url(forResource: soundName, withExtension: ext)
+        }
+
+        guard let soundURL = url else {
+            print("❌ Sound file not found: \(soundName).\(ext)")
+            print("   Tried: AudioResources/SFX/\(soundName).\(ext)")
+            print("   And: \(soundName).\(ext)")
             return
         }
-        
-        let url = URL(fileURLWithPath: path)
-        
+
         do {
-            audioPlayer = try AVAudioPlayer(contentsOf: url)
-            audioPlayer?.volume = sfxVolume
-            audioPlayer?.play()
+            let player = try AVAudioPlayer(contentsOf: soundURL)
+            player.prepareToPlay()
+            audioPlayers[soundName] = player
+            print("✅ Preloaded sound: \(soundName).\(ext)")
         } catch {
-            print("Error playing sound: \(error.localizedDescription)")
+            print("❌ Failed to load sound \(soundName).\(ext): \(error)")
         }
+    }
+
+    func playSound(named soundName: String, volume: Float? = nil) {
+        guard sfxVolume > 0.0 else { return }
+
+        if let player = audioPlayers[soundName] {
+            player.volume = volume ?? sfxVolume
+            player.currentTime = 0.0
+            player.play()
+            print("🔊 Playing sound: \(soundName) at volume \(player.volume)")
+        } else {
+            print("⚠️ Sound \(soundName) not preloaded, attempting to load and play.")
+            preloadSound(named: soundName)
+            audioPlayers[soundName]?.volume = volume ?? sfxVolume
+            audioPlayers[soundName]?.play()
+        }
+    }
+
+    func stopSound(named soundName: String) {
+        audioPlayers[soundName]?.stop()
+    }
+
+    func stopAllSounds() {
+        audioPlayers.values.forEach { $0.stop() }
+    }
+
+    func playPageFlip(volume: Float? = nil) {
+        playSound(named: "flippingbook", volume: volume)
     }
     
     // MARK: - Music Settings
@@ -90,7 +130,6 @@ class SettingsManager {
     }
     
     func playMusic(named fileName: String, ofType type: String = "mp3", loops: Int = -1) {
-        // Configure audio session for playback
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
             try AVAudioSession.sharedInstance().setActive(true)
@@ -98,7 +137,6 @@ class SettingsManager {
             print("Failed to setup audio session: \(error.localizedDescription)")
         }
 
-        // Stop any currently playing music
         stopMusic()
 
         guard let path = Bundle.main.path(forResource: fileName, ofType: type) else {
@@ -155,7 +193,6 @@ class SettingsManager {
     var isSubtitlesEnabled: Bool {
         get {
             if UserDefaults.standard.object(forKey: subtitlesEnabledKey) == nil {
-                // Default to true if not set
                 return true
             }
             return UserDefaults.standard.bool(forKey: subtitlesEnabledKey)
@@ -174,7 +211,6 @@ class SettingsManager {
     var isCutscenesEnabled: Bool {
         get {
             if UserDefaults.standard.object(forKey: cutscenesEnabledKey) == nil {
-                // Default to true
                 return true
             }
             return UserDefaults.standard.bool(forKey: cutscenesEnabledKey)
