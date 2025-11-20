@@ -489,24 +489,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         let buttonY: CGFloat = 50
         let buttonX = size.width - buttonSize - 30
         
-        // Book Button (bottom)
-        if let bookTexture = SKTexture(imageNamed: "BookButton") as SKTexture? {
-            bookButton = SKSpriteNode(texture: bookTexture)
-            bookButton.size = CGSize(width: buttonSize, height: buttonSize)
-            bookButton.position = CGPoint(x: buttonX, y: buttonY)
-            bookButton.zPosition = 100
-            bookButton.name = "bookButton"
-            addChild(bookButton)
-        }
-        
-        // Setting Button (above book button)
+        // Setting Button (bottom)
         if let settingTexture = SKTexture(imageNamed: "SettingButton") as SKTexture? {
             settingButton = SKSpriteNode(texture: settingTexture)
             settingButton.size = CGSize(width: buttonSize, height: buttonSize)
-            settingButton.position = CGPoint(x: buttonX, y: buttonY + buttonSize + buttonSpacing)
+            settingButton.position = CGPoint(x: buttonX, y: buttonY)
             settingButton.zPosition = 100
             settingButton.name = "settingButton"
             addChild(settingButton)
+        }
+        
+        // Book Button (above setting button)
+        if let bookTexture = SKTexture(imageNamed: "BookButton") as SKTexture? {
+            bookButton = SKSpriteNode(texture: bookTexture)
+            bookButton.size = CGSize(width: buttonSize, height: buttonSize)
+            bookButton.position = CGPoint(x: buttonX, y: buttonY + buttonSize + buttonSpacing)
+            bookButton.zPosition = 100
+            bookButton.name = "bookButton"
+            addChild(bookButton)
         }
         
         // Reset and Wrap buttons (below bouquet)
