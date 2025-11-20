@@ -68,24 +68,29 @@ struct HistoryDialogueBox: View {
         return characterName
     }
 
+    // Check if this is Maria's dialogue
+    private var isMaria: Bool {
+        characterName.lowercased().contains("maria")
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(displayName)
                 .font(.bodyGaegu)
                 .fontWeight(.semibold)
-                .foregroundColor(.primary)
+                .foregroundColor(isMaria ? .white : .primary)
 
             Text(dialogue)
                 .font(.bodyGaegu)
-                .foregroundColor(.primary)
+                .foregroundColor(isMaria ? .white : .primary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color("DialogueTextbox"))
-                .stroke(Color("DialogueTextboxBorder"), lineWidth: 5)
+                .fill(isMaria ? Color("DialogueTextboxBorder") : Color("DialogueTextbox"))
+                .stroke(isMaria ? Color("DialogueTextbox") : Color("DialogueTextboxBorder"), lineWidth: 5)
         )
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(characterName) said: \(dialogue)")

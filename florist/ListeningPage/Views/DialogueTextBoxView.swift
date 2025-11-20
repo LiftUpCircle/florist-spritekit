@@ -48,14 +48,19 @@ struct DialogueTextboxView: View {
         return characterName
     }
 
+    // Check if this is Maria's dialogue
+    private var isMaria: Bool {
+        characterName.lowercased().contains("maria")
+    }
+
     var body: some View {
         ZStack(alignment: .bottomTrailing) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(displayName)
                     .font(.bodyGaegu)
                     .fontWeight(.semibold)
-                    .foregroundColor(.primary)
-                
+                    .foregroundColor(isMaria ? .white : .primary)
+
                 ZStack(alignment: .topLeading) {
                     // Hidden text to set the size based on processed dialogue with line breaks
                     Text(processedDialogue)
@@ -63,11 +68,11 @@ struct DialogueTextboxView: View {
                         .foregroundColor(.clear)
                         .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
-                    
+
                     // Visible typing text
                     Text(typewriter.displayedText)
                         .font(.bodyGaegu)
-                        .foregroundColor(.primary)
+                        .foregroundColor(isMaria ? .white : .primary)
                         .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -77,16 +82,16 @@ struct DialogueTextboxView: View {
             .padding(.trailing, 40)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color("DialogueTextbox"))
-                    .stroke(Color("DialogueTextboxBorder"), lineWidth: 5)
+                    .fill(isMaria ? Color("DialogueTextboxBorder") : Color("DialogueTextbox"))
+                    .stroke(isMaria ? Color("DialogueTextbox") : Color("DialogueTextboxBorder"), lineWidth: 5)
             )
-            
+
 
             // Blinking triangle indicator (only show if showTriangleIndicator is true)
             if showTriangleIndicator && typewriter.isTypingComplete {
                 Image(systemName: "play.fill")
                     .font(.bodyGaegu)
-                    .foregroundColor(.primary)
+                    .foregroundColor(isMaria ? .white : .primary)
 //                    .shadow(color: .primary.opacity(0.4), radius: 2)
                     .opacity(showTriangle ? 1.0 : 0.5)
                     .padding(.trailing, 12)
