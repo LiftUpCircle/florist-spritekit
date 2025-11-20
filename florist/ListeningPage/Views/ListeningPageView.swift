@@ -148,6 +148,7 @@ struct ListeningPageView: View {
                         }) {
                             Image("SkipButton")
                                 .resizable()
+                                .opacity(0.7)
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 90, height: 50)
                         }

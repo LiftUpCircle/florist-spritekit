@@ -121,10 +121,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     // Buttons
     private var bookButton: SKSpriteNode!
     private var settingButton: SKSpriteNode!
-    private var resetButton: SKShapeNode!
-    private var wrapButton: SKShapeNode!
-    private var resetLabel: SKLabelNode!
-    private var wrapLabel: SKLabelNode!
+    private var resetButton: SKSpriteNode!
+    private var wrapButton: SKSpriteNode!
     private var mirrorLeftButton: SKSpriteNode!
     private var mirrorRightButton: SKSpriteNode!
     private var currentlySelectedFlowerForMirror: FlowerNode?
@@ -193,6 +191,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             // Fallback background color
             backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.97, alpha: 1.0)
         }
+
+        // Add black shadow overlay covering entire screen with 50% opacity
+        let shadowOverlay = SKSpriteNode(color: .black, size: size)
+        shadowOverlay.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        shadowOverlay.alpha = 0.25
+        shadowOverlay.zPosition = -9
+        addChild(shadowOverlay)
     }
     
     private func setupLayout() {
@@ -486,79 +491,65 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     private func setupButtons() {
         let buttonSize: CGFloat = 60
         let buttonSpacing: CGFloat = 20
-        let buttonY: CGFloat = 50
-        let buttonX = size.width - buttonSize - 30
-        
-        // Setting Button (bottom)
+        let rightPadding: CGFloat = 30
+        let topPadding: CGFloat = 30
+
+        // Top right buttons
+        let topButtonX = size.width - buttonSize / 2 - rightPadding
+        let topButtonY = size.height - buttonSize / 2 - topPadding
+
+        // Setting Button (top right)
         if let settingTexture = SKTexture(imageNamed: "SettingButton") as SKTexture? {
             settingButton = SKSpriteNode(texture: settingTexture)
             settingButton.size = CGSize(width: buttonSize, height: buttonSize)
-            settingButton.position = CGPoint(x: buttonX, y: buttonY)
+            settingButton.position = CGPoint(x: topButtonX, y: topButtonY)
             settingButton.zPosition = 100
             settingButton.name = "settingButton"
             addChild(settingButton)
         }
-        
-        // Book Button (above setting button)
+
+        // Book Button (below settings)
         if let bookTexture = SKTexture(imageNamed: "BookButton") as SKTexture? {
             bookButton = SKSpriteNode(texture: bookTexture)
             bookButton.size = CGSize(width: buttonSize, height: buttonSize)
-            bookButton.position = CGPoint(x: buttonX, y: buttonY + buttonSize + buttonSpacing)
+            bookButton.position = CGPoint(x: topButtonX, y: topButtonY - buttonSize - buttonSpacing)
             bookButton.zPosition = 100
             bookButton.name = "bookButton"
             addChild(bookButton)
         }
-        
-        // Reset and Wrap buttons (below bouquet)
-        let actionButtonWidth: CGFloat = 120
-        let actionButtonHeight: CGFloat = 45
-        // Ensure buttons are visible by using max to keep them above bottom of screen
-        let actionButtonY = max(60, bouquetRect.minY - 60)
-        let actionButtonSpacing: CGFloat = 20
-        
-        // Reset Button
-        resetButton = SKShapeNode(rectOf: CGSize(width: actionButtonWidth, height: actionButtonHeight), cornerRadius: 15)
-        resetButton.fillColor = UIColor(red: 0.9, green: 0.5, blue: 0.5, alpha: 0.8)
-        resetButton.strokeColor = UIColor(red: 0.7, green: 0.3, blue: 0.3, alpha: 1.0)
-        resetButton.lineWidth = 3
-        resetButton.position = CGPoint(
-            x: bouquetRect.midX - actionButtonWidth / 2 - actionButtonSpacing / 2,
-            y: actionButtonY
-        )
-        resetButton.zPosition = 100
-        resetButton.name = "resetButton"
-        resetButton.alpha = 0.5 // Start disabled
-        addChild(resetButton)
-        
-        resetLabel = SKLabelNode(text: "Reset")
-        resetLabel.fontName = GaeguTypography.boldFontName
-        resetLabel.fontSize = FontSize.headline
-        resetLabel.fontColor = .white
-        resetLabel.verticalAlignmentMode = .center
-        resetLabel.zPosition = 1
-        resetButton.addChild(resetLabel)
-        
-        // Wrap Button
-        wrapButton = SKShapeNode(rectOf: CGSize(width: actionButtonWidth, height: actionButtonHeight), cornerRadius: 15)
-        wrapButton.fillColor = UIColor(red: 0.5, green: 0.8, blue: 0.6, alpha: 0.9)
-        wrapButton.strokeColor = UIColor(red: 0.3, green: 0.6, blue: 0.4, alpha: 1.0)
-        wrapButton.lineWidth = 3
-        wrapButton.position = CGPoint(
-            x: bouquetRect.midX + actionButtonWidth / 2 + actionButtonSpacing / 2,
-            y: actionButtonY
-        )
-        wrapButton.zPosition = 100
-        wrapButton.name = "wrapButton"
-        wrapButton.alpha = 0.5 // Start disabled
-        addChild(wrapButton)
-        
-        wrapLabel = SKLabelNode(text: "Wrap")
-        wrapLabel.fontName = GaeguTypography.boldFontName
-        wrapLabel.fontSize = FontSize.headline
-        wrapLabel.fontColor = .white
-        wrapLabel.verticalAlignmentMode = .center
-        wrapLabel.zPosition = 1
-        wrapButton.addChild(wrapLabel)
+
+        // Bottom right buttons
+        let actionButtonWidth: CGFloat = 51
+        let actionButtonHeight: CGFloat = 44
+        let actionButtonSpacing: CGFloat = 10
+        let bottomPadding: CGFloat = 30
+        let bottomButtonY = actionButtonHeight / 2 + bottomPadding
+        let bottomButtonX = size.width - actionButtonWidth / 2 - rightPadding
+
+        // Wrap Button (bottom right) - using DoneButton asset
+        if let doneTexture = SKTexture(imageNamed: "DoneButton") as SKTexture? {
+            wrapButton = SKSpriteNode(texture: doneTexture)
+            wrapButton.size = CGSize(width: actionButtonWidth, height: actionButtonHeight)
+            wrapButton.position = CGPoint(x: bottomButtonX, y: bottomButtonY)
+            wrapButton.zPosition = 100
+            wrapButton.name = "wrapButton"
+            wrapButton.alpha = 0.5 // Start disabled
+            addChild(wrapButton)
+        }
+
+        // Reset Button (to the left of wrap button)
+        if let resetTexture = SKTexture(imageNamed: "ResetButton") as SKTexture? {
+            resetButton = SKSpriteNode(texture: resetTexture)
+            resetButton.size = CGSize(width: actionButtonWidth, height: actionButtonHeight)
+            resetButton.position = CGPoint(
+                x: bottomButtonX - actionButtonWidth - actionButtonSpacing,
+                y: bottomButtonY
+            )
+            resetButton.zPosition = 100
+            resetButton.name = "resetButton"
+            resetButton.alpha = 0.5 // Start disabled
+            addChild(resetButton)
+        }
 
         // Mirror buttons (hidden initially, shown when flower is selected)
         let mirrorButtonSize: CGFloat = 40
@@ -599,23 +590,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     private func updateButtonStates() {
         let hasFlowers = !placedFlowers.isEmpty
 
-        // Reset button
-        if hasFlowers {
-            resetButton.fillColor = UIColor(red: 0.9, green: 0.5, blue: 0.5, alpha: 1.0)
-            resetButton.alpha = 1.0
-        } else {
-            resetButton.fillColor = UIColor.gray.withAlphaComponent(0.5)
-            resetButton.alpha = 0.5
-        }
+        // Reset button - use alpha to indicate enabled/disabled state
+        resetButton.alpha = hasFlowers ? 1.0 : 0.5
 
-        // Wrap button
-        if hasFlowers {
-            wrapButton.fillColor = UIColor(red: 0.5, green: 0.8, blue: 0.6, alpha: 1.0)
-            wrapButton.alpha = 1.0
-        } else {
-            wrapButton.fillColor = UIColor.gray.withAlphaComponent(0.5)
-            wrapButton.alpha = 0.5
-        }
+        // Wrap button - use alpha to indicate enabled/disabled state
+        wrapButton.alpha = hasFlowers ? 1.0 : 0.5
     }
 
     private func showMirrorButtons(for flower: FlowerNode) {
