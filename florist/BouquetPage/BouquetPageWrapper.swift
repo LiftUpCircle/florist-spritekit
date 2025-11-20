@@ -37,5 +37,9 @@ struct BouquetPageWrapper: View {
             icon: "book.closed.fill",
             duration: 2.0
         )
+        .onReceive(NotificationCenter.default.publisher(for: .settingsOverlayDidTapHomeButton)) { _ in
+            // Handle notification for navigation to main menu
+            flowCoordinator.returnToMainMenu()
+        }
     }
 }

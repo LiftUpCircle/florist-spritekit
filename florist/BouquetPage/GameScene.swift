@@ -208,10 +208,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         )
         
         // Center: Bouquet area
-        let bouquetSize: CGFloat = min(400, size.height * 0.75)
+        let bouquetSize: CGFloat = min(500, size.height * 0.8)
         bouquetRect = CGRect(
             x: (size.width - bouquetSize) / 2,
-            y: (size.height - bouquetSize) / 2 - 20,
+            y: (size.height - bouquetSize) / 2 - 10,
             width: bouquetSize,
             height: bouquetSize
         )
@@ -220,17 +220,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     private func setupBouquet() {
         // Bouquet back image and placement area
+        let bouquetScale: CGFloat = 0.9
+        
         if let backTexture = SKTexture(imageNamed: "BouquetBack") as SKTexture? {
             bouquetBackNode = SKSpriteNode(texture: backTexture)
             bouquetBackNode.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
-            bouquetBackNode.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.7)
+            bouquetBackNode.size = CGSize(width: bouquetRect.width * bouquetScale, height: bouquetRect.height * bouquetScale)
             bouquetBackNode.zPosition = 10
             addChild(bouquetBackNode)
             
             // Create invisible placement area with physics body from BACK texture
             bouquetPlacementArea = SKSpriteNode(texture: backTexture)
             bouquetPlacementArea.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
-            bouquetPlacementArea.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.7)
+            bouquetPlacementArea.size = CGSize(width: bouquetRect.width * bouquetScale, height: bouquetRect.height * bouquetScale)
             bouquetPlacementArea.zPosition = 11
             bouquetPlacementArea.alpha = 0.0
             
@@ -256,7 +258,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         // Bottom zone: Use the original bouquet texture for the lower portion
         if let backTexture = SKTexture(imageNamed: "BouquetBack") as SKTexture? {
             let bouquetMaskBottom = SKSpriteNode(texture: backTexture)
-            bouquetMaskBottom.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.7)
+            bouquetMaskBottom.size = CGSize(width: bouquetRect.width * bouquetScale, height: bouquetRect.height * bouquetScale)
             bouquetMaskBottom.position = CGPoint(x: 0, y: 0)
             compositeMaskNode.addChild(bouquetMaskBottom)
         }
@@ -268,7 +270,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             width: bouquetRect.width * 1.2,  // Wider than bouquet for side petals
             height: bouquetRect.height * 0.9  // Generous height for top flowers
         ))
-        topClipArea.position = CGPoint(x: 0, y: bouquetRect.height * 0.66)  // Position above bouquet center
+        topClipArea.position = CGPoint(x: 0, y: bouquetRect.height * 0.725)  // Position above bouquet center
         compositeMaskNode.addChild(topClipArea)
         
         // Right side zone: Extra clipping area for right-side flowers
@@ -279,7 +281,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         ))
         rightClipArea.position = CGPoint(
             x: bouquetRect.width * 0.45,  // Position on the right side
-            y: bouquetRect.height * 0.285   // Slightly above center
+            y: bouquetRect.height * 0.34   // Slightly above center
         )
         compositeMaskNode.addChild(rightClipArea)
         
@@ -321,7 +323,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         if let frontTexture = SKTexture(imageNamed: "BouquetFront") as SKTexture? {
             bouquetFrontNode = SKSpriteNode(texture: frontTexture)
             bouquetFrontNode.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
-            bouquetFrontNode.size = CGSize(width: bouquetRect.width * 0.7, height: bouquetRect.height * 0.7)
+            bouquetFrontNode.size = CGSize(width: bouquetRect.width * bouquetScale, height: bouquetRect.height * bouquetScale)
             bouquetFrontNode.zPosition = 20
             addChild(bouquetFrontNode)
         }
@@ -823,7 +825,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                         animateCardShrink(flower: flower)
 
                         let imageName = getFlowerImageName(for: flower.flowerData.flowerName)
-                        draggedFlowerCopy = FlowerNode(flower: flower.flowerData, imageName: imageName, size: flower.size)
+                        // Make flowers bigger when placed in bouquet
+                        let bouquetFlowerSize = CGSize(width: 150, height: 150)  // Adjust this value
+                        draggedFlowerCopy = FlowerNode(flower: flower.flowerData, imageName: imageName, size: bouquetFlowerSize)
                         draggedFlowerCopy!.position = location
                         draggedFlowerCopy!.zPosition = 200
                         draggedFlowerCopy!.setScale(1.0)
@@ -1256,6 +1260,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     func settingsOverlayDidClose() {
         // Notify that settings are now closed
         onSettingsStateChanged?(false)
+    }
+    
+    func settingsOverlayDidTapHomeButton() {
+        // Post notification to trigger navigation to main menu
+        // The notification will be observed by views that have access to flowCoordinator
+        NotificationCenter.default.post(name: .settingsOverlayDidTapHomeButton, object: nil)
     }
     
     func settingsOverlayDidTapRateGame() {

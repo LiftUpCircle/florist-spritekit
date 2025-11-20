@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-@main
+@main 
 struct FloristApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @Environment(\.scenePhase) private var scenePhase
