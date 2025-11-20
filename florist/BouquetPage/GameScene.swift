@@ -1290,6 +1290,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         onSettingsStateChanged?(false)
     }
     
+    func settingsOverlayDidTapHomeButton() {
+        // Post notification to trigger navigation to main menu
+        // The notification will be observed by views that have access to flowCoordinator
+        NotificationCenter.default.post(name: .settingsOverlayDidTapHomeButton, object: nil)
+    }
+    
     func settingsOverlayDidTapRateGame() {
         // Handle rate game action
         print("Rate game tapped")

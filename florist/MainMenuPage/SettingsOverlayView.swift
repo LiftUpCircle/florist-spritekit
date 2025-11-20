@@ -12,6 +12,9 @@ import SpriteKit
 class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
     private var settingsOverlayController: SettingsOverlayController?
     var onDismiss: (() -> Void)?
+    var onHomeButtonTap: (() -> Void)?
+    var onResetGameTap: (() -> Void)?
+    var isFromMainMenu: Bool = false
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -24,8 +27,14 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
         view.backgroundColor = .clear
 
         // Show settings overlay immediately
-        settingsOverlayController = SettingsOverlayController(scene: self)
+        settingsOverlayController = SettingsOverlayController(scene: self, isFromMainMenu: isFromMainMenu)
         settingsOverlayController?.delegate = self
+        settingsOverlayController?.onHomeButtonTap = { [weak self] in
+            self?.onHomeButtonTap?()
+        }
+        settingsOverlayController?.onResetGameTap = { [weak self] in
+            self?.onResetGameTap?()
+        }
     }
 
     // MARK: - Touch Handling
@@ -56,6 +65,11 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
     // MARK: - SettingsOverlayControllerDelegate
     func settingsOverlayDidClose() {
         onDismiss?()
+    }
+    
+    func settingsOverlayDidTapHomeButton() {
+        // Call the home button tap closure
+        onHomeButtonTap?()
     }
 
     func settingsOverlayDidTapRateGame() {
@@ -88,6 +102,9 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
 // MARK: - SwiftUI View Wrapper
 struct SettingsOverlayView: View {
     @Binding var isPresented: Bool
+    var onHomeButtonTap: (() -> Void)?
+    var onResetGameTap: (() -> Void)?
+    var isFromMainMenu: Bool = false
 
     var body: some View {
         GeometryReader { geometry in
@@ -105,10 +122,27 @@ struct SettingsOverlayView: View {
     private func createSettingsScene(size: CGSize) -> SettingsScene {
         let scene = SettingsScene(size: size)
         scene.scaleMode = .aspectFill
+        scene.isFromMainMenu = isFromMainMenu
         scene.onDismiss = {
             withAnimation {
                 isPresented = false
             }
+        }
+        scene.onHomeButtonTap = {
+            // Close settings first
+            withAnimation {
+                isPresented = false
+            }
+            // Then call the navigation closure
+            onHomeButtonTap?()
+        }
+        scene.onResetGameTap = {
+            // Close settings first
+            withAnimation {
+                isPresented = false
+            }
+            // Then call the reset game closure
+            onResetGameTap?()
         }
         return scene
     }
