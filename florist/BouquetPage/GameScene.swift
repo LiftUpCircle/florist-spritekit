@@ -853,7 +853,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                         animateCardShrink(flower: flower)
 
                         let imageName = getFlowerImageName(for: flower.flowerData.flowerName)
-                        draggedFlowerCopy = FlowerNode(flower: flower.flowerData, imageName: imageName, size: flower.size)
+                        // Make flowers bigger when placed in bouquet
+                        let bouquetFlowerSize = CGSize(width: 150, height: 150)  // Adjust this value
+                        draggedFlowerCopy = FlowerNode(flower: flower.flowerData, imageName: imageName, size: bouquetFlowerSize)
                         draggedFlowerCopy!.position = location
                         draggedFlowerCopy!.zPosition = 200
                         draggedFlowerCopy!.setScale(1.0)
