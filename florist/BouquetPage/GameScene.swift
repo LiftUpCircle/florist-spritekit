@@ -191,6 +191,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             // Fallback background color
             backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.97, alpha: 1.0)
         }
+
+        // Add black shadow overlay covering entire screen with 50% opacity
+        let shadowOverlay = SKSpriteNode(color: .black, size: size)
+        shadowOverlay.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        shadowOverlay.alpha = 0.25
+        shadowOverlay.zPosition = -9
+        addChild(shadowOverlay)
     }
     
     private func setupLayout() {
