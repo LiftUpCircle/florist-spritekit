@@ -26,12 +26,14 @@ class SettingsOverlayController {
     private let settingsManager = SettingsManager.shared
     weak var delegate: SettingsOverlayControllerDelegate?
     var onHomeButtonTap: (() -> Void)?
+    var onResetGameTap: (() -> Void)?
     
     // MARK: - Initialization
     
-    init(scene: SKScene) {
+    init(scene: SKScene, isFromMainMenu: Bool = false) {
         overlay = SettingsOverlay()
-        overlay.presentInScene(scene)
+        overlay.isFromMainMenu = isFromMainMenu
+        overlay.presentInScene(scene, isFromMainMenu: isFromMainMenu)
         setupOverlayDelegates()
     }
     
@@ -48,8 +50,9 @@ class SettingsOverlayController {
     
     // MARK: - Public Methods
     
-    func show(in scene: SKScene) {
-        overlay.presentInScene(scene)
+    func show(in scene: SKScene, isFromMainMenu: Bool = false) {
+        overlay.isFromMainMenu = isFromMainMenu
+        overlay.presentInScene(scene, isFromMainMenu: isFromMainMenu)
     }
     
     func hide() {
@@ -90,6 +93,14 @@ class SettingsOverlayController {
     
     func handleCloseTap() {
         overlay.close()
+    }
+    
+    func handleResetGameTap() {
+        settingsManager.triggerVibration(style: .light)
+        // Remove overlay immediately without animation
+        overlay.closeImmediately()
+        // Call the reset game closure
+        onResetGameTap?()
     }
     
     // MARK: - Touch Handling

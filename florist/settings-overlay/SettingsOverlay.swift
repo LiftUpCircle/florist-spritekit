@@ -26,9 +26,14 @@ class SettingsOverlay: SKNode {
     
     // Action buttons
     private var homeButton: SKNode!
+    private var resetGameButton: SKNode!
     
     var onClose: (() -> Void)?
     var onHomeButtonTap: (() -> Void)?
+    var onResetGameTap: (() -> Void)?
+    
+    // Whether this overlay is shown from main menu (affects which buttons are shown)
+    var isFromMainMenu: Bool = false
     
     override init() {
         super.init()
@@ -236,15 +241,23 @@ class SettingsOverlay: SKNode {
         let totalAvailableWidth = overlayWidth * 0.80
         let buttonWidth = totalAvailableWidth
         
-        // Center the button horizontally
-        homeButton = createActionButton(text: "Back to home", width: buttonWidth, height: buttonHeight,
+        if isFromMainMenu {
+            // Only show Reset Game button (full width)
+            resetGameButton = createActionButton(text: "Reset Game", width: buttonWidth, height: buttonHeight,
+                                                 cornerRadius: buttonCornerRadius, fontSize: buttonFontSize)
+            resetGameButton.position = CGPoint(x: 0, y: topButtonY)
+            resetGameButton.name = "resetGameButton"
+            resetGameButton.zPosition = 1002
+            addChild(resetGameButton)
+        } else {
+            // Only show Back to home button (full width)
+            homeButton = createActionButton(text: "Back to home", width: buttonWidth, height: buttonHeight,
                                            cornerRadius: buttonCornerRadius, fontSize: buttonFontSize)
-        homeButton.position = CGPoint(x: 0, y: topButtonY)
-        homeButton.name = "homeButton"
-        homeButton.zPosition = 1002
-        addChild(homeButton)
-        
-
+            homeButton.position = CGPoint(x: 0, y: topButtonY)
+            homeButton.name = "homeButton"
+            homeButton.zPosition = 1002
+            addChild(homeButton)
+        }
     }
     
     private func createActionButton(text: String, width: CGFloat, height: CGFloat, cornerRadius: CGFloat, fontSize: CGFloat) -> SKNode {
@@ -301,7 +314,9 @@ class SettingsOverlay: SKNode {
             case "homeButton":
                 controller.handleHomeButtonTap()
                 return true
-            
+            case "resetGameButton":
+                controller.handleResetGameTap()
+                return true
             default:
                 break
             }
@@ -312,9 +327,14 @@ class SettingsOverlay: SKNode {
         while node != nil && node != self {
             if let nodeName = node?.name {
                 switch nodeName {
-                
+                case "closeButton":
+                    controller.handleCloseTap()
+                    return true
                 case "homeButton":
                     controller.handleHomeButtonTap()
+                    return true
+                case "resetGameButton":
+                    controller.handleResetGameTap()
                     return true
                 default:
                     break
@@ -367,9 +387,10 @@ class SettingsOverlay: SKNode {
         onClose?()
     }
     
-    func presentInScene(_ scene: SKScene) {
+    func presentInScene(_ scene: SKScene, isFromMainMenu: Bool = false) {
         // Size for responsive calculations
         setSceneSize(scene.size)
+        self.isFromMainMenu = isFromMainMenu
         // Recreate overlay sizenya repsonsive
         removeAllChildren()
         setupOverlay()

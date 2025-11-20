@@ -131,10 +131,16 @@ struct MainMenuView: View {
                 
                 // Settings overlay
                 if showSettings {
-                    SettingsOverlayView(isPresented: $showSettings) {
-                        // Navigate to main menu (we're already on main menu, just ensure we're at root)
-                        flowCoordinator.returnToMainMenu()
-                    }
+                    SettingsOverlayView(
+                        isPresented: $showSettings,
+                        onResetGameTap: {
+                            // Reset game: delete all checkpoints and memories
+                            Task {
+                                await resetGame()
+                            }
+                        },
+                        isFromMainMenu: true
+                    )
                     .transition(.opacity)
                     .zIndex(100)
                 }
@@ -236,6 +242,35 @@ struct MainMenuView: View {
             }
         } catch {
             print("⚠️ Failed to check for saved progress: \(error.localizedDescription)")
+        }
+    }
+    
+    private func resetGame() async {
+        print("🔄 Resetting game: deleting all checkpoints and memories...")
+        
+        do {
+            // Delete all progress/checkpoints
+            let allProgress = try await ProgressPersistenceManager.shared.getAllProgress()
+            for progress in allProgress {
+                try await ProgressPersistenceManager.shared.deleteProgress(for: progress.storyId)
+                print("✅ Deleted progress for story: \(progress.storyId)")
+            }
+            
+            // Reset all memories
+            MemoriesPersistenceManager.shared.resetAllMemories()
+            print("✅ Reset all memories")
+            
+            // Reset GameProgressManager to first story
+            GameProgressManager.shared.resetToFirstStory()
+            
+            // Clear saved progress state
+            await MainActor.run {
+                savedProgress = nil
+            }
+            
+            print("✅ Game reset complete")
+        } catch {
+            print("❌ Failed to reset game: \(error.localizedDescription)")
         }
     }
     
