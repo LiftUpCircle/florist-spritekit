@@ -482,62 +482,64 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     private func setupButtons() {
         let buttonSize: CGFloat = 60
         let buttonSpacing: CGFloat = 20
-        let buttonY: CGFloat = 50
-        let buttonX = size.width - buttonSize - 30
-        
-        // Book Button (bottom)
-        if let bookTexture = SKTexture(imageNamed: "BookButton") as SKTexture? {
-            bookButton = SKSpriteNode(texture: bookTexture)
-            bookButton.size = CGSize(width: buttonSize, height: buttonSize)
-            bookButton.position = CGPoint(x: buttonX, y: buttonY)
-            bookButton.zPosition = 100
-            bookButton.name = "bookButton"
-            addChild(bookButton)
-        }
-        
-        // Setting Button (above book button)
+        let rightPadding: CGFloat = 30
+        let topPadding: CGFloat = 30
+
+        // Top right buttons
+        let topButtonX = size.width - buttonSize / 2 - rightPadding
+        let topButtonY = size.height - buttonSize / 2 - topPadding
+
+        // Setting Button (top right)
         if let settingTexture = SKTexture(imageNamed: "SettingButton") as SKTexture? {
             settingButton = SKSpriteNode(texture: settingTexture)
             settingButton.size = CGSize(width: buttonSize, height: buttonSize)
-            settingButton.position = CGPoint(x: buttonX, y: buttonY + buttonSize + buttonSpacing)
+            settingButton.position = CGPoint(x: topButtonX, y: topButtonY)
             settingButton.zPosition = 100
             settingButton.name = "settingButton"
             addChild(settingButton)
         }
-        
-        // Reset and Wrap buttons (below bouquet)
+
+        // Book Button (below settings)
+        if let bookTexture = SKTexture(imageNamed: "BookButton") as SKTexture? {
+            bookButton = SKSpriteNode(texture: bookTexture)
+            bookButton.size = CGSize(width: buttonSize, height: buttonSize)
+            bookButton.position = CGPoint(x: topButtonX, y: topButtonY - buttonSize - buttonSpacing)
+            bookButton.zPosition = 100
+            bookButton.name = "bookButton"
+            addChild(bookButton)
+        }
+
+        // Bottom right buttons
         let actionButtonWidth: CGFloat = 51
         let actionButtonHeight: CGFloat = 44
-        // Ensure buttons are visible by using max to keep them above bottom of screen
-        let actionButtonY = max(60, bouquetRect.minY - 60)
-        let actionButtonSpacing: CGFloat = 20
+        let actionButtonSpacing: CGFloat = 10
+        let bottomPadding: CGFloat = 30
+        let bottomButtonY = actionButtonHeight / 2 + bottomPadding
+        let bottomButtonX = size.width - actionButtonWidth / 2 - rightPadding
 
-        // Reset Button
+        // Wrap Button (bottom right) - using DoneButton asset
+        if let doneTexture = SKTexture(imageNamed: "DoneButton") as SKTexture? {
+            wrapButton = SKSpriteNode(texture: doneTexture)
+            wrapButton.size = CGSize(width: actionButtonWidth, height: actionButtonHeight)
+            wrapButton.position = CGPoint(x: bottomButtonX, y: bottomButtonY)
+            wrapButton.zPosition = 100
+            wrapButton.name = "wrapButton"
+            wrapButton.alpha = 0.5 // Start disabled
+            addChild(wrapButton)
+        }
+
+        // Reset Button (to the left of wrap button)
         if let resetTexture = SKTexture(imageNamed: "ResetButton") as SKTexture? {
             resetButton = SKSpriteNode(texture: resetTexture)
             resetButton.size = CGSize(width: actionButtonWidth, height: actionButtonHeight)
             resetButton.position = CGPoint(
-                x: bouquetRect.midX - actionButtonWidth / 2 - actionButtonSpacing / 2,
-                y: actionButtonY
+                x: bottomButtonX - actionButtonWidth - actionButtonSpacing,
+                y: bottomButtonY
             )
             resetButton.zPosition = 100
             resetButton.name = "resetButton"
             resetButton.alpha = 0.5 // Start disabled
             addChild(resetButton)
-        }
-
-        // Wrap Button (using DoneButton asset)
-        if let doneTexture = SKTexture(imageNamed: "DoneButton") as SKTexture? {
-            wrapButton = SKSpriteNode(texture: doneTexture)
-            wrapButton.size = CGSize(width: actionButtonWidth, height: actionButtonHeight)
-            wrapButton.position = CGPoint(
-                x: bouquetRect.midX + actionButtonWidth / 2 + actionButtonSpacing / 2,
-                y: actionButtonY
-            )
-            wrapButton.zPosition = 100
-            wrapButton.name = "wrapButton"
-            wrapButton.alpha = 0.5 // Start disabled
-            addChild(wrapButton)
         }
 
         // Mirror buttons (hidden initially, shown when flower is selected)
