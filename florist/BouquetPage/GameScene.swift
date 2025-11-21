@@ -837,48 +837,48 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
-
+        
         // Check if settings overlay is handling the touch
         if let settingsController = settingsOverlayController {
             if settingsController.handleTouchMoved(touch) {
                 return
             }
         }
-
+        
         let location = touch.location(in: self)
-
+        
         // Check if we need to start dragging a bouquet flower
         if !isDraggingBouquetFlower && selectedFlower != nil && !isDraggingFromInventory {
             let deltaX = abs(location.x - dragStartLocation.x)
             let deltaY = abs(location.y - dragStartLocation.y)
-
+            
             // Check if movement exceeds threshold
             if deltaX > scrollThreshold || deltaY > scrollThreshold {
                 // Start dragging the bouquet flower
                 if let flower = selectedFlower, originalFlowerIndex >= 0 {
                     // Hide mirror buttons when starting to drag
                     hideMirrorButtons()
-
+                    
                     // Remove from placed flowers
                     placedFlowers.remove(at: originalFlowerIndex)
-
+                    
                     // Move to scene for dragging
                     let worldPos = flower.parent!.convert(flower.position, to: self)
                     flower.removeFromParent()
                     flower.physicsBody = nil
-
+                    
                     flower.position = worldPos
                     flower.zPosition = 200
                     flower.setScale(1.2)
                     addChild(flower)
                     draggedFlowerCopy = flower
                     isDraggingBouquetFlower = true
-
+                    
                     updateButtonStates()
                 }
             }
         }
-
+        
         // If we haven't decided the gesture type yet
         if !gestureDecided && potentialFlowerToDrag != nil {
             let deltaX = abs(location.x - touchStartLocation.x)
@@ -892,27 +892,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                     gestureDecided = true
                     
                     if let flower = potentialFlowerToDrag {
-                            animateCardRestore(flower: flower)
-                        }
+                        animateCardRestore(flower: flower)
+                    }
                     
                     // Visual feedback: slightly fade the inventory during scroll
                     inventoryScrollNode.run(SKAction.fadeAlpha(to: 0.7, duration: 0.1))
                 } else {
                     // Horizontal or diagonal movement - treat as drag
                     gestureDecided = true
-
+                    
                     // Hide tutorial and tooltip when user starts dragging
                     tutorialManager?.hideTutorial()
                     tutorialManager?.hideBookTooltip()
-
+                    
                     // Create the flower copy for dragging
                     if let flower = potentialFlowerToDrag {
-
+                        
                         // Hide mirror buttons when starting to drag from inventory
                         hideMirrorButtons()
-
+                        
                         animateCardShrink(flower: flower)
-
+                        
                         let imageName = getFlowerImageName(for: flower.flowerData.flowerName)
                         // Make flowers bigger when placed in bouquet
                         let bouquetFlowerSize = CGSize(width: 150, height: 150)  // Adjust this value
@@ -921,9 +921,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                         draggedFlowerCopy!.zPosition = 200
                         draggedFlowerCopy!.setScale(1.0)
                         addChild(draggedFlowerCopy!)
-
+                        
                         isDraggingFromInventory = true
-
+                        
                         // Haptic feedback
                         let generator = UIImpactFeedbackGenerator(style: .light)
                         generator.impactOccurred()
@@ -959,7 +959,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         
         // Check if we're over the bouquet area and not exceeding max flowers
         if placedFlowers.count < maxFlowers || !isDraggingFromInventory {
-            if bouquetRect.contains(location) {
+            let body = physicsWorld.body(at: location)
+            if body == bouquetPlacementArea.physicsBody ||
+                (body?.node is FlowerNode && bouquetRect.contains(location)) {
+                
                 isValidPlacement = true
                 
                 // Show placement indicator
@@ -977,7 +980,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                         break
                     }
                 }
-            } else if bouquetRect.contains(location) {
+            } else {
                 // Near the bouquet but not in valid area
                 placementIndicator.position = location
                 placementIndicator.fillColor = UIColor.red.withAlphaComponent(0.3)
@@ -989,6 +992,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 placementIndicator.position = location
                 placementIndicator.fillColor = UIColor.orange.withAlphaComponent(0.3)
                 placementIndicator.isHidden = false
+            }
+            else {
+                // Outside and Max reached
+                placementIndicator.position = location
+                placementIndicator.fillColor = UIColor.red.withAlphaComponent(0.3)
+                placementIndicator.isHidden = false
+                
             }
         }
     }
