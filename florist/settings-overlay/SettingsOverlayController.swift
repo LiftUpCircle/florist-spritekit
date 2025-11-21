@@ -46,6 +46,10 @@ class SettingsOverlayController {
         overlay.onHomeButtonTap = { [weak self] in
             self?.delegate?.settingsOverlayDidTapHomeButton()
         }
+        overlay.onResetGameTap = { [weak self] in
+            // When reset is confirmed, call handleResetGameConfirm
+            self?.handleResetGameConfirm()
+        }
     }
     
     // MARK: - Public Methods
@@ -96,6 +100,14 @@ class SettingsOverlayController {
     }
     
     func handleResetGameTap() {
+        // This method is now called when reset button is tapped
+        // The confirmation dialog will be shown by the overlay
+        // This method is kept for backward compatibility but shouldn't be called directly
+        settingsManager.triggerVibration(style: .light)
+    }
+    
+    func handleResetGameConfirm() {
+        // This is called when user confirms the reset in the confirmation dialog
         settingsManager.triggerVibration(style: .light)
         // Remove overlay immediately without animation
         overlay.closeImmediately()

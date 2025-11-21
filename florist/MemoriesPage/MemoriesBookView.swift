@@ -171,43 +171,66 @@ struct BouquetMemoryRow: View {
                 .foregroundColor(.black)
                 .lineLimit(1)
 
-            // Bouquet image
-            if let savedBouquet = memory.savedBouquet,
-               let bouquetImage = BouquetImageManager.shared.loadBouquetImage(filename: savedBouquet.imageFileName) {
-                Image(uiImage: bouquetImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 100, height: 100)
-                    .cornerRadius(6)
+            // Check if story has been played (savedBouquet exists)
+            if memory.savedBouquet != nil {
+                // Show bouquet image
+                if let savedBouquet = memory.savedBouquet,
+                   let bouquetImage = BouquetImageManager.shared.loadBouquetImage(filename: savedBouquet.imageFileName) {
+                    Image(uiImage: bouquetImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 100, height: 100)
+                        .cornerRadius(6)
+                } else {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(width: 100, height: 100)
+                        .cornerRadius(6)
+                }
+
+                // Show description
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(memory.description)
+                        .font(.custom("Gaegu-Regular", size: 12))
+                        .foregroundColor(.gray)
+
+                    if let savedBouquet = memory.savedBouquet {
+                        Text("Created: \(formattedDate(savedBouquet.dateCreated))")
+                            .font(.custom("Gaegu-Light", size: 10))
+                            .foregroundColor(.gray)
+                    }
+                }
+                .padding(8)
+                .frame(width: 175, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.white.opacity(0.8))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                )
             } else {
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 100, height: 100)
-                    .cornerRadius(6)
-            }
+                // Story not played yet - show locked state
+                VStack {
+                    Image(systemName: "lock.fill")
+                        .font(.system(size: 40))
+                        .foregroundColor(.gray.opacity(0.5))
 
-            // Description
-            VStack(alignment: .leading, spacing: 2) {
-                Text(memory.description)
-                    .font(.custom("Gaegu-Regular", size: 12))
-                    .foregroundColor(.gray)
-
-                if let savedBouquet = memory.savedBouquet {
-                    Text("Created: \(formattedDate(savedBouquet.dateCreated))")
-                        .font(.custom("Gaegu-Light", size: 10))
+                    Text("Play the story to unlock")
+                        .font(.custom("Gaegu-Regular", size: 12))
                         .foregroundColor(.gray)
                 }
+                .frame(width: 175, height: 150)
+                .background(
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.gray.opacity(0.1))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                        )
+                )
             }
-            .padding(8)
-            .frame(width: 175, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.white.opacity(0.8))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                    )
-            )
         }
         .padding(.vertical, 4)
     }

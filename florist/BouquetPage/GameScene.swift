@@ -147,6 +147,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     private var touchedNode: SKNode?
     private var longPressTimer: Timer?
     
+    // Debug var
+    private var debugHitboxesEnabled: Bool = true
+    
     // MARK: - Scene Setup
     override func didMove(to view: SKView) {
         // Don't load default requirements here - they will be set by BouquetViewController
@@ -178,6 +181,76 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             )
         }
     }
+    
+    private func showDebugHitboxes(for flower: FlowerNode) {
+        // Remove existing debug hitbox
+        flower.childNode(withName: "debugHitbox")?.removeFromParent()
+        
+        guard debugHitboxesEnabled else { return }
+        
+        // If flower has a physics body with texture, show a more accurate representation
+        if let _ = flower.physicsBody, let texture = flower.texture {
+            // Create a container for debug visuals
+            let debugContainer = SKNode()
+            debugContainer.name = "debugHitbox"
+            debugContainer.zPosition = 100
+            
+            // Show the actual texture with alpha threshold visualization
+            // This creates a copy of the texture that shows what the physics body "sees"
+            let debugSprite = SKSpriteNode(texture: texture)
+            debugSprite.size = flower.size
+            debugSprite.color = .red
+            debugSprite.colorBlendFactor = 0.6
+            debugSprite.alpha = 0.4
+            
+            // Add a label showing the alpha threshold
+            let label = SKLabelNode(text: "α: 0.2")
+            label.fontSize = 12
+            label.fontColor = .red
+            label.position = CGPoint(x: 0, y: flower.size.height / 2 + 10)
+            debugContainer.addChild(label)
+            
+            debugContainer.addChild(debugSprite)
+            
+            // Add center dot
+            let centerDot = SKShapeNode(circleOfRadius: 4)
+            centerDot.fillColor = .red
+            centerDot.strokeColor = .white
+            centerDot.lineWidth = 1
+            debugContainer.addChild(centerDot)
+            
+            // Add outline showing full sprite bounds
+            let outline = SKShapeNode(rect: CGRect(
+                x: -flower.size.width / 2,
+                y: -flower.size.height / 2,
+                width: flower.size.width,
+                height: flower.size.height
+            ))
+            outline.strokeColor = .red
+            outline.lineWidth = 2
+            outline.fillColor = .clear
+            debugContainer.addChild(outline)
+            
+            flower.addChild(debugContainer)
+        } else {
+            // Fallback to circle if no physics body
+            let hitRadius = flower.size.width * 0.35
+            let debugCircle = SKShapeNode(circleOfRadius: hitRadius)
+            debugCircle.strokeColor = .red
+            debugCircle.lineWidth = 2
+            debugCircle.fillColor = .clear
+            debugCircle.name = "debugHitbox"
+            debugCircle.zPosition = 100
+            
+            let centerDot = SKShapeNode(circleOfRadius: 3)
+            centerDot.fillColor = .red
+            centerDot.strokeColor = .clear
+            debugCircle.addChild(centerDot)
+            
+            flower.addChild(debugCircle)
+        }
+    }
+
     
     private func setupBackground() {
         // Load and display background image
@@ -223,7 +296,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             height: bouquetSize
         )
     }
-    
     
     private func setupBouquet() {
         // Bouquet back image and placement area
@@ -734,20 +806,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         
         // Check if we touched a flower in the bouquet
         let containerLocation = touch.location(in: bouquetFlowersContainer)
-        for (index, flower) in placedFlowers.enumerated() {
-            if flower.contains(containerLocation) {
-                // Store touch info but don't start dragging yet
-                selectedFlower = flower
-                isDraggingFromInventory = false
-                isDraggingBouquetFlower = false
-                dragStartLocation = location
-                originalFlowerIndex = index
-
-                // Haptic feedback
-                let generator = UIImpactFeedbackGenerator(style: .light)
-                generator.impactOccurred()
-
-                return
+        
+        // Convert to world coordinates for physics query
+        let worldLocation = bouquetFlowersContainer.convert(containerLocation, to: self)
+        
+        for (index, flower) in placedFlowers.enumerated().reversed() {
+            if let physicsBody = flower.physicsBody {
+                // Check if the touch point is within the flower's physics body
+                if physicsWorld.body(at: worldLocation) == physicsBody {
+                    
+                    // Store touch info but don't start dragging yet
+                    selectedFlower = flower
+                    isDraggingFromInventory = false
+                    isDraggingBouquetFlower = false
+                    dragStartLocation = location
+                    originalFlowerIndex = index
+                    
+                    // Haptic feedback
+                    let generator = UIImpactFeedbackGenerator(style: .light)
+                    generator.impactOccurred()
+                    
+                    return
+                }
             }
         }
 
@@ -785,6 +865,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                     // Move to scene for dragging
                     let worldPos = flower.parent!.convert(flower.position, to: self)
                     flower.removeFromParent()
+                    flower.physicsBody = nil
+
                     flower.position = worldPos
                     flower.zPosition = 200
                     flower.setScale(1.2)
@@ -877,10 +959,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         
         // Check if we're over the bouquet area and not exceeding max flowers
         if placedFlowers.count < maxFlowers || !isDraggingFromInventory {
-            // Use physics to check if we're inside the bouquet shape
-            let physicsPoint = location
-            if let body = physicsWorld.body(at: physicsPoint),
-               body == bouquetPlacementArea.physicsBody {
+            if bouquetRect.contains(location) {
                 isValidPlacement = true
                 
                 // Show placement indicator
@@ -1002,7 +1081,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             
             bouquetFlowersContainer.addChild(draggedFlower)
             placedFlowers.append(draggedFlower)
-
+            
+            if let texture = draggedFlower.texture {
+                draggedFlower.physicsBody = SKPhysicsBody(
+                    texture: texture,
+                    alphaThreshold: 0.1,
+                    size: draggedFlower.size)
+                draggedFlower.physicsBody?.isDynamic = false
+                draggedFlower.physicsBody?.categoryBitMask = 0x4
+                draggedFlower.physicsBody?.collisionBitMask = 0
+            }
+            
+            // MARK: - Debug show hitbox
+//            showDebugHitboxes(for: draggedFlower)
+            
             // Show mirror buttons for the newly placed flower
             showMirrorButtons(for: draggedFlower)
 
@@ -1019,12 +1111,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             generator.notificationOccurred(.success)
             
             // Gentle placement animation
-            let bounce = SKAction.sequence([
-                SKAction.scale(to: scaleFactor * 1.1, duration: 0.1),
-                SKAction.scale(to: scaleFactor, duration: 0.1)
-            ])
-            let rotate = SKAction.rotate(byAngle: CGFloat.random(in: -0.1...0.1), duration: 0.2)
-            draggedFlower.run(SKAction.group([bounce, rotate]))
+//            let bounce = SKAction.sequence([
+//                SKAction.scale(to: scaleFactor * 1.1, duration: 0.1),
+//                SKAction.scale(to: scaleFactor, duration: 0.1)
+//            ])
+//            let rotate = SKAction.rotate(byAngle: CGFloat.random(in: -0.1...0.1), duration: 0.2)
+//            draggedFlower.run(SKAction.group([bounce, rotate]))
             
             updateButtonStates()
         } else {
@@ -1032,6 +1124,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             if isDraggingFromInventory, let flower = selectedFlower {
                     animateCardRestore(flower: flower)
                 }
+            draggedFlower.physicsBody = nil
             
             if isDraggingFromInventory {
                 // Animate back to inventory
