@@ -15,8 +15,8 @@ struct MemoriesBookView: View {
     // Character data
     private let characters = [
         CharacterMemory(id: "robert", name: "Robert", imageName: "MemoriesRobert"),
-        CharacterMemory(id: "abigail", name: "Abigail", imageName: "MemoriesAbigail"),
-        CharacterMemory(id: "michael", name: "Michael", imageName: "MemoriesMichael")
+        CharacterMemory(id: "michael", name: "Michael", imageName: "MemoriesMichael"),
+        CharacterMemory(id: "abigail", name: "Abigail", imageName: "MemoriesAbigail")
     ]
 
     var body: some View {
