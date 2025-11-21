@@ -13,32 +13,45 @@ struct PanningBackgroundView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            Image(imageName)
-                .resizable()
-                .scaledToFill()
-                .frame(width: geometry.size.width * 1.8) // Make it wider for panning
+            if let uiImage = UIImage(named: imageName) {
+                let imageAspectRatio = uiImage.size.width / uiImage.size.height
+                let screenHeight = geometry.size.height
+                let calculatedImageWidth = screenHeight * imageAspectRatio
+                let screenWidth = geometry.size.width
+
+                // Calculate how much extra width we have beyond the screen
+                let extraWidth = calculatedImageWidth - screenWidth
+
+                // Position the image so it starts aligned to the left edge of the screen
+                HStack(spacing: 0) {
+                    Image(imageName)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: calculatedImageWidth, height: screenHeight)
+                }
+                .frame(width: screenWidth, height: screenHeight, alignment: .leading)
                 .offset(x: offset)
-                .frame(width: geometry.size.width, height: geometry.size.height)
                 .clipped()
                 .onAppear {
-                    startPanning(screenWidth: geometry.size.width)
+                    startPanning(extraWidth: extraWidth)
                 }
+            } else {
+                // Fallback if image not found
+                Color.black
+            }
         }
     }
 
-    private func startPanning(screenWidth: CGFloat) {
-        // Calculate the maximum pan distance
-        // The image is 1.8x screen width, so we can pan 0.8x screen width
-        let maxPanDistance = screenWidth * 0.8
+    private func startPanning(extraWidth: CGFloat) {
+        // Only pan if there's extra width to show
+        guard extraWidth > 0 else { return }
 
-        // Start from the left (0) and pan to the right (-maxPanDistance)
-        // offset of 0 shows the leftmost part
-        // offset of -maxPanDistance shows the rightmost part
+        // Pan from 0 (showing leftmost) to -extraWidth (showing rightmost)
         withAnimation(
-            .linear(duration: 20.0) // Slow smooth pan
+            .linear(duration: 20.0)
             .repeatForever(autoreverses: true)
         ) {
-            offset = -maxPanDistance
+            offset = -extraWidth
         }
     }
 }
