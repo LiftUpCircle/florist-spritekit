@@ -2,7 +2,7 @@
 //  MemoriesBookView.swift
 //  florist
 //
-//  Created by Claude on 17/11/25.
+//  Created by reynaldo on 17/11/25.
 //
 
 import SwiftUI
