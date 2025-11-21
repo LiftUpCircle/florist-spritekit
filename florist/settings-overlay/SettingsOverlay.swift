@@ -7,7 +7,7 @@
 
 import SpriteKit
 
-class SettingsOverlay: SKNode {
+class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
     
     
     private let whiteColor = SKColor.white
@@ -27,6 +27,9 @@ class SettingsOverlay: SKNode {
     // Action buttons
     private var homeButton: SKNode!
     private var resetGameButton: SKNode!
+    
+    // Confirmation dialog
+    private var resetConfirmationDialog: ResetConfirmationDialog!
     
     var onClose: (() -> Void)?
     var onHomeButtonTap: (() -> Void)?
@@ -93,6 +96,9 @@ class SettingsOverlay: SKNode {
         
         // Action buttons
         setupActionButtons()
+        
+        // Confirmation dialog (initially hidden)
+        setupResetConfirmationDialog()
     }
     
     private func setupTitle() {
@@ -281,10 +287,37 @@ class SettingsOverlay: SKNode {
         return button
     }
     
+    // MARK: - Reset Confirmation Dialog
+    
+    private func setupResetConfirmationDialog() {
+        resetConfirmationDialog = ResetConfirmationDialog()
+        resetConfirmationDialog.setSceneSize(sceneSize)
+        resetConfirmationDialog.delegate = self
+        addChild(resetConfirmationDialog)
+    }
+    
+    // MARK: - ResetConfirmationDialogDelegate
+    
+    func resetConfirmationDialogDidConfirm() {
+        // This will be handled by the controller through the onResetGameTap closure
+        // We need to pass this to the controller, but we don't have direct access here
+        // Instead, we'll use a closure pattern
+        onResetGameTap?()
+    }
+    
+    func resetConfirmationDialogDidCancel() {
+        // Dialog is already hidden, nothing else to do
+    }
+    
     // MARK: - Touch Handling
     
     func handleTouch(at location: CGPoint, controller: SettingsOverlayController) -> Bool {
         let touchedNode = atPoint(location)
+        
+        // If confirmation dialog is visible, let it handle the touch
+        if resetConfirmationDialog.isVisible {
+            return resetConfirmationDialog.handleTouch(at: location)
+        }
         
         // Check toggles
         var node: SKNode? = touchedNode
@@ -315,7 +348,8 @@ class SettingsOverlay: SKNode {
                 controller.handleHomeButtonTap()
                 return true
             case "resetGameButton":
-                controller.handleResetGameTap()
+                // Show confirmation dialog instead of immediately resetting
+                resetConfirmationDialog.show()
                 return true
             default:
                 break
@@ -334,7 +368,8 @@ class SettingsOverlay: SKNode {
                     controller.handleHomeButtonTap()
                     return true
                 case "resetGameButton":
-                    controller.handleResetGameTap()
+                    // Show confirmation dialog instead of immediately resetting
+                    resetConfirmationDialog.show()
                     return true
                 default:
                     break
@@ -394,6 +429,8 @@ class SettingsOverlay: SKNode {
         // Recreate overlay sizenya repsonsive
         removeAllChildren()
         setupOverlay()
+        // Recreate confirmation dialog (it was removed with removeAllChildren)
+        setupResetConfirmationDialog()
         // Overlay center
         position = CGPoint(x: scene.size.width / 2, y: scene.size.height / 2)
         show(in: scene)
