@@ -78,11 +78,11 @@ struct HistoryDialogueBox: View {
             Text(displayName)
                 .font(.bodyGaegu)
                 .fontWeight(.semibold)
-                .foregroundColor(isMaria ? .white : .primary)
+                .foregroundColor(isMaria ? Color("TextPlayButton") : .primary)
 
             Text(dialogue)
                 .font(.bodyGaegu)
-                .foregroundColor(isMaria ? .white : .primary)
+                .foregroundColor(isMaria ? Color("TextPlayButton") : .primary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(16)

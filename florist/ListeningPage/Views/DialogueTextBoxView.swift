@@ -59,7 +59,7 @@ struct DialogueTextboxView: View {
                 Text(displayName)
                     .font(.bodyGaegu)
                     .fontWeight(.semibold)
-                    .foregroundColor(isMaria ? .white : .primary)
+                    .foregroundColor(isMaria ? Color("TextPlayButton") : .primary)
 
                 ZStack(alignment: .topLeading) {
                     // Hidden text to set the size based on processed dialogue with line breaks
@@ -72,7 +72,7 @@ struct DialogueTextboxView: View {
                     // Visible typing text
                     Text(typewriter.displayedText)
                         .font(.bodyGaegu)
-                        .foregroundColor(isMaria ? .white : .primary)
+                        .foregroundColor(isMaria ? Color("TextPlayButton") : .primary)
                         .lineLimit(nil)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -91,7 +91,7 @@ struct DialogueTextboxView: View {
             if showTriangleIndicator && typewriter.isTypingComplete {
                 Image(systemName: "play.fill")
                     .font(.bodyGaegu)
-                    .foregroundColor(isMaria ? .white : .primary)
+                    .foregroundColor(isMaria ? Color("TextPlayButton") : .primary)
 //                    .shadow(color: .primary.opacity(0.4), radius: 2)
                     .opacity(showTriangle ? 1.0 : 0.5)
                     .padding(.trailing, 12)
