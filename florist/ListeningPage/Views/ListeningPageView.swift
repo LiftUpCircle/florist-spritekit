@@ -41,15 +41,23 @@ struct ListeningPageView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Layer 1: Background (stretched to fill)
+                // Layer 1: Background (stretched to fill or panning for prologue)
                 if let backgroundImage = controller.currentScene?.backgroundImage {
                     if backgroundImageExists(backgroundImage) {
-                        Image(backgroundImage)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: geometry.size.width, height: geometry.size.height)
-                            .clipped()
-                            .accessibilityHidden(true)
+                        // Check if this is the prologue background
+                        if backgroundImage == "BackgroundPrologue" {
+                            // Use panning background for prologue
+                            PanningBackgroundView(imageName: backgroundImage)
+                                .accessibilityHidden(true)
+                        } else {
+                            // Regular background for other scenes
+                            Image(backgroundImage)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: geometry.size.width, height: geometry.size.height)
+                                .clipped()
+                                .accessibilityHidden(true)
+                        }
                     } else {
                         // Fallback solid color background for missing image
                         Color.gray.opacity(0.3)
@@ -64,17 +72,19 @@ struct ListeningPageView: View {
                         .accessibilityHidden(true)
                 }
 
-                // Layer 1.5: Dark overlay when in conversation
+                // Layer 1.5: Dark overlay when in conversation (skip for prologue)
                 if controller.currentScene != nil {
-                    Color.black.opacity(0.3)
-                        .ignoresSafeArea()
-                        .accessibilityHidden(true)
+                    if controller.currentScene?.backgroundImage != "BackgroundPrologue" {
+                        Color.black.opacity(0.3)
+                            .ignoresSafeArea()
+                            .accessibilityHidden(true)
+                    }
                 }
 
-                // Layer 2: Character Sprite (centered)
+                // Layer 2: Character Sprite (centered) (skip for prologue)
                 if let scene = controller.currentScene {
-                    // Character Sprite
-                    if let sprite = scene.characterSprite {
+                    // Character Sprite - hide for prologue
+                    if let sprite = scene.characterSprite, scene.backgroundImage != "BackgroundPrologue" {
                         CharacterSpriteView(
                             spriteName: getCharacterAssetName(from: sprite),
                             position: .center
@@ -85,14 +95,16 @@ struct ListeningPageView: View {
                     }
                 }
 
-                // Layer 2.5: BackgroundTable (in front of character)
+                // Layer 2.5: BackgroundTable (in front of character) (skip for prologue)
                 if controller.currentScene != nil {
-                    Image("BackgroundTable")
-                        .resizable()
-                        .scaledToFill()
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                        .clipped()
-                        .accessibilityHidden(true)
+                    if controller.currentScene?.backgroundImage != "BackgroundPrologue" {
+                        Image("BackgroundTable")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                            .clipped()
+                            .accessibilityHidden(true)
+                    }
                 }
 
                 // Layer 3: Dialogue Box (most front, above table)
