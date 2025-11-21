@@ -234,9 +234,12 @@ struct MainMenuView: View {
     
     private func checkForSavedProgress() async {
         do {
-            // Check for progress for the current story from GameProgressManager
+            // Check for progress for the last played story first, then current story
+            let lastPlayedStoryId = GameProgressManager.shared.lastPlayedStoryId
             let currentStoryId = GameProgressManager.shared.currentStoryId
-            let progress = try await ProgressPersistenceManager.shared.loadProgress(for: currentStoryId)
+            let storyToCheck = lastPlayedStoryId ?? currentStoryId
+
+            let progress = try await ProgressPersistenceManager.shared.loadProgress(for: storyToCheck)
             await MainActor.run {
                 savedProgress = progress
             }
@@ -260,8 +263,8 @@ struct MainMenuView: View {
             MemoriesPersistenceManager.shared.resetAllMemories()
             print("✅ Reset all memories")
             
-            // Reset GameProgressManager to first story
-            GameProgressManager.shared.resetToFirstStory()
+            // Reset GameProgressManager to first story (this also clears lastPlayedStoryId)
+            GameProgressManager.shared.resetAllProgress()
             
             // Clear saved progress state
             await MainActor.run {
