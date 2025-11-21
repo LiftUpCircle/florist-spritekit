@@ -38,6 +38,10 @@ class GameFlowCoordinator: ObservableObject {
     func navigateToListening(storyId: String) {
         print("🔄 navigateToListening called for storyId: \(storyId)")
 
+        // Update last played story and page
+        progressManager.updateLastPlayedStory(storyId)
+        progressManager.updateLastGamePage("listening")
+
         // Show loading screen with animation
         withAnimation(.easeIn(duration: 0.3)) {
             showLoadingScreen = true
@@ -61,6 +65,10 @@ class GameFlowCoordinator: ObservableObject {
 
     func navigateToBouquet(storyId: String) {
         print("🔄 navigateToBouquet called for storyId: \(storyId)")
+
+        // Update last played story and page
+        progressManager.updateLastPlayedStory(storyId)
+        progressManager.updateLastGamePage("bouquet")
 
         // Show loading screen with animation
         withAnimation(.easeIn(duration: 0.3)) {
@@ -145,6 +153,9 @@ class GameFlowCoordinator: ObservableObject {
     // The storyId parameter is passed from the BouquetPageWrapper
     func onBouquetComplete(for storyId: String? = nil) {
         let currentStory = storyId ?? currentStoryId
+
+        // Clear the bouquet page state since it's been completed
+        progressManager.updateLastGamePage("listening")
 
         // Check if current story has a second part by naming convention
         do {
@@ -308,20 +319,45 @@ class GameFlowCoordinator: ObservableObject {
     @MainActor
     private func checkForSavedProgress() async {
         do {
-            // Try to load progress for the current story
-            if let progress = try await ProgressPersistenceManager.shared.loadProgress(for: currentStoryId) {
+            // First check if there's a last played story (including part 2)
+            let storyToLoad = progressManager.lastPlayedStoryId ?? currentStoryId
+            let lastPage = progressManager.lastGamePage
+
+            // Check if user was in bouquet page
+            if lastPage == "bouquet", let lastPlayedStory = progressManager.lastPlayedStoryId {
+                print("🌸 Resuming to bouquet page for story: \(lastPlayedStory)")
+                navigateToBouquet(storyId: lastPlayedStory)
+                return
+            }
+
+            // Try to load progress for the story to load
+            if let progress = try await ProgressPersistenceManager.shared.loadProgress(for: storyToLoad) {
                 // Store the progress for restoration
                 savedProgress = progress
                 shouldRestoreProgress = true
 
-                print("✅ Found saved progress: Scene \(progress.currentSceneIndex)")
+                print("✅ Found saved progress for \(storyToLoad): Scene \(progress.currentSceneIndex)")
 
-                // Navigate to listening page with restoration flag
-                navigateToListening(storyId: currentStoryId)
+                // Navigate to the last played story (which could be part 2)
+                navigateToListening(storyId: storyToLoad)
             } else {
-                // No saved progress, start from beginning
-                print("ℹ️ No saved progress found, starting from beginning")
-                navigateToListening(storyId: currentStoryId)
+                // No saved progress for last played story, check current story
+                if storyToLoad != currentStoryId {
+                    print("ℹ️ No saved progress for last played story \(storyToLoad), checking current story")
+                    if let progress = try await ProgressPersistenceManager.shared.loadProgress(for: currentStoryId) {
+                        savedProgress = progress
+                        shouldRestoreProgress = true
+                        print("✅ Found saved progress for current story: Scene \(progress.currentSceneIndex)")
+                        navigateToListening(storyId: currentStoryId)
+                    } else {
+                        print("ℹ️ No saved progress found, starting from beginning")
+                        navigateToListening(storyId: currentStoryId)
+                    }
+                } else {
+                    // No saved progress, start from beginning
+                    print("ℹ️ No saved progress found, starting from beginning")
+                    navigateToListening(storyId: currentStoryId)
+                }
             }
         } catch {
             // If loading fails, start from beginning
