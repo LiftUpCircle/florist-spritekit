@@ -272,6 +272,9 @@ struct ListeningPageView: View {
             }
         }
         .onDisappear {
+            // Stop any playing voice over when leaving the page
+            SettingsManager.shared.stopVoiceOver()
+
             // Save progress when navigating away from the story
             Task {
                 await controller.saveCurrentProgress()

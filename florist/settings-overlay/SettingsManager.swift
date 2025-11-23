@@ -21,6 +21,7 @@ class SettingsManager {
 
     private var audioPlayers: [String: AVAudioPlayer] = [:]
     private var musicPlayer: AVAudioPlayer?
+    private var voiceOverPlayer: AVAudioPlayer?
 
     private init() {
         do {
@@ -107,7 +108,50 @@ class SettingsManager {
     func playPageFlip(volume: Float? = nil) {
         playSound(named: "flippingbook", volume: volume)
     }
-    
+
+    // MARK: - Voice Over
+
+    func playVoiceOver(named voiceName: String, withExtension ext: String = "mp3") {
+        // Voice over respects the sound volume setting, not music
+        guard sfxVolume > 0.0 else { return }
+
+        // Stop any currently playing voice over
+        stopVoiceOver()
+
+        // Try to find the voice over file in assets
+        var url = Bundle.main.url(forResource: "AudioResources/VoiceOver/\(voiceName)", withExtension: ext)
+
+        if url == nil {
+            url = Bundle.main.url(forResource: voiceName, withExtension: ext)
+        }
+
+        guard let voiceURL = url else {
+            print("❌ Voice over file not found: \(voiceName).\(ext)")
+            print("   Tried: AudioResources/VoiceOver/\(voiceName).\(ext)")
+            print("   And: \(voiceName).\(ext)")
+            return
+        }
+
+        do {
+            voiceOverPlayer = try AVAudioPlayer(contentsOf: voiceURL)
+            voiceOverPlayer?.volume = sfxVolume
+            voiceOverPlayer?.prepareToPlay()
+            voiceOverPlayer?.play()
+            print("🎙️ Playing voice over: \(voiceName) at volume \(sfxVolume)")
+        } catch {
+            print("❌ Failed to play voice over \(voiceName).\(ext): \(error)")
+        }
+    }
+
+    func stopVoiceOver() {
+        voiceOverPlayer?.stop()
+        voiceOverPlayer = nil
+    }
+
+    func isVoiceOverPlaying() -> Bool {
+        return voiceOverPlayer?.isPlaying ?? false
+    }
+
     // MARK: - Music Settings
     
     var musicVolume: Float {

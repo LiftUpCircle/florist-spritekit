@@ -10,7 +10,8 @@
       "characterSprite": "robert",
       "characterName": "Maria",
       "dialogue": "Robert! \nYou're early.",
-      "spritePosition": "center"
+      "spritePosition": "center",
+      "storyVoiceOver": "robert_001_vo"
     },
     {
       "id": "robert_002",

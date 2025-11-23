@@ -14,6 +14,7 @@ struct StoryScene: Codable, Identifiable {
     let characterName: String
     let dialogue: String
     let spritePosition: SpritePosition?
+    let storyVoiceOver: String?
     
     enum SpritePosition: String, Codable {
         case left

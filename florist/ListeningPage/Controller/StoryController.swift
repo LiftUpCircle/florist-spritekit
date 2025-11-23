@@ -85,6 +85,11 @@ class StoryController: ObservableObject {
 
             addToHistory(firstScene)
 
+            // Play voice over for the first scene if available
+            if let voiceOver = firstScene.storyVoiceOver {
+                SettingsManager.shared.playVoiceOver(named: voiceOver)
+            }
+
             // Check if there's saved progress to restore from the coordinator
             Task {
                 await restoreProgressIfAvailable()
@@ -119,6 +124,11 @@ class StoryController: ObservableObject {
             isTypingComplete = false
 
             addToHistory(firstScene)
+
+            // Play voice over for the first scene if available
+            if let voiceOver = firstScene.storyVoiceOver {
+                SettingsManager.shared.playVoiceOver(named: voiceOver)
+            }
 
             // Check if there's saved progress to restore from the coordinator
             Task {
@@ -181,7 +191,7 @@ class StoryController: ObservableObject {
         // Restore the saved state
         currentSceneIndex = progress.currentSceneIndex
         currentScene = storyData.scenes[currentSceneIndex]
-        
+
         // Restore dialogue history from persisted entries
         dialogueHistory = progress.dialogueHistory.map { historyEntry in
             DialogueEntry(
@@ -191,9 +201,14 @@ class StoryController: ObservableObject {
                 timestamp: historyEntry.timestamp
             )
         }
-        
+
         isTypingComplete = false
         isStoryComplete = false
+
+        // Play voice over for the restored scene if available
+        if let scene = currentScene, let voiceOver = scene.storyVoiceOver {
+            SettingsManager.shared.playVoiceOver(named: voiceOver)
+        }
         
         print("✅ Restored progress for story '\(progress.storyId)': Scene \(progress.currentSceneIndex) with \(progress.dialogueHistory.count) dialogue entries")
     }
@@ -203,16 +218,24 @@ class StoryController: ObservableObject {
         guard let storyData = storyData else { return }
         guard !isStoryComplete else { return }
         guard isTypingComplete else { return }
-        
+
+        // Stop any currently playing voice over before advancing
+        SettingsManager.shared.stopVoiceOver()
+
         currentSceneIndex += 1
         isTypingComplete = false
-        
+
         if currentSceneIndex < storyData.scenes.count {
             currentScene = storyData.scenes[currentSceneIndex]
             if let scene = currentScene {
                 addToHistory(scene)
+
+                // Play voice over for the new scene if available
+                if let voiceOver = scene.storyVoiceOver {
+                    SettingsManager.shared.playVoiceOver(named: voiceOver)
+                }
             }
-            
+
             // Save progress after advancing to next scene
             Task {
                 await saveCurrentProgress()
@@ -220,7 +243,7 @@ class StoryController: ObservableObject {
         } else {
             // Story is complete - mark it as such
             isStoryComplete = true
-            
+
             // Mark story as complete in persistence
             Task {
                 await markCurrentStoryComplete()
@@ -251,14 +274,22 @@ class StoryController: ObservableObject {
     
     /// Resets the story to the beginning
     func resetStory() {
+        // Stop any currently playing voice over
+        SettingsManager.shared.stopVoiceOver()
+
         currentSceneIndex = 0
         currentScene = storyData?.scenes.first
         dialogueHistory = []
         isStoryComplete = false
         isTypingComplete = false
-        
+
         if let scene = currentScene {
             addToHistory(scene)
+
+            // Play voice over for the first scene if available
+            if let voiceOver = scene.storyVoiceOver {
+                SettingsManager.shared.playVoiceOver(named: voiceOver)
+            }
         }
     }
     
@@ -276,6 +307,9 @@ class StoryController: ObservableObject {
     func skipStory() {
         guard let storyData = storyData else { return }
         guard !isStoryComplete else { return }
+
+        // Stop any currently playing voice over
+        SettingsManager.shared.stopVoiceOver()
 
         // Jump to the last scene index
         currentSceneIndex = storyData.scenes.count
