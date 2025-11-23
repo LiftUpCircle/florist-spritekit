@@ -17,7 +17,7 @@ struct BouquetView: View {
     @State private var showFlowerBook = false
     @State private var dialogueText: String = ""
     @State private var characterName: String = "Hint"
-    @State private var isHintMinimized: Bool = false 
+    @State private var isHintMinimized: Bool = true
 
     init(storyRequirements: StoryFlowerRequirements? = nil, storyId: String? = nil, onBouquetComplete: (() -> Void)? = nil) {
         self.storyRequirements = storyRequirements
