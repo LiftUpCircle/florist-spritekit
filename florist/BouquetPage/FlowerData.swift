@@ -83,14 +83,11 @@ struct StoryFlowerRequirements {
 
         let result: ValidationResult
         if !allMatch {
-            result = .failure(message: "Hmm, something's missing...", missingEmotions: missingEmotions)
-            print("🚫 Result: FAILURE - missing emotions: \(missingEmotions)")
+            result = .failure(message: "Wait a second,something’s not here.", missingEmotions: missingEmotions)
         } else if allPerfect {
             result = .perfectMatch
-            print("🌟 Result: PERFECT MATCH!")
         } else {
             result = .goodMatch
-            print("👍 Result: GOOD MATCH")
         }
 
         return result

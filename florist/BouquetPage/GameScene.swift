@@ -1326,29 +1326,28 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
 
         switch result {
         case .perfectMatch:
-            message = "Perfect Match!"
-            color1 = UIColor(named: "PerfectMatchColor") ?? UIColor(red: 0.8, green: 0.2, blue: 0.4, alpha: 1.0)
-            color2 = UIColor(named: "PerfectMatchColor_2") ?? UIColor(red: 1.0, green: 0.4, blue: 0.6, alpha: 1.0)
-            shadowColor = UIColor(named: "ShadowSuccessColor") ?? .yellow
+            message = "Perfect Match"
+            color1 = UIColor(named: "PerfectMatchColor")!
+            color2 = UIColor(named: "PerfectMatchColor_2")!
+            shadowColor = UIColor(named: "ShadowSuccessColor")!
             hapticType = .success
             shouldShowConfetti = true
 
-            // Add confetti effect for perfect match only
             addSparkleEffect()
 
         case .goodMatch:
-            message = "Good Match!"
-            color1 = UIColor(named: "GoodMatchColor") ?? UIColor(red: 0.3, green: 0.5, blue: 0.8, alpha: 1.0)
-            color2 = UIColor(named: "GoodMatchColor_2") ?? UIColor(red: 0.5, green: 0.7, blue: 1.0, alpha: 1.0)
-            shadowColor = UIColor(named: "ShadowSuccessColor") ?? .yellow
+            message = "Good Match"
+            color1 = UIColor(named: "GoodMatchColor")!
+            color2 = UIColor(named: "GoodMatchColor_2")!
+            shadowColor = UIColor(named: "ShadowSuccessColor")!
             hapticType = .success
-            shouldShowConfetti = false  // No confetti for good match
+            shouldShowConfetti = false
 
         case .failure(let failureMessage, let missingEmotions):
             message = "\(failureMessage)"
-            color1 = UIColor(red: 0.9, green: 0.6, blue: 0.3, alpha: 1.0)
-            color2 = color1  // No cycling for failure
-            shadowColor = .clear
+            color1 = UIColor(named: "FailureMatchColor")!
+            color2 = color1
+            shadowColor = UIColor(named: "ShadowFailureColor")!
             hapticType = .warning
 
             print("Missing emotions: \(missingEmotions.joined(separator: ", "))")
@@ -1387,15 +1386,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
 
         // Add color cycling animation for perfect match and good match
         if case .perfectMatch = result {
-            let colorChange1 = SKAction.colorize(with: color2, colorBlendFactor: 1.0, duration: 0.5)
-            let colorChange2 = SKAction.colorize(with: color1, colorBlendFactor: 1.0, duration: 0.5)
-            let colorSequence = SKAction.sequence([colorChange1, colorChange2])
+            let colorChange1 = SKAction.run { resultLabel.fontColor = color2 }
+            let wait1 = SKAction.wait(forDuration: 0.5)
+            let colorChange2 = SKAction.run { resultLabel.fontColor = color1 }
+            let wait2 = SKAction.wait(forDuration: 0.5)
+            let colorSequence = SKAction.sequence([colorChange1, wait1, colorChange2, wait2])
             let colorRepeat = SKAction.repeatForever(colorSequence)
             resultLabel.run(colorRepeat, withKey: "colorCycle")
         } else if case .goodMatch = result {
-            let colorChange1 = SKAction.colorize(with: color2, colorBlendFactor: 1.0, duration: 0.5)
-            let colorChange2 = SKAction.colorize(with: color1, colorBlendFactor: 1.0, duration: 0.5)
-            let colorSequence = SKAction.sequence([colorChange1, colorChange2])
+            let colorChange1 = SKAction.run { resultLabel.fontColor = color2 }
+            let wait1 = SKAction.wait(forDuration: 0.5)
+            let colorChange2 = SKAction.run { resultLabel.fontColor = color1 }
+            let wait2 = SKAction.wait(forDuration: 0.5)
+            let colorSequence = SKAction.sequence([colorChange1, wait1, colorChange2, wait2])
             let colorRepeat = SKAction.repeatForever(colorSequence)
             resultLabel.run(colorRepeat, withKey: "colorCycle")
         }
