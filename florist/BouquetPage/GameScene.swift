@@ -123,9 +123,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     private var settingButton: SKSpriteNode!
     private var resetButton: SKSpriteNode!
     private var wrapButton: SKSpriteNode!
-    private var mirrorLeftButton: SKSpriteNode!
-    private var mirrorRightButton: SKSpriteNode!
-    private var currentlySelectedFlowerForMirror: FlowerNode?
+//    private var mirrorLeftButton: SKSpriteNode!
+//    private var mirrorRightButton: SKSpriteNode!
+//    private var currentlySelectedFlowerForMirror: FlowerNode?
+    
+    // Rotation gesture
+    private var rotationControl : SKSpriteNode!
+    private var isRotatingFlower: Bool = false
+    private var currentlySelectedFlower: FlowerNode?
+    private var rotationStartX: CGFloat = 0
+    private var initialFlowerRotation: CGFloat = 0
     
     // Layout properties
     private var inventoryRect: CGRect!
@@ -624,38 +631,70 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         }
 
         // Mirror buttons (hidden initially, shown when flower is selected)
-        let mirrorButtonSize: CGFloat = 40
+//        let mirrorButtonSize: CGFloat = 40
 
         // Create SF Symbol images for mirror buttons
-        let leftArrowConfig = UIImage.SymbolConfiguration(pointSize: 24, weight: .bold)
-        let rightArrowConfig = UIImage.SymbolConfiguration(pointSize: 24, weight: .bold)
-
-        if let leftArrowImage = UIImage(systemName: "arrowtriangle.backward.fill", withConfiguration: leftArrowConfig),
-           let rightArrowImage = UIImage(systemName: "arrowtriangle.right.fill", withConfiguration: rightArrowConfig) {
-
-            // Create textures from SF Symbol images
-            let leftTexture = SKTexture(image: leftArrowImage)
-            let rightTexture = SKTexture(image: rightArrowImage)
-
-            // Left mirror button
-            mirrorLeftButton = SKSpriteNode(texture: leftTexture)
-            mirrorLeftButton.size = CGSize(width: mirrorButtonSize, height: mirrorButtonSize)
-            mirrorLeftButton.color = .white
-            mirrorLeftButton.colorBlendFactor = 1.0
-            mirrorLeftButton.zPosition = 150
-            mirrorLeftButton.name = "mirrorLeftButton"
-            mirrorLeftButton.isHidden = true
-            addChild(mirrorLeftButton)
-
-            // Right mirror button
-            mirrorRightButton = SKSpriteNode(texture: rightTexture)
-            mirrorRightButton.size = CGSize(width: mirrorButtonSize, height: mirrorButtonSize)
-            mirrorRightButton.color = .white
-            mirrorRightButton.colorBlendFactor = 1.0
-            mirrorRightButton.zPosition = 150
-            mirrorRightButton.name = "mirrorRightButton"
-            mirrorRightButton.isHidden = true
-            addChild(mirrorRightButton)
+//        let leftArrowConfig = UIImage.SymbolConfiguration(pointSize: 24, weight: .bold)
+//        let rightArrowConfig = UIImage.SymbolConfiguration(pointSize: 24, weight: .bold)
+//
+//        if let leftArrowImage = UIImage(systemName: "arrowtriangle.backward.fill", withConfiguration: leftArrowConfig),
+//           let rightArrowImage = UIImage(systemName: "arrowtriangle.right.fill", withConfiguration: rightArrowConfig) {
+//
+//            // Create textures from SF Symbol images
+//            let leftTexture = SKTexture(image: leftArrowImage)
+//            let rightTexture = SKTexture(image: rightArrowImage)
+//
+//            // Left mirror button
+//            mirrorLeftButton = SKSpriteNode(texture: leftTexture)
+//            mirrorLeftButton.size = CGSize(width: mirrorButtonSize, height: mirrorButtonSize)
+//            mirrorLeftButton.color = .white
+//            mirrorLeftButton.colorBlendFactor = 1.0
+//            mirrorLeftButton.zPosition = 150
+//            mirrorLeftButton.name = "mirrorLeftButton"
+//            mirrorLeftButton.isHidden = true
+//            addChild(mirrorLeftButton)
+//
+//            // Right mirror button
+//            mirrorRightButton = SKSpriteNode(texture: rightTexture)
+//            mirrorRightButton.size = CGSize(width: mirrorButtonSize, height: mirrorButtonSize)
+//            mirrorRightButton.color = .white
+//            mirrorRightButton.colorBlendFactor = 1.0
+//            mirrorRightButton.zPosition = 150
+//            mirrorRightButton.name = "mirrorRightButton"
+//            mirrorRightButton.isHidden = true
+//            addChild(mirrorRightButton)
+//        }
+        
+        let rotationControlSize: CGFloat = 50
+        if let rotationTexture = SKTexture(imageNamed: "ChangeDirection") as SKTexture? {
+            rotationControl = SKSpriteNode(texture: rotationTexture)
+            rotationControl.size = CGSize(width: rotationControlSize, height: rotationControlSize / 2)
+            rotationControl.zPosition = 150
+            rotationControl.name = "rotationControl"
+            rotationControl.isHidden = true
+            addChild(rotationControl)
+        } else {
+            // Fallback: simple circle if texture not found
+            let circle = SKShapeNode(circleOfRadius: rotationControlSize / 2)
+            circle.fillColor = .white
+            circle.strokeColor = .black
+            circle.lineWidth = 2
+            
+            rotationControl = SKSpriteNode()
+            rotationControl.size = CGSize(width: rotationControlSize, height: rotationControlSize)
+            rotationControl.zPosition = 150
+            rotationControl.name = "rotationControl"
+            rotationControl.isHidden = true
+            
+            // Add rotation arrows as visual hint
+            let label = SKLabelNode(text: "↻")
+            label.fontSize = 30
+            label.fontColor = .black
+            label.verticalAlignmentMode = .center
+            rotationControl.addChild(circle)
+            rotationControl.addChild(label)
+            
+            addChild(rotationControl)
         }
     }
     
@@ -668,59 +707,81 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         // Wrap button - use alpha to indicate enabled/disabled state
         wrapButton.alpha = hasFlowers ? 1.0 : 0.5
     }
-
-    private func showMirrorButtons(for flower: FlowerNode) {
-        currentlySelectedFlowerForMirror = flower
-
+    
+    private func showRotationControl(for flower: FlowerNode) {
+        currentlySelectedFlower = flower
+        
         // Convert flower position to scene coordinates
         let flowerWorldPos = bouquetFlowersContainer.convert(flower.position, to: self)
-
-        // Position buttons on left and right of the flower
-        let buttonOffset: CGFloat = 60
-
-        mirrorLeftButton.position = CGPoint(
-            x: flowerWorldPos.x - buttonOffset,
-            y: flowerWorldPos.y + 40
+        
+        // Position rotation control above the flower
+        let buttonOffset: CGFloat = 80
+        rotationControl.position = CGPoint(
+            x: flowerWorldPos.x,
+            y: flowerWorldPos.y + buttonOffset
         )
-        mirrorLeftButton.isHidden = false
-
-        mirrorRightButton.position = CGPoint(
-            x: flowerWorldPos.x + buttonOffset,
-            y: flowerWorldPos.y + 40
-        )
-        mirrorRightButton.isHidden = false
+        rotationControl.isHidden = false
+    }
+    
+    private func hideRotationControl() {
+        rotationControl.isHidden = true
+        rotationControl.removeAllActions()
+        currentlySelectedFlower = nil
+        isRotatingFlower = false
     }
 
-    private func hideMirrorButtons() {
-        mirrorLeftButton.isHidden = true
-        mirrorRightButton.isHidden = true
-        currentlySelectedFlowerForMirror = nil
-    }
+//    private func showMirrorButtons(for flower: FlowerNode) {
+//        currentlySelectedFlowerForMirror = flower
+//
+//        // Convert flower position to scene coordinates
+//        let flowerWorldPos = bouquetFlowersContainer.convert(flower.position, to: self)
+//
+//        // Position buttons on left and right of the flower
+//        let buttonOffset: CGFloat = 60
+//
+//        mirrorLeftButton.position = CGPoint(
+//            x: flowerWorldPos.x - buttonOffset,
+//            y: flowerWorldPos.y + 40
+//        )
+//        mirrorLeftButton.isHidden = false
+//
+//        mirrorRightButton.position = CGPoint(
+//            x: flowerWorldPos.x + buttonOffset,
+//            y: flowerWorldPos.y + 40
+//        )
+//        mirrorRightButton.isHidden = false
+//    }
+//
+//    private func hideMirrorButtons() {
+//        mirrorLeftButton.isHidden = true
+//        mirrorRightButton.isHidden = true
+//        currentlySelectedFlowerForMirror = nil
+//    }
 
-    private func mirrorFlower(_ flower: FlowerNode, direction: String) {
-        // Left button: mirror to face left (negative xScale)
-        // Right button: mirror to face right (positive xScale)
-        if direction == "left" {
-            // Only flip if currently facing right
-            if flower.xScale > 0 {
-                flower.xScale *= -1
-            }
-        } else if direction == "right" {
-            // Only flip if currently facing left
-            if flower.xScale < 0 {
-                flower.xScale *= -1
-            }
-        }
-
-        // Update button positions if flower is still selected
-        if currentlySelectedFlowerForMirror == flower {
-            showMirrorButtons(for: flower)
-        }
-
-        // Haptic feedback
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.impactOccurred()
-    }
+//    private func mirrorFlower(_ flower: FlowerNode, direction: String) {
+//        // Left button: mirror to face left (negative xScale)
+//        // Right button: mirror to face right (positive xScale)
+//        if direction == "left" {
+//            // Only flip if currently facing right
+//            if flower.xScale > 0 {
+//                flower.xScale *= -1
+//            }
+//        } else if direction == "right" {
+//            // Only flip if currently facing left
+//            if flower.xScale < 0 {
+//                flower.xScale *= -1
+//            }
+//        }
+//
+//        // Update button positions if flower is still selected
+//        if currentlySelectedFlowerForMirror == flower {
+//            showMirrorButtons(for: flower)
+//        }
+//
+//        // Haptic feedback
+//        let generator = UIImpactFeedbackGenerator(style: .light)
+//        generator.impactOccurred()
+//    }
 
     // MARK: - Touch Handling
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -733,19 +794,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 return
             }
         }
-        
         let touchedNodes = nodes(at: location)
         
         // Check if touching a button
         for node in touchedNodes {
-            if node.name == "mirrorLeftButton" {
-                if let flower = currentlySelectedFlowerForMirror {
-                    mirrorFlower(flower, direction: "left")
-                }
-                return
-            } else if node.name == "mirrorRightButton" {
-                if let flower = currentlySelectedFlowerForMirror {
-                    mirrorFlower(flower, direction: "right")
+            if node.name == "rotationControl" {
+                // Start rotating the currently selected flower
+                isRotatingFlower = true
+                rotationStartX = location.x
+                if let flower = currentlySelectedFlower {
+                    initialFlowerRotation = flower.zRotation
                 }
                 return
             } else if node.name == "resetButton" {
@@ -832,11 +890,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         }
 
         // If touched elsewhere (not on buttons or flowers), hide mirror buttons
-        hideMirrorButtons()
+        hideRotationControl()
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
+        let location = touch.location(in: self)
         
         // Check if settings overlay is handling the touch
         if let settingsController = settingsOverlayController {
@@ -845,7 +904,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             }
         }
         
-        let location = touch.location(in: self)
+        if isRotatingFlower, let flower = currentlySelectedFlower {
+            let deltaX = location.x - rotationStartX
+            
+            // Convert horizontal movement to rotation angle
+            // Drag right = rotate clockwise, Drag left = rotate counter-clockwise
+            let rotationSensitivity: CGFloat = 0.01 // Adjust for speed of rotation
+            let newRotation = initialFlowerRotation - (deltaX * rotationSensitivity)
+            
+            flower.zRotation = newRotation
+            
+            // Update rotation control position to follow flower
+            let flowerWorldPos = bouquetFlowersContainer.convert(flower.position, to: self)
+            rotationControl.position = CGPoint(
+                x: flowerWorldPos.x,
+                y: flowerWorldPos.y + 80
+            )
+            return
+        }
         
         // Check if we need to start dragging a bouquet flower
         if !isDraggingBouquetFlower && selectedFlower != nil && !isDraggingFromInventory {
@@ -857,7 +933,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 // Start dragging the bouquet flower
                 if let flower = selectedFlower, originalFlowerIndex >= 0 {
                     // Hide mirror buttons when starting to drag
-                    hideMirrorButtons()
+                    hideRotationControl()
                     
                     // Remove from placed flowers
                     placedFlowers.remove(at: originalFlowerIndex)
@@ -909,7 +985,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                     if let flower = potentialFlowerToDrag {
                         
                         // Hide mirror buttons when starting to drag from inventory
-                        hideMirrorButtons()
+                        hideRotationControl()
                         
                         animateCardShrink(flower: flower)
                         
@@ -1025,6 +1101,16 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             touchedNode = nil
             return
         }
+        
+        if isRotatingFlower {
+            isRotatingFlower = false
+            
+            // Haptic feedback on rotation end
+            let generator = UIImpactFeedbackGenerator(style: .light)
+            generator.impactOccurred()
+            
+            return
+        }
 
         // Restore card scale we didnt drag
         if let flower = potentialFlowerToDrag, !gestureDecided {
@@ -1054,7 +1140,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         if selectedFlower != nil && !isDraggingBouquetFlower && draggedFlowerCopy == nil {
             // Just show mirror buttons for the tapped flower
             if let flower = selectedFlower {
-                showMirrorButtons(for: flower)
+                showRotationControl(for: flower)
             }
             selectedFlower = nil
             originalFlowerIndex = -1
@@ -1106,7 +1192,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
 //            showDebugHitboxes(for: draggedFlower)
             
             // Show mirror buttons for the newly placed flower
-            showMirrorButtons(for: draggedFlower)
+            showRotationControl(for: draggedFlower)
 
             // Mark that the user has successfully dragged a flower to the bouquet
             if isDraggingFromInventory {
@@ -1185,6 +1271,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         isScrolling = false
         potentialFlowerToDrag = nil
         gestureDecided = false
+        
+        isRotatingFlower = false
+        hideRotationControl()
     }
     
     // MARK: - Button Handlers
@@ -1192,7 +1281,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         guard !placedFlowers.isEmpty else { return }
 
         // Hide mirror buttons
-        hideMirrorButtons()
+        hideRotationControl()
 
         // Haptic feedback
         let generator = UIImpactFeedbackGenerator(style: .medium)
@@ -1223,7 +1312,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         guard !placedFlowers.isEmpty else { return }
 
         // Hide mirror buttons
-        hideMirrorButtons()
+        hideRotationControl()
 
         // Haptic feedback
         let generator = UIImpactFeedbackGenerator(style: .heavy)
