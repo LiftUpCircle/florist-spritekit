@@ -125,6 +125,14 @@ class SettingsManager {
             url = Bundle.main.url(forResource: voiceName, withExtension: ext)
         }
 
+        // If still not found and we were looking for mp3, try wav as fallback
+        if url == nil && ext == "mp3" {
+            url = Bundle.main.url(forResource: "AudioResources/VoiceOver/\(voiceName)", withExtension: "wav")
+            if url == nil {
+                url = Bundle.main.url(forResource: voiceName, withExtension: "wav")
+            }
+        }
+
         guard let voiceURL = url else {
             print("❌ Voice over file not found: \(voiceName).\(ext)")
             print("   Tried: AudioResources/VoiceOver/\(voiceName).\(ext)")
