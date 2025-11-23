@@ -53,8 +53,8 @@ class GameFlowCoordinator: ObservableObject {
             print("⏱️ Navigating to listening page...")
             self?.navigationPath.append(GamePage.listening(storyId: storyId))
 
-            // Hide loading screen after navigation and view loads
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            // Hide loading screen after all 6 flowers are shown (3 seconds) plus view load time
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
                 withAnimation(.easeOut(duration: 0.3)) {
                     self?.showLoadingScreen = false
                     print("❌ Loading screen set to false")
@@ -81,8 +81,8 @@ class GameFlowCoordinator: ObservableObject {
             print("⏱️ Navigating to bouquet page...")
             self?.navigationPath.append(GamePage.bouquet(storyId: storyId))
 
-            // Hide loading screen after navigation and view loads
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            // Hide loading screen after all 6 flowers are shown (3 seconds) plus view load time
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
                 withAnimation(.easeOut(duration: 0.3)) {
                     self?.showLoadingScreen = false
                     print("❌ Loading screen set to false")
@@ -235,8 +235,8 @@ class GameFlowCoordinator: ObservableObject {
                 print("⏱️ Navigating to next listening page...")
                 self.navigationPath.append(GamePage.listening(storyId: self.currentStoryId))
 
-                // Hide loading screen after navigation and view loads
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                // Hide loading screen after all 6 flowers are shown (3 seconds) plus view load time
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
                     withAnimation(.easeOut(duration: 0.3)) {
                         self.showLoadingScreen = false
                         print("❌ Loading screen set to false after next story")
