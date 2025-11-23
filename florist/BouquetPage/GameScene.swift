@@ -49,6 +49,11 @@ class FlowerNode: SKSpriteNode {
         
         // Copy visual children
         for child in self.children {
+            // Skip selection highlights or debug visual
+            if child.name == "selectionIndicator" || child.name == "debugHitbox" {
+                continue
+            }
+            
             if let childCopy = child.copy() as? SKNode {
                 copy.addChild(childCopy)
             }
@@ -709,7 +714,47 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     }
     
     private func showRotationControl(for flower: FlowerNode) {
+        
+        // Remove glow from previous flower if any
+        if let previousFlower = currentlySelectedFlower, previousFlower != flower {
+            previousFlower.childNode(withName: "selectionIndicator")?.removeFromParent()
+        }
+        
         currentlySelectedFlower = flower
+        
+        // Remove any existing selection indicators
+        flower.childNode(withName: "selectionIndicator")?.removeFromParent()
+        
+        // Create a glowing effect
+        if let texture = flower.texture {
+           // Create a copy of the flower texture with a glow
+            let glowSprite = SKSpriteNode(texture: texture)
+            
+            // Calculate size in parent's coordinate space
+            // Get the flower's current scale (which varies by position)
+            let currentScale = flower.xScale
+            
+            // Calculate the glow size to be consistently 8% larger
+            // We divide by currentScale to counteract the parent's scale
+            let glowSize = CGSize(
+                width: (flower.size.width * 1.02) / currentScale,
+                height: (flower.size.height * 1.02) / currentScale
+            )
+            
+            glowSprite.size = glowSize
+            glowSprite.name = "selectionIndicator"
+            glowSprite.zPosition = -0.1
+            
+            // Add white glow effect
+            glowSprite.color = .black
+            glowSprite.colorBlendFactor = 1.0
+            glowSprite.alpha = 0.7
+            
+            // ensuring the glow doesn't interfere with flower appearance
+            glowSprite.isUserInteractionEnabled = false
+            
+            flower.addChild(glowSprite)
+        }
         
         // Convert flower position to scene coordinates
         let flowerWorldPos = bouquetFlowersContainer.convert(flower.position, to: self)
@@ -726,6 +771,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     private func hideRotationControl() {
         rotationControl.isHidden = true
         rotationControl.removeAllActions()
+        
+        // Remove selection indicator from flower
+        if let flower = currentlySelectedFlower {
+            flower.childNode(withName: "selectionIndicator")?.removeFromParent()
+        }
+        
+        // Remove any orphaned selection indicators
+        for flower in placedFlowers {
+            flower.childNode(withName: "selectionIndicator")?.removeFromParent()
+        }
+        
         currentlySelectedFlower = nil
         isRotatingFlower = false
     }
@@ -836,6 +892,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         
         // Check if we're touching within the inventory area
         if inventoryRect.contains(location) {
+            // Hide rotation control when touching inventory
+            hideRotationControl()
+            
             // Store initial touch position
             touchStartLocation = location
             scrollStartY = location.y
@@ -862,16 +921,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             return
         }
         
-        // Check if we touched a flower in the bouquet
-        let containerLocation = touch.location(in: bouquetFlowersContainer)
-        
-        // Convert to world coordinates for physics query
-        let worldLocation = bouquetFlowersContainer.convert(containerLocation, to: self)
+        // check if we touched a placed flower in the bouquet
+        // get touch location in bouquet container coordinates
+        let sceneLocation = touch.location(in: self)
         
         for (index, flower) in placedFlowers.enumerated().reversed() {
             if let physicsBody = flower.physicsBody {
                 // Check if the touch point is within the flower's physics body
-                if physicsWorld.body(at: worldLocation) == physicsBody {
+                if physicsWorld.body(at: sceneLocation) == physicsBody {
                     
                     // Store touch info but don't start dragging yet
                     selectedFlower = flower
@@ -889,7 +946,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             }
         }
 
-        // If touched elsewhere (not on buttons or flowers), hide mirror buttons
+        // If touched elsewhere (not on buttons or flowers), hide rotation buttons
         hideRotationControl()
     }
     
@@ -932,7 +989,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             if deltaX > scrollThreshold || deltaY > scrollThreshold {
                 // Start dragging the bouquet flower
                 if let flower = selectedFlower, originalFlowerIndex >= 0 {
-                    // Hide mirror buttons when starting to drag
+                    // Hide rotation buttons when starting to drag
                     hideRotationControl()
                     
                     // Remove from placed flowers
@@ -984,7 +1041,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                     // Create the flower copy for dragging
                     if let flower = potentialFlowerToDrag {
                         
-                        // Hide mirror buttons when starting to drag from inventory
+                        // Hide rotation buttons when starting to drag from inventory
                         hideRotationControl()
                         
                         animateCardShrink(flower: flower)
@@ -1138,8 +1195,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
 
         // Handle case where bouquet flower was tapped but not dragged
         if selectedFlower != nil && !isDraggingBouquetFlower && draggedFlowerCopy == nil {
-            // Just show mirror buttons for the tapped flower
-            if let flower = selectedFlower {
+            // Just show rotation buttons for the tapped flower
+            if let flower = selectedFlower, placedFlowers.contains(where: { $0 == flower }) {
                 showRotationControl(for: flower)
             }
             selectedFlower = nil
@@ -1178,10 +1235,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             bouquetFlowersContainer.addChild(draggedFlower)
             placedFlowers.append(draggedFlower)
             
+            // Mark as not in inventory
+            draggedFlower.isInInventory = false
+            
             if let texture = draggedFlower.texture {
                 draggedFlower.physicsBody = SKPhysicsBody(
                     texture: texture,
-                    alphaThreshold: 0.1,
+                    alphaThreshold: 0.01,
                     size: draggedFlower.size)
                 draggedFlower.physicsBody?.isDynamic = false
                 draggedFlower.physicsBody?.categoryBitMask = 0x4
@@ -1191,7 +1251,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             // MARK: - Debug show hitbox
 //            showDebugHitboxes(for: draggedFlower)
             
-            // Show mirror buttons for the newly placed flower
+            // Show Rotation buttons for the newly placed flower
             showRotationControl(for: draggedFlower)
 
             // Mark that the user has successfully dragged a flower to the bouquet
@@ -1280,7 +1340,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     private func handleResetButton() {
         guard !placedFlowers.isEmpty else { return }
 
-        // Hide mirror buttons
+        // Hide rotation buttons
         hideRotationControl()
 
         // Haptic feedback
@@ -1311,7 +1371,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     private func handleWrapButton() {
         guard !placedFlowers.isEmpty else { return }
 
-        // Hide mirror buttons
+        // Hide rotation buttons
         hideRotationControl()
 
         // Haptic feedback
