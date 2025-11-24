@@ -52,8 +52,6 @@ class StoryController: ObservableObject {
     private var storyData: StoryData?
     private var flowCoordinator: GameFlowCoordinator?
     
-    // Use shared tracker to persist character appearances across story parts
-    private let characterTracker = CharacterAppearanceTracker.shared
     
     // MARK: - Initialization
     
@@ -86,8 +84,6 @@ class StoryController: ObservableObject {
             isStoryComplete = false
             isTypingComplete = false
             
-            // Mark first scene's character as appeared (if main character)
-            characterTracker.markAsAppeared(characterName: firstScene.characterName)
 
             addToHistory(firstScene)
 
@@ -124,8 +120,6 @@ class StoryController: ObservableObject {
             isStoryComplete = false
             isTypingComplete = false
             
-            // Mark first scene's character as appeared (if main character)
-            characterTracker.markAsAppeared(characterName: firstScene.characterName)
 
             addToHistory(firstScene)
 
@@ -204,7 +198,6 @@ class StoryController: ObservableObject {
         // Mark all characters that have appeared up to the restored scene
         for i in 0...currentSceneIndex {
             let scene = storyData.scenes[i]
-            characterTracker.markAsAppeared(characterName: scene.characterName)
         }
         
         isTypingComplete = false
@@ -394,8 +387,7 @@ class StoryController: ObservableObject {
                     // Mark all characters that have appeared up to the restored scene
                     for i in 0...currentSceneIndex {
                         let scene = storyData.scenes[i]
-                        characterTracker.markAsAppeared(characterName: scene.characterName)
-                    }
+                                }
                     
                     isTypingComplete = false
                     isStoryComplete = false

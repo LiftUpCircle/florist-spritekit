@@ -265,11 +265,7 @@ struct MainMenuView: View {
             
             // Reset GameProgressManager to first story (this also clears lastPlayedStoryId)
             GameProgressManager.shared.resetAllProgress()
-            
-            // Reset character appearance tracking
-            CharacterAppearanceTracker.shared.reset()
-            print("✅ Reset character appearance tracking")
-            
+
             // Clear saved progress state
             await MainActor.run {
                 savedProgress = nil
