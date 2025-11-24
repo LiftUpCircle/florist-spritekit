@@ -277,17 +277,18 @@ class GameFlowCoordinator: ObservableObject {
                     withAnimation(.easeOut(duration: 0.3)) {
                         self.showLoadingScreen = false
                         print("❌ Loading screen set to false after next story")
-                
-                // Only play doorbell sound for first part stories
-                // Check by filename pattern: "story_abigail_1" (2 underscores) = first part
-                let isFirstPartStory = self.isFirstPartStoryByFilename(storyId: self.currentStoryId)
-                
-                if isFirstPartStory {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                        SettingsManager.shared.playSound(named: "DoorBellAudioClose")
+                    }
+
+                    // Only play doorbell sound for first part stories
+                    // Check by filename pattern: "story_abigail_1" (2 underscores) = first part
+                    let isFirstPartStory = self.isFirstPartStoryByFilename(storyId: self.currentStoryId)
+
+                    if isFirstPartStory {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            SettingsManager.shared.playSound(named: "DoorBellAudioClose")
+                        }
                     }
                 }
-            }
             }
         } else {
             // All stories complete, return to main menu
