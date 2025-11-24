@@ -52,6 +52,9 @@ class StoryController: ObservableObject {
     private var storyData: StoryData?
     private var flowCoordinator: GameFlowCoordinator?
     
+    // Use shared tracker to persist character appearances across story parts
+    private let characterTracker = CharacterAppearanceTracker.shared
+    
     // MARK: - Initialization
     
     init() {
@@ -82,6 +85,9 @@ class StoryController: ObservableObject {
             dialogueHistory = []
             isStoryComplete = false
             isTypingComplete = false
+            
+            // Mark first scene's character as appeared (if main character)
+            characterTracker.markAsAppeared(characterName: firstScene.characterName)
 
             addToHistory(firstScene)
 
@@ -117,6 +123,9 @@ class StoryController: ObservableObject {
             dialogueHistory = []
             isStoryComplete = false
             isTypingComplete = false
+            
+            // Mark first scene's character as appeared (if main character)
+            characterTracker.markAsAppeared(characterName: firstScene.characterName)
 
             addToHistory(firstScene)
 
@@ -192,6 +201,12 @@ class StoryController: ObservableObject {
             )
         }
         
+        // Mark all characters that have appeared up to the restored scene
+        for i in 0...currentSceneIndex {
+            let scene = storyData.scenes[i]
+            characterTracker.markAsAppeared(characterName: scene.characterName)
+        }
+        
         isTypingComplete = false
         isStoryComplete = false
         
@@ -204,18 +219,28 @@ class StoryController: ObservableObject {
         guard !isStoryComplete else { return }
         guard isTypingComplete else { return }
         
-        currentSceneIndex += 1
-        isTypingComplete = false
+        let nextSceneIndex = currentSceneIndex + 1
         
-        if currentSceneIndex < storyData.scenes.count {
-            currentScene = storyData.scenes[currentSceneIndex]
-            if let scene = currentScene {
-                addToHistory(scene)
-            }
+        if nextSceneIndex < storyData.scenes.count {
+            let nextScene = storyData.scenes[nextSceneIndex]
+            let characterName = nextScene.characterName
             
-            // Save progress after advancing to next scene
-            Task {
-                await saveCurrentProgress()
+            // Check if this is a main character appearing for the first time in a first part story
+            let isFirstAppearance = characterTracker.checkAndMarkFirstAppearance(
+                characterName: characterName,
+                storyId: storyData.storyId
+            )
+            
+            if isFirstAppearance {
+                // Play doorbell sound and delay scene change
+                SettingsManager.shared.playSound(named: "DoorBellAudioClose")
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                    self?.performSceneChange(to: nextSceneIndex, in: storyData, scene: nextScene)
+                }
+            } else {
+                // No delay, proceed immediately
+                performSceneChange(to: nextSceneIndex, in: storyData, scene: nextScene)
             }
         } else {
             // Story is complete - mark it as such
@@ -227,6 +252,21 @@ class StoryController: ObservableObject {
             }
         }
     }
+    
+    /// Performs the actual scene change
+    private func performSceneChange(to sceneIndex: Int, in storyData: StoryData, scene: StoryScene) {
+        currentSceneIndex = sceneIndex
+        currentScene = scene
+        isTypingComplete = false
+        
+        addToHistory(scene)
+        
+        // Save progress after advancing to next scene
+        Task {
+            await saveCurrentProgress()
+        }
+    }
+    
     
     /// Called when typing animation completes
     func onTypingComplete() {
@@ -364,6 +404,12 @@ class StoryController: ObservableObject {
                             dialogue: historyEntry.dialogue,
                             timestamp: historyEntry.timestamp
                         )
+                    }
+                    
+                    // Mark all characters that have appeared up to the restored scene
+                    for i in 0...currentSceneIndex {
+                        let scene = storyData.scenes[i]
+                        characterTracker.markAsAppeared(characterName: scene.characterName)
                     }
                     
                     isTypingComplete = false

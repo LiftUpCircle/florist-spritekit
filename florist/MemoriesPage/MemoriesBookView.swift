@@ -15,8 +15,8 @@ struct MemoriesBookView: View {
     // Character data
     private let characters = [
         CharacterMemory(id: "robert", name: "Robert", imageName: "MemoriesRobert"),
-        CharacterMemory(id: "abigail", name: "Abigail", imageName: "MemoriesAbigail"),
-        CharacterMemory(id: "michael", name: "Michael", imageName: "MemoriesMichael")
+        CharacterMemory(id: "michael", name: "Michael", imageName: "MemoriesMichael"),
+        CharacterMemory(id: "abigail", name: "Abigail", imageName: "MemoriesAbigail")
     ]
 
     var body: some View {
@@ -29,44 +29,84 @@ struct MemoriesBookView: View {
                         onDismiss()
                     }
 
-                VStack(spacing: 10) {
-                    // Memories book
-                    ZStack {
-                        // Book background
-                        Image("MemoriesBook")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: min(geometry.size.width * 0.75, 750),
-                                   height: min(geometry.size.height * 0.90, 900))
-
-                        // Book content
-                        MemoriesBookContentView(
-                            character: characters[selectedCharacterIndex],
-                            controller: controller
-                        )
+                // Centered book with arrow buttons
+                ZStack {
+                    // Book background
+                    Image("MemoriesBook")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
                         .frame(width: min(geometry.size.width * 0.75, 750),
                                height: min(geometry.size.height * 0.90, 900))
-                    }
 
-                    // Character tabs horizontally at bottom
-                    HStack(spacing: 30) {
-                        ForEach(Array(characters.enumerated()), id: \.offset) { index, character in
-                            CharacterTabButton(
-                                characterName: character.name,
-                                isSelected: selectedCharacterIndex == index
-                            ) {
-                                selectedCharacterIndex = index
+                    // Book content with independent transitions for each page
+                    MemoriesBookContentView(
+                        character: characters[selectedCharacterIndex],
+                        controller: controller
+                    )
+                    .frame(width: min(geometry.size.width * 0.75, 750),
+                           height: min(geometry.size.height * 0.90, 900))
+
+                    // Navigation arrows
+                    HStack {
+                        // Previous Button (Left Arrow)
+                        if selectedCharacterIndex > 0 {
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    selectedCharacterIndex -= 1
+                                }
+                                playFlippingSound()
+                            }) {
+                                Image(systemName: "chevron.left")
+                                    .font(.system(size: 24, weight: .bold))
+                                    .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.3))
+                                    .background(
+                                        Circle()
+                                            .fill(Color.white)
+                                            .frame(width: 44, height: 44)
+                                    )
                             }
+                            .padding(.leading, 11)
+                        }
+
+                        Spacer()
+
+                        // Next Button (Right Arrow)
+                        if selectedCharacterIndex < characters.count - 1 {
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.3)) {
+                                    selectedCharacterIndex += 1
+                                }
+                                playFlippingSound()
+                            }) {
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 24, weight: .bold))
+                                    .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.3))
+                                    .background(
+                                        Circle()
+                                            .fill(Color.white)
+                                            .frame(width: 44, height: 44)
+                                    )
+                            }
+                            .padding(.trailing, 15)
                         }
                     }
-                    .padding(.bottom, 20)
+                    .frame(width: min(geometry.size.width * 0.65, 650),
+                           height: min(geometry.size.height * 0.85, 850))
                 }
             }
         }
         .onAppear {
             controller.refreshSavedBouquets()
+            // Preload flipping sound
+            SettingsManager.shared.preloadSound(named: "flippingbook")
         }
         .statusBar(hidden: true)
+    }
+
+    // Helper function to play flipping sound
+    private func playFlippingSound() {
+        print("🎵 Page flip - playing flipping sound")
+        SettingsManager.shared.playPageFlip()
     }
 }
 
@@ -112,7 +152,7 @@ struct MemoriesBookContentView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // Left page - Character portrait
+            // Left page - Character portrait (fade animation only)
             VStack {
                 Spacer()
 
@@ -125,8 +165,10 @@ struct MemoriesBookContentView: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.leading, 80)
+            .id(character.id) // Force view recreation
+            .transition(.opacity) // Fade only for character portrait
 
-            // Right page - Bouquet list
+            // Right page - Bouquet list (slide animation)
             VStack(alignment: .leading, spacing: 6) {
                 Text("Bouquets")
                     .font(.bodyGaegu)
@@ -155,6 +197,8 @@ struct MemoriesBookContentView: View {
             .padding(.leading, 18)
             .padding(.trailing, 80)
             .padding(.vertical, 40)
+            .id("\(character.id)_bouquets") // Force view recreation with unique id
+            .transition(.opacity.combined(with: .move(edge: .trailing))) // Slide for bouquet list
         }
     }
 }

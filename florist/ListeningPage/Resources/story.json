@@ -39,34 +39,6 @@
       "isSecondPart": true,
       "skipBouquet": true
     },
-    "abigail_1_1": {
-      "id": "story_abigail_1_1",
-      "file": "story_abigail_1.json",
-      "characterId": "abigail",
-      "characterName": "Abigail Surya Kencana",
-      "title": "Abigail's Hope",
-      "unlocked": true,
-      "order": 3,
-      "hintText": "The kind that feels safe... quiet but not sad",
-      "requirements": [
-        {
-          "emotion": "Serenity",
-          "minimumCount": 1,
-          "idealCount": 3
-        }
-      ]
-    },
-    "abigail_1_2": {
-      "id": "story_abigail_1_2",
-      "file": "story_abigail_1_2.json",
-      "characterId": "abigail",
-      "characterName": "Abigail Surya Kencana",
-      "title": "Abigail's Hope (Part 2)",
-      "unlocked": false,
-      "order": 4,
-      "isSecondPart": true,
-      "skipBouquet": true
-    },
     "michael_1_1": {
       "id": "story_michael_1_1",
       "file": "story_michael_1.json",
@@ -74,7 +46,7 @@
       "characterName": "Michael Kosasih",
       "title": "Michael's Gift",
       "unlocked": true,
-      "order": 5,
+      "order": 3,
       "hintText": "Something yellow... so you don't forget to smile",
       "requirements": [
         {
@@ -90,6 +62,34 @@
       "characterId": "michael",
       "characterName": "Michael Kosasih",
       "title": "Michael's Gift (Part 2)",
+      "unlocked": false,
+      "order": 4,
+      "isSecondPart": true,
+      "skipBouquet": true
+    },
+    "abigail_1_1": {
+      "id": "story_abigail_1_1",
+      "file": "story_abigail_1.json",
+      "characterId": "abigail",
+      "characterName": "Abigail Surya Kencana",
+      "title": "Abigail's Hope",
+      "unlocked": true,
+      "order": 5,
+      "hintText": "The kind that feels safe... quiet but not sad",
+      "requirements": [
+        {
+          "emotion": "Serenity",
+          "minimumCount": 1,
+          "idealCount": 3
+        }
+      ]
+    },
+    "abigail_1_2": {
+      "id": "story_abigail_1_2",
+      "file": "story_abigail_1_2.json",
+      "characterId": "abigail",
+      "characterName": "Abigail Surya Kencana",
+      "title": "Abigail's Hope (Part 2)",
       "unlocked": false,
       "order": 6,
       "isSecondPart": true,
