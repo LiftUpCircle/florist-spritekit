@@ -466,10 +466,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             y: inventoryRect.maxY + 10
         )
         titleBackground.zPosition = 9
+        titleBackground.name = "titleBackground"
         addChild(titleBackground)
-        
-        
-        
+
+
+
         // Title label above inventory
         let titleLabel = SKLabelNode(text: "Choose The Flowers")
         titleLabel.fontName = GaeguTypography.boldFontName
@@ -481,6 +482,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         )
         titleLabel.verticalAlignmentMode = .center
         titleLabel.zPosition = 10
+        titleLabel.name = "titleLabel"
         addChild(titleLabel)
         
         // Get available flowers from database
@@ -1547,47 +1549,84 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         print("Privacy tapped")
     }
     
+    private func hideInventoryUI() {
+        // Hide inventory scroll node (all flower cards)
+        inventoryCropNode.run(SKAction.fadeOut(withDuration: 0.3))
+
+        // Hide "Choose The Flowers" title label and background by finding them
+        if let titleLabel = self.childNode(withName: "//titleLabel") as? SKLabelNode {
+            titleLabel.run(SKAction.fadeOut(withDuration: 0.3))
+        }
+        if let titleBackground = self.childNode(withName: "//titleBackground") as? SKShapeNode {
+            titleBackground.run(SKAction.fadeOut(withDuration: 0.3))
+        }
+
+        // Hide reset and wrap buttons
+        resetButton.run(SKAction.fadeOut(withDuration: 0.3))
+        wrapButton.run(SKAction.fadeOut(withDuration: 0.3))
+    }
+
     private func showValidationResult(_ result: StoryFlowerRequirements.ValidationResult) {
         var message: String
-        var color: UIColor
+        var color1: UIColor  // Primary color for text
+        var color2: UIColor  // Secondary color for cycling
+        var shadowColor: UIColor
         var hapticType: UINotificationFeedbackGenerator.FeedbackType
-        
+        var shouldShowConfetti = false
+
         switch result {
         case .perfectMatch:
-            message = "Perfect Match!"
-            color = UIColor(red: 0.2, green: 0.8, blue: 0.3, alpha: 1.0)
+            message = "Perfect Match"
+            color1 = UIColor(named: "PerfectMatchColor")!
+            color2 = UIColor(named: "PerfectMatchColor_2")!
+            shadowColor = UIColor(named: "ShadowSuccessColor")!
             hapticType = .success
-            
-            // Add sparkle effect
+            shouldShowConfetti = true
+
             addSparkleEffect()
-            
+            hideInventoryUI()
+
         case .goodMatch:
-            message = "Good Match!"
-            color = UIColor(red: 0.3, green: 0.6, blue: 0.8, alpha: 1.0)
+            message = "Good Match"
+            color1 = UIColor(named: "GoodMatchColor")!
+            color2 = UIColor(named: "GoodMatchColor_2")!
+            shadowColor = UIColor(named: "ShadowSuccessColor")!
             hapticType = .success
-            
+            shouldShowConfetti = false
+
+            hideInventoryUI()
+
         case .failure(let failureMessage, let missingEmotions):
             message = "\(failureMessage)"
-            color = UIColor(red: 0.9, green: 0.6, blue: 0.3, alpha: 1.0)
+            color1 = UIColor(named: "FailureMatchColor")!
+            color2 = color1
+            shadowColor = UIColor(named: "ShadowFailureColor")!
             hapticType = .warning
-            
+
             print("Missing emotions: \(missingEmotions.joined(separator: ", "))")
         }
-        
+
         // Haptic feedback
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(hapticType)
-        
+
+        // Add shadow for perfect match and good match
+        if case .perfectMatch = result {
+            addShadowLabel(message: message, shadowColor: shadowColor)
+        } else if case .goodMatch = result {
+            addShadowLabel(message: message, shadowColor: shadowColor)
+        }
+
         // Show result label
         let resultLabel = SKLabelNode(text: message)
         resultLabel.fontName = GaeguTypography.boldFontName
         resultLabel.fontSize = FontSize.largeTitle
-        resultLabel.fontColor = color
+        resultLabel.fontColor = color1  // Start with color1
         resultLabel.position = CGPoint(x: size.width / 2, y: size.height / 2)
         resultLabel.zPosition = 250
         resultLabel.alpha = 0
         addChild(resultLabel)
-        
+
         // Animate result
         let fadeIn = SKAction.fadeIn(withDuration: 0.3)
         let scale = SKAction.sequence([
@@ -1597,8 +1636,56 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         let wait = SKAction.wait(forDuration: 2.0)
         let fadeOut = SKAction.fadeOut(withDuration: 0.5)
         let remove = SKAction.removeFromParent()
-        
+
+        // Add color cycling animation for perfect match and good match
+        if case .perfectMatch = result {
+            let colorChange1 = SKAction.run { resultLabel.fontColor = color2 }
+            let wait1 = SKAction.wait(forDuration: 0.5)
+            let colorChange2 = SKAction.run { resultLabel.fontColor = color1 }
+            let wait2 = SKAction.wait(forDuration: 0.5)
+            let colorSequence = SKAction.sequence([colorChange1, wait1, colorChange2, wait2])
+            let colorRepeat = SKAction.repeatForever(colorSequence)
+            resultLabel.run(colorRepeat, withKey: "colorCycle")
+        } else if case .goodMatch = result {
+            let colorChange1 = SKAction.run { resultLabel.fontColor = color2 }
+            let wait1 = SKAction.wait(forDuration: 0.5)
+            let colorChange2 = SKAction.run { resultLabel.fontColor = color1 }
+            let wait2 = SKAction.wait(forDuration: 0.5)
+            let colorSequence = SKAction.sequence([colorChange1, wait1, colorChange2, wait2])
+            let colorRepeat = SKAction.repeatForever(colorSequence)
+            resultLabel.run(colorRepeat, withKey: "colorCycle")
+        }
+
         resultLabel.run(SKAction.sequence([
+            SKAction.group([fadeIn, scale]),
+            wait,
+            SKAction.run { resultLabel.removeAction(forKey: "colorCycle") },
+            fadeOut,
+            remove
+        ]))
+    }
+
+    private func addShadowLabel(message: String, shadowColor: UIColor) {
+        let shadowLabel = SKLabelNode(text: message)
+        shadowLabel.fontName = GaeguTypography.boldFontName
+        shadowLabel.fontSize = FontSize.largeTitle
+        shadowLabel.fontColor = shadowColor
+        shadowLabel.position = CGPoint(x: size.width / 2 + 3, y: size.height / 2 - 3)
+        shadowLabel.zPosition = 249  // Just behind the main text
+        shadowLabel.alpha = 0
+        addChild(shadowLabel)
+
+        // Animate shadow
+        let fadeIn = SKAction.fadeIn(withDuration: 0.3)
+        let scale = SKAction.sequence([
+            SKAction.scale(to: 1.2, duration: 0.2),
+            SKAction.scale(to: 1.0, duration: 0.2)
+        ])
+        let wait = SKAction.wait(forDuration: 2.0)
+        let fadeOut = SKAction.fadeOut(withDuration: 0.5)
+        let remove = SKAction.removeFromParent()
+
+        shadowLabel.run(SKAction.sequence([
             SKAction.group([fadeIn, scale]),
             wait,
             fadeOut,
@@ -1607,27 +1694,34 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     }
     
     private func addSparkleEffect() {
-        // Add sparkles around the bouquet area
-        for _ in 0..<15 {
-            let sparkle = SKShapeNode(circleOfRadius: 4)
-            sparkle.fillColor = .yellow
-            sparkle.strokeColor = .orange
-            sparkle.position = CGPoint(
-                x: bouquetRect.midX + CGFloat.random(in: -150...150),
-                y: bouquetRect.midY + CGFloat.random(in: -150...150)
-            )
-            sparkle.zPosition = 150
-            addChild(sparkle)
-            
-            let fadeOut = SKAction.fadeOut(withDuration: 1.0)
-            let scaleUp = SKAction.scale(to: 2.0, duration: 1.0)
-            let remove = SKAction.removeFromParent()
-            
-            sparkle.run(SKAction.sequence([
-                SKAction.group([fadeOut, scaleUp]),
-                remove
-            ]))
-        }
+        // Add confetti effect behind the bouquet with animation
+        let confettiTexture = SKTexture(imageNamed: "ConfettiEffect")
+        let confetti = SKSpriteNode(texture: confettiTexture)
+        confetti.position = CGPoint(x: bouquetRect.midX, y: bouquetRect.midY)
+        confetti.size = CGSize(width: bouquetRect.width * 0.9, height: bouquetRect.height * 0.9)
+        confetti.zPosition = 5  // Behind bouquet (bouquet is at 10)
+        confetti.alpha = 0.75  // Start at 75% opacity
+        addChild(confetti)
+
+        // Create cycling animation: opacity 75% -> 100% and scale 1x -> 1.2x
+        let fadeIn = SKAction.fadeAlpha(to: 1.0, duration: 0.5)
+        let fadeOut = SKAction.fadeAlpha(to: 0.75, duration: 0.5)
+        let fadeSequence = SKAction.sequence([fadeIn, fadeOut])
+        let fadeRepeat = SKAction.repeatForever(fadeSequence)
+
+        let scaleUp = SKAction.scale(to: 1.2, duration: 0.5)
+        let scaleDown = SKAction.scale(to: 1.0, duration: 0.5)
+        let scaleSequence = SKAction.sequence([scaleUp, scaleDown])
+        let scaleRepeat = SKAction.repeatForever(scaleSequence)
+
+        // Run both animations together
+        confetti.run(SKAction.group([fadeRepeat, scaleRepeat]))
+
+        // Remove after 3 seconds (3 complete cycles)
+        let wait = SKAction.wait(forDuration: 3.0)
+        let fadeOutFinal = SKAction.fadeOut(withDuration: 0.5)
+        let remove = SKAction.removeFromParent()
+        confetti.run(SKAction.sequence([wait, fadeOutFinal, remove]))
     }
     
     // MARK: - Public Methods

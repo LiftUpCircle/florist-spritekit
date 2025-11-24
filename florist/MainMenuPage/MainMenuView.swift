@@ -265,7 +265,7 @@ struct MainMenuView: View {
             
             // Reset GameProgressManager to first story (this also clears lastPlayedStoryId)
             GameProgressManager.shared.resetAllProgress()
-            
+
             // Clear saved progress state
             await MainActor.run {
                 savedProgress = nil

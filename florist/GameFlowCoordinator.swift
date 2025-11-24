@@ -35,12 +35,15 @@ class GameFlowCoordinator: ObservableObject {
     }
 
 
-    func navigateToListening(storyId: String) {
+    func navigateToListening(storyId: String, playDoorbell: Bool = false) {
         print("🔄 navigateToListening called for storyId: \(storyId)")
 
         // Update last played story and page
         progressManager.updateLastPlayedStory(storyId)
         progressManager.updateLastGamePage("listening")
+
+        // Check if doorbell should play for first part stories
+        let shouldPlayDoorbell = playDoorbell && isFirstPartStoryByFilename(storyId: storyId)
 
         // Show loading screen with animation
         withAnimation(.easeIn(duration: 0.3)) {
@@ -53,11 +56,18 @@ class GameFlowCoordinator: ObservableObject {
             print("⏱️ Navigating to listening page...")
             self?.navigationPath.append(GamePage.listening(storyId: storyId))
 
-            // Hide loading screen after navigation and view loads
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            // Hide loading screen after all 6 flowers are shown (3 seconds) plus view load time
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
                 withAnimation(.easeOut(duration: 0.3)) {
                     self?.showLoadingScreen = false
                     print("❌ Loading screen set to false")
+                }
+
+                // Play doorbell sound if needed
+                if shouldPlayDoorbell {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        SettingsManager.shared.playSound(named: "DoorBellAudioClose")
+                    }
                 }
             }
         }
@@ -81,8 +91,8 @@ class GameFlowCoordinator: ObservableObject {
             print("⏱️ Navigating to bouquet page...")
             self?.navigationPath.append(GamePage.bouquet(storyId: storyId))
 
-            // Hide loading screen after navigation and view loads
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            // Hide loading screen after all 6 flowers are shown (3 seconds) plus view load time
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
                 withAnimation(.easeOut(duration: 0.3)) {
                     self?.showLoadingScreen = false
                     print("❌ Loading screen set to false")
@@ -102,116 +112,60 @@ class GameFlowCoordinator: ObservableObject {
     // Called when a story completes without needing a bouquet (e.g., prologue, second parts)
     func onStoryCompleteNoBouquet(for storyId: String? = nil) {
         let completedStory = storyId ?? currentStoryId
+        progressManager.completeCurrentStory()
 
-        // Check if this is a second part story
-        do {
-            let storyIndex = try StoryManager.shared.loadStoryIndex()
-            if let story = storyIndex.stories[completedStory],
-               story.isSecondPart == true {
-                // This is a second part - now mark the main story as complete and continue
-                progressManager.completeCurrentStory()
-
-                // Continue to next story
-                if progressManager.hasMoreStories {
-                    progressManager.moveToNextStory()
-                    navigateToListening(storyId: currentStoryId)
-                } else {
-                    // All stories complete, return to main menu
-                    print("🎉 All stories completed!")
-                    returnToMainMenu()
-                }
-            } else {
-                // Normal story without bouquet (like prologue)
-                progressManager.completeCurrentStory()
-
-                // Continue to next story
-                if progressManager.hasMoreStories {
-                    progressManager.moveToNextStory()
-                    navigateToListening(storyId: currentStoryId)
-                } else {
-                    // All stories complete, return to main menu
-                    print("🎉 All stories completed!")
-                    returnToMainMenu()
-                }
-            }
-        } catch {
-            print("⚠️ Failed to check story type: \(error)")
-            // Default behavior
-            progressManager.completeCurrentStory()
-
-            if progressManager.hasMoreStories {
-                progressManager.moveToNextStory()
-                navigateToListening(storyId: currentStoryId)
-            } else {
-                print("🎉 All stories completed!")
-                returnToMainMenu()
-            }
+        // Continue to next story or return to main menu
+        if progressManager.hasMoreStories {
+            progressManager.moveToNextStory()
+            navigateToListening(storyId: currentStoryId, playDoorbell: true)
+        } else {
+            print("🎉 All stories completed!")
+            returnToMainMenu()
         }
     }
 
     // Called when bouquet is successfully wrapped
-    // The storyId parameter is passed from the BouquetPageWrapper
     func onBouquetComplete(for storyId: String? = nil) {
         let currentStory = storyId ?? currentStoryId
 
         // Clear the bouquet page state since it's been completed
         progressManager.updateLastGamePage("listening")
 
-        // Check if current story has a second part by naming convention
-        do {
-            let storyIndex = try StoryManager.shared.loadStoryIndex()
+        // Show toast notification
+        let characterName = getCharacterName(from: currentStory)
+        toastMessage = "Bouquet for \(characterName) saved to memories!"
+        showBouquetSavedToast = true
 
-            // Infer second part ID from naming convention
-            // Pattern: character_arc_part (e.g., robert_1_1 → robert_1_2, robert_2_1 → robert_2_2)
-            var secondPartId = currentStory
-            if currentStory.hasSuffix("_1") {
-                // Replace last "_1" with "_2"
-                secondPartId = String(currentStory.dropLast(2)) + "_2"
+        // Check if current story has a second part
+        let secondPartId = getSecondPartId(for: currentStory)
+
+        if let secondPartId = secondPartId {
+            // Second part exists! DON'T mark story complete yet
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                print("📖 Navigating to second part: \(secondPartId)")
+                self?.navigateToListening(storyId: secondPartId)
             }
-
-            // Check if the second part exists in the story index
-            if secondPartId != currentStory && storyIndex.stories[secondPartId] != nil {
-                // Second part exists! DON'T mark story complete yet
-                // Get character name from story ID
-                let characterName = getCharacterName(from: currentStory)
-
-                // Show toast notification
-                toastMessage = "Bouquet for \(characterName) saved to memories!"
-                showBouquetSavedToast = true
-
-                // Navigate to second part of the story after delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-                    print("📖 Navigating to second part: \(secondPartId)")
-                    self?.navigateToListening(storyId: secondPartId)
-                }
-            } else {
-                // No second part, proceed normally
-                progressManager.completeCurrentStory()
-
-                // Get character name from story ID
-                let characterName = getCharacterName(from: currentStory)
-
-                // Show toast notification
-                toastMessage = "Bouquet for \(characterName) saved to memories!"
-                showBouquetSavedToast = true
-
-                // Automatically continue to next story after delay
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-                    self?.continueToNextStory()
-                }
-            }
-        } catch {
-            print("⚠️ Failed to check for second part: \(error)")
-            // Default behavior
+        } else {
+            // No second part, mark complete and continue
             progressManager.completeCurrentStory()
-
-            let characterName = getCharacterName(from: currentStory)
-            toastMessage = "Bouquet for \(characterName) saved to memories!"
-            showBouquetSavedToast = true
-
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
                 self?.continueToNextStory()
             }
+        }
+    }
+
+    // Helper to get second part ID if it exists
+    private func getSecondPartId(for storyId: String) -> String? {
+        guard storyId.hasSuffix("_1") else { return nil }
+
+        let secondPartId = String(storyId.dropLast(2)) + "_2"
+
+        do {
+            let storyIndex = try StoryManager.shared.loadStoryIndex()
+            return storyIndex.stories[secondPartId] != nil ? secondPartId : nil
+        } catch {
+            print("⚠️ Failed to check for second part: \(error)")
+            return nil
         }
     }
 
@@ -235,8 +189,8 @@ class GameFlowCoordinator: ObservableObject {
                 print("⏱️ Navigating to next listening page...")
                 self.navigationPath.append(GamePage.listening(storyId: self.currentStoryId))
 
-                // Hide loading screen after navigation and view loads
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                // Hide loading screen after all 6 flowers are shown (3 seconds) plus view load time
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
                     withAnimation(.easeOut(duration: 0.3)) {
                         self.showLoadingScreen = false
                         print("❌ Loading screen set to false after next story")
@@ -255,10 +209,33 @@ class GameFlowCoordinator: ObservableObject {
         navigationPath.removeLast(navigationPath.count)
     }
 
-    func resetToMainMenu() {
-        navigationPath.removeLast(navigationPath.count)
+    // Helper to check if a story is a first part by checking filename pattern
+    private func isFirstPartStoryByFilename(storyId: String) -> Bool {
+        // Get the filename from the story index to check underscore count
+        // Filenames: "story_abigail_1" (2 underscores) = first part
+        //           "story_abigail_1_2" (3 underscores) = second part
+        do {
+            let storyIndex = try StoryManager.shared.loadStoryIndex()
+            if let storyEntry = storyIndex.stories[storyId] {
+                let filename = storyEntry.file.replacingOccurrences(of: ".json", with: "")
+                let underscoreCount = filename.filter { $0 == "_" }.count
+                // First part stories have exactly 2 underscores in filename (e.g., "story_abigail_1")
+                return underscoreCount == 2
+            }
+        } catch {
+            print("⚠️ Failed to load story index for checking first part: \(error)")
+        }
+        
+        // Fallback: if story ID already looks like a filename with 2 underscores
+        if storyId.hasPrefix("story_") {
+            let underscoreCount = storyId.filter { $0 == "_" }.count
+            return underscoreCount == 2
+        }
+        
+        // Default: not a first part
+        return false
     }
-
+    
     // Helper to get character name from story ID
     private func getCharacterName(from storyId: String) -> String {
         // Load story index to get character name
