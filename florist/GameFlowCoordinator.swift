@@ -62,6 +62,43 @@ class GameFlowCoordinator: ObservableObject {
             }
         }
     }
+    
+    /// Navigate to listening page and play doorbell sound after loading screen disappears (only for first part stories)
+    private func navigateToListeningWithDoorbell(storyId: String) {
+        print("🔄 navigateToListeningWithDoorbell called for storyId: \(storyId)")
+
+        // Check if this is a first part story by checking the filename pattern
+        // Filenames: "story_abigail_1" (2 underscores) = first part
+        //           "story_abigail_1_2" (3 underscores) = second part
+        let isFirstPartStory = isFirstPartStoryByFilename(storyId: storyId)
+
+        // Show loading screen with animation
+        withAnimation(.easeIn(duration: 0.3)) {
+            showLoadingScreen = true
+            print("✅ Loading screen set to true")
+        }
+
+        // Wait for loading screen to be fully visible, then navigate
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            print("⏱️ Navigating to listening page...")
+            self?.navigationPath.append(GamePage.listening(storyId: storyId))
+
+            // Hide loading screen after navigation and view loads
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    self?.showLoadingScreen = false
+                    print("❌ Loading screen set to false")
+                }
+                
+                // Only play doorbell sound for first part stories (exactly 2 underscores)
+                if isFirstPartStory {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        SettingsManager.shared.playSound(named: "DoorBellAudioClose")
+                    }
+                }
+            }
+        }
+    }
 
     func navigateToBouquet(storyId: String) {
         print("🔄 navigateToBouquet called for storyId: \(storyId)")
@@ -114,7 +151,7 @@ class GameFlowCoordinator: ObservableObject {
                 // Continue to next story
                 if progressManager.hasMoreStories {
                     progressManager.moveToNextStory()
-                    navigateToListening(storyId: currentStoryId)
+                    navigateToListeningWithDoorbell(storyId: currentStoryId)
                 } else {
                     // All stories complete, return to main menu
                     print("🎉 All stories completed!")
@@ -127,7 +164,7 @@ class GameFlowCoordinator: ObservableObject {
                 // Continue to next story
                 if progressManager.hasMoreStories {
                     progressManager.moveToNextStory()
-                    navigateToListening(storyId: currentStoryId)
+                    navigateToListeningWithDoorbell(storyId: currentStoryId)
                 } else {
                     // All stories complete, return to main menu
                     print("🎉 All stories completed!")
@@ -141,7 +178,7 @@ class GameFlowCoordinator: ObservableObject {
 
             if progressManager.hasMoreStories {
                 progressManager.moveToNextStory()
-                navigateToListening(storyId: currentStoryId)
+                navigateToListeningWithDoorbell(storyId: currentStoryId)
             } else {
                 print("🎉 All stories completed!")
                 returnToMainMenu()
@@ -182,7 +219,7 @@ class GameFlowCoordinator: ObservableObject {
                 // Navigate to second part of the story after delay
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
                     print("📖 Navigating to second part: \(secondPartId)")
-                    self?.navigateToListening(storyId: secondPartId)
+                    self?.navigateToListeningWithDoorbell(storyId: secondPartId)
                 }
             } else {
                 // No second part, proceed normally
@@ -235,13 +272,23 @@ class GameFlowCoordinator: ObservableObject {
                 print("⏱️ Navigating to next listening page...")
                 self.navigationPath.append(GamePage.listening(storyId: self.currentStoryId))
 
-                // Hide loading screen after navigation and view loads
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    withAnimation(.easeOut(duration: 0.3)) {
-                        self.showLoadingScreen = false
-                        print("❌ Loading screen set to false after next story")
+            // Hide loading screen after navigation and view loads
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    self.showLoadingScreen = false
+                    print("❌ Loading screen set to false after next story")
+                }
+                
+                // Only play doorbell sound for first part stories
+                // Check by filename pattern: "story_abigail_1" (2 underscores) = first part
+                let isFirstPartStory = self.isFirstPartStoryByFilename(storyId: self.currentStoryId)
+                
+                if isFirstPartStory {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        SettingsManager.shared.playSound(named: "DoorBellAudioClose")
                     }
                 }
+            }
             }
         } else {
             // All stories complete, return to main menu
@@ -259,6 +306,33 @@ class GameFlowCoordinator: ObservableObject {
         navigationPath.removeLast(navigationPath.count)
     }
 
+    // Helper to check if a story is a first part by checking filename pattern
+    private func isFirstPartStoryByFilename(storyId: String) -> Bool {
+        // Get the filename from the story index to check underscore count
+        // Filenames: "story_abigail_1" (2 underscores) = first part
+        //           "story_abigail_1_2" (3 underscores) = second part
+        do {
+            let storyIndex = try StoryManager.shared.loadStoryIndex()
+            if let storyEntry = storyIndex.stories[storyId] {
+                let filename = storyEntry.file.replacingOccurrences(of: ".json", with: "")
+                let underscoreCount = filename.filter { $0 == "_" }.count
+                // First part stories have exactly 2 underscores in filename (e.g., "story_abigail_1")
+                return underscoreCount == 2
+            }
+        } catch {
+            print("⚠️ Failed to load story index for checking first part: \(error)")
+        }
+        
+        // Fallback: if story ID already looks like a filename with 2 underscores
+        if storyId.hasPrefix("story_") {
+            let underscoreCount = storyId.filter { $0 == "_" }.count
+            return underscoreCount == 2
+        }
+        
+        // Default: not a first part
+        return false
+    }
+    
     // Helper to get character name from story ID
     private func getCharacterName(from storyId: String) -> String {
         // Load story index to get character name
