@@ -225,23 +225,8 @@ class StoryController: ObservableObject {
             let nextScene = storyData.scenes[nextSceneIndex]
             let characterName = nextScene.characterName
             
-            // Check if this is a main character appearing for the first time in a first part story
-            let isFirstAppearance = characterTracker.checkAndMarkFirstAppearance(
-                characterName: characterName,
-                storyId: storyData.storyId
-            )
-            
-            if isFirstAppearance {
-                // Play doorbell sound and delay scene change
-                SettingsManager.shared.playSound(named: "DoorBellAudioClose")
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                    self?.performSceneChange(to: nextSceneIndex, in: storyData, scene: nextScene)
-                }
-            } else {
-                // No delay, proceed immediately
-                performSceneChange(to: nextSceneIndex, in: storyData, scene: nextScene)
-            }
+            // Proceed to next scene immediately
+            performSceneChange(to: nextSceneIndex, in: storyData, scene: nextScene)
         } else {
             // Story is complete - mark it as such
             isStoryComplete = true
