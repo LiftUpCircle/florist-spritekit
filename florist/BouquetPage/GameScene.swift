@@ -454,10 +454,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             y: inventoryRect.maxY + 10
         )
         titleBackground.zPosition = 9
+        titleBackground.name = "titleBackground"
         addChild(titleBackground)
-        
-        
-        
+
+
+
         // Title label above inventory
         let titleLabel = SKLabelNode(text: "Choose The Flowers")
         titleLabel.fontName = GaeguTypography.boldFontName
@@ -469,6 +470,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         )
         titleLabel.verticalAlignmentMode = .center
         titleLabel.zPosition = 10
+        titleLabel.name = "titleLabel"
         addChild(titleLabel)
         
         // Get available flowers from database
@@ -1398,6 +1400,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         print("Privacy tapped")
     }
     
+    private func hideInventoryUI() {
+        // Hide inventory scroll node (all flower cards)
+        inventoryCropNode.run(SKAction.fadeOut(withDuration: 0.3))
+
+        // Hide "Choose The Flowers" title label and background by finding them
+        if let titleLabel = self.childNode(withName: "//titleLabel") as? SKLabelNode {
+            titleLabel.run(SKAction.fadeOut(withDuration: 0.3))
+        }
+        if let titleBackground = self.childNode(withName: "//titleBackground") as? SKShapeNode {
+            titleBackground.run(SKAction.fadeOut(withDuration: 0.3))
+        }
+
+        // Hide reset and wrap buttons
+        resetButton.run(SKAction.fadeOut(withDuration: 0.3))
+        wrapButton.run(SKAction.fadeOut(withDuration: 0.3))
+    }
+
     private func showValidationResult(_ result: StoryFlowerRequirements.ValidationResult) {
         var message: String
         var color1: UIColor  // Primary color for text
@@ -1416,6 +1435,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             shouldShowConfetti = true
 
             addSparkleEffect()
+            hideInventoryUI()
 
         case .goodMatch:
             message = "Good Match"
@@ -1424,6 +1444,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             shadowColor = UIColor(named: "ShadowSuccessColor")!
             hapticType = .success
             shouldShowConfetti = false
+
+            hideInventoryUI()
 
         case .failure(let failureMessage, let missingEmotions):
             message = "\(failureMessage)"
