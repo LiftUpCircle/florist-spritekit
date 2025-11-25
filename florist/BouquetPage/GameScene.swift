@@ -14,6 +14,7 @@ class FlowerNode: SKSpriteNode {
     var originalPosition: CGPoint = .zero
     var flowerData: Flower
     var inventoryIndex: Int = 0
+    var currentVariation: Int = 0 // 0 = Perpendicular, 1 = Left Tilted, 2 = Right Tilted
     
     init(flower: Flower, imageName: String, size: CGSize) {
         self.flowerData = flower
@@ -128,6 +129,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     private var settingButton: SKSpriteNode!
     private var resetButton: SKSpriteNode!
     private var wrapButton: SKSpriteNode!
+    private var flowerControlMenu: SKNode!
+    private var mirrorButton: SKSpriteNode!
+    private var bringToFrontButton: SKSpriteNode!
+    private var sendToBackButton: SKSpriteNode!
 //    private var mirrorLeftButton: SKSpriteNode!
 //    private var mirrorRightButton: SKSpriteNode!
 //    private var currentlySelectedFlowerForMirror: FlowerNode?
@@ -607,6 +612,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         }
     }
     
+    private func getSlantedImageName(for flowerName: String) -> String {
+        // Map flower names to slanted asset names
+        switch flowerName {
+        case "Rose": return "RoseLeft"
+        case "Jasmine": return "JasmineLeft"
+        case "Lavender": return "LavenderLeft"
+        case "Carnation": return "CarnationsLeft"
+        case "Lily": return "LilyLeft"
+        case "Tulip": return "TulipLeft"
+        default: return ""
+        }
+    }
+    
     private func setupButtons() {
         let buttonSize: CGFloat = 60
         let buttonSpacing: CGFloat = 20
@@ -705,6 +723,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
 //            addChild(mirrorRightButton)
 //        }
         
+        // MARK: - Rotation Control Menu
+        // Rotation control (hidden initially, shown when flower is selected)
         let rotationControlSize: CGFloat = 50
         if let rotationTexture = SKTexture(imageNamed: "ChangeDirection") as SKTexture? {
             rotationControl = SKSpriteNode(texture: rotationTexture)
@@ -736,6 +756,76 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             
             addChild(rotationControl)
         }
+        
+        // MARK: - Flower Control Menu
+        // Panel menu for flower controls (bring to front, send to back, mirror)
+        flowerControlMenu = SKNode()
+        flowerControlMenu.zPosition = 150
+        flowerControlMenu.isHidden = true
+        addChild(flowerControlMenu)
+        
+        let buttonSizeControlWidth: CGFloat = 40
+        let buttonSizeControlHeight: CGFloat = 30
+        let buttonSpacingControl: CGFloat = 35
+        
+        // Create background panel for the menu
+        let menuWidth: CGFloat = buttonSizeControlWidth + 20  // Button width + padding
+        let menuHeight: CGFloat = (buttonSizeControlHeight * 3) + (buttonSpacingControl * 2) + 20  // 3 buttons + spacing + padding
+        let menuBackground = SKShapeNode(
+            rectOf: CGSize(width: menuWidth, height: menuHeight),
+            cornerRadius: 12
+        )
+        menuBackground.fillColor = .white
+        menuBackground.strokeColor = .borderInventory  // Using the same border color as inventory
+        menuBackground.lineWidth = 3
+        menuBackground.zPosition = -1  // Behind the buttons
+        menuBackground.position = CGPoint(x: 0, y: 0)
+        flowerControlMenu.addChild(menuBackground)
+        
+        // Mirror Button
+        let mirrorTexture = SKTexture(imageNamed: "MirrorIcon")
+        mirrorButton = SKSpriteNode(texture: mirrorTexture)
+        mirrorButton.size = CGSize(width: buttonSizeControlWidth, height: buttonSizeControlHeight)
+        mirrorButton.position = CGPoint(x: 0, y: 0)
+        mirrorButton.name = "mirrorButton"
+        flowerControlMenu.addChild(mirrorButton)
+            
+        // Bring to Front Button (Top)
+        let bringToFrontTexture = SKTexture(imageNamed: "BringTFIcon")
+        bringToFrontButton = SKSpriteNode(texture: bringToFrontTexture)
+        bringToFrontButton.size = CGSize(width: buttonSizeControlWidth, height: buttonSizeControlHeight)
+        bringToFrontButton.position = CGPoint(x: 0, y: buttonSpacingControl + buttonSizeControlHeight / 2)
+        bringToFrontButton.name = "bringToFrontButton"
+        flowerControlMenu.addChild(bringToFrontButton)
+
+        // Send to Back Button (Bottom)
+        let sendToBackTexture = SKTexture(imageNamed: "SendTBIcon")
+        sendToBackButton = SKSpriteNode(texture: sendToBackTexture)
+        sendToBackButton.size = CGSize(width: buttonSizeControlWidth, height: buttonSizeControlHeight)
+        sendToBackButton.position = CGPoint(x: 0, y: -buttonSpacingControl - buttonSizeControlHeight / 2)
+        sendToBackButton.name = "sendToBackButton"
+        flowerControlMenu.addChild(sendToBackButton)
+        
+        // Add separator lines between buttons
+        let separatorWidth = menuWidth - 10  // Slightly narrower than menu
+        let separatorThickness: CGFloat = 2
+
+        // Top separator (between mirror and bring to front)
+        let topSeparator = SKShapeNode(rectOf: CGSize(width: separatorWidth, height: separatorThickness))
+        topSeparator.fillColor = .borderInventory
+        topSeparator.strokeColor = .clear
+        topSeparator.position = CGPoint(x: 0, y: buttonSpacingControl / 2 + 10)
+        topSeparator.zPosition = 0
+        flowerControlMenu.addChild(topSeparator)
+
+        // Bottom separator (between bring to front and send to back)
+        let bottomSeparator = SKShapeNode(rectOf: CGSize(width: separatorWidth, height: separatorThickness))
+        bottomSeparator.fillColor = .borderInventory
+        bottomSeparator.strokeColor = .clear
+        bottomSeparator.position = CGPoint(x: 0, y: -buttonSpacingControl / 2 - 10)
+        bottomSeparator.zPosition = 0
+        flowerControlMenu.addChild(bottomSeparator)
+            
     }
     
     private func updateButtonStates() {
@@ -801,10 +891,33 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             y: flowerWorldPos.y + buttonOffset
         )
         rotationControl.isHidden = false
+        
+        // Flower control menu to the left of the flower
+        let menuOffset: CGFloat = bouquetRect.width / 2 + 10
+        flowerControlMenu.position = CGPoint(
+            x: bouquetRect.midX - menuOffset,
+            y: bouquetRect.midY + 10
+        )
+        flowerControlMenu.isHidden = false
+        
+        // Animate menu appearance
+        flowerControlMenu.alpha = 0.0
+        flowerControlMenu.setScale(0.8)
+        flowerControlMenu.run(SKAction.group([
+            SKAction.fadeIn(withDuration: 0.2),
+            SKAction.scale(to: 1.0, duration: 0.2)
+        ]))
+        
     }
     
     private func hideRotationControl() {
+        
+        // Hide rotation control
         rotationControl.isHidden = true
+        rotationControl.removeAllActions()
+        
+        // Hide flower control menu
+        flowerControlMenu.isHidden = true
         rotationControl.removeAllActions()
         
         // Remove selection indicator from flower
@@ -819,6 +932,171 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         
         currentlySelectedFlower = nil
         isRotatingFlower = false
+    }
+    
+    private func handleMirrorButton() {
+        guard let flower = currentlySelectedFlower else { return }
+        
+        // Cycle through 3 variations: 0 -> 1 -> 2 -> 0
+        flower.currentVariation = (flower.currentVariation + 1) % 3
+        
+        // Store the current scale magnitude (without sign)
+        let currentScaleMagnitude = abs(flower.xScale)
+        let currentYScale = flower.yScale
+        
+        switch flower.currentVariation {
+        case 0:
+            // Perpendicular (straight) - use original texture
+            let imageName = getFlowerImageName(for: flower.flowerData.flowerName)
+            let perpendicularTexture = SKTexture(imageNamed: imageName)
+            flower.texture = perpendicularTexture
+            
+            // Update size to match texture's natural aspect ratio
+            let textureSize = perpendicularTexture.size()
+            let targetHeight: CGFloat = 150  // Keep consistent height
+            let aspectRatio = textureSize.width / textureSize.height
+            flower.size = CGSize(width: targetHeight * aspectRatio, height: targetHeight)
+            
+            flower.xScale = currentScaleMagnitude  // Positive scale (facing right)
+            flower.yScale = currentYScale
+            
+        case 1:
+            // Slanted left - use slanted texture
+            let slantedImageName = getSlantedImageName(for: flower.flowerData.flowerName)
+            let slantedTexture = SKTexture(imageNamed: slantedImageName)
+            flower.texture = slantedTexture
+            
+            // Update size to match texture's natural aspect ratio
+            let textureSize = slantedTexture.size()
+            let targetHeight: CGFloat = 150  // Keep consistent height
+            let aspectRatio = textureSize.width / textureSize.height
+            flower.size = CGSize(width: targetHeight * aspectRatio, height: targetHeight)
+            
+            flower.xScale = currentScaleMagnitude  // Positive scale (left slant)
+            flower.yScale = currentYScale
+            
+        case 2:
+            // Slanted right - use slanted texture but mirrored
+            let slantedImageName = getSlantedImageName(for: flower.flowerData.flowerName)
+            let slantedTexture = SKTexture(imageNamed: slantedImageName)
+            flower.texture = slantedTexture
+            
+            // Update size to match texture's natural aspect ratio
+            let textureSize = slantedTexture.size()
+            let targetHeight: CGFloat = 150  // Keep consistent height
+            let aspectRatio = textureSize.width / textureSize.height
+            flower.size = CGSize(width: targetHeight * aspectRatio, height: targetHeight)
+            
+            flower.xScale = -currentScaleMagnitude  // Negative scale (mirror to right slant)
+            flower.yScale = currentYScale
+            
+        default:
+            break
+        }
+        
+        // Update physics body with new texture and size
+        if let texture = flower.texture {
+            flower.physicsBody = SKPhysicsBody(
+                texture: texture,
+                alphaThreshold: 0.6,
+                size: flower.size
+            )
+            flower.physicsBody?.isDynamic = false
+            flower.physicsBody?.categoryBitMask = 0x4
+            flower.physicsBody?.collisionBitMask = 0
+        }
+        
+        // Update the selection indicator (glow) to match new texture
+        flower.childNode(withName: "selectionIndicator")?.removeFromParent()
+        if let texture = flower.texture {
+            let glowSprite = SKSpriteNode(texture: texture)
+            let currentScale = abs(flower.xScale)
+            let glowSize = CGSize(
+                width: (flower.size.width * 1.02) / currentScale,
+                height: (flower.size.height * 1.02) / currentScale
+            )
+            
+            glowSprite.size = glowSize
+            glowSprite.name = "selectionIndicator"
+            glowSprite.zPosition = -0.1
+            glowSprite.color = .black
+            glowSprite.colorBlendFactor = 1.0
+            glowSprite.alpha = 0.7
+            glowSprite.isUserInteractionEnabled = false
+            
+            flower.addChild(glowSprite)
+        }
+        
+        // Haptic feedback
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+        
+        // Animate button press
+        mirrorButton.run(SKAction.sequence([
+            SKAction.scale(to: 0.85, duration: 0.1),
+            SKAction.scale(to: 1.0, duration: 0.1)
+        ]))
+        
+        // Visual feedback on flower - quick rotation animation
+        flower.run(SKAction.sequence([
+            SKAction.rotate(byAngle: 0.1, duration: 0.1),
+            SKAction.rotate(byAngle: -0.1, duration: 0.1)
+        ]))
+    }
+
+    
+    private func handleBringToFrontButton() {
+        guard let flower = currentlySelectedFlower else { return }
+                
+        // Find the highest zPosition among placed flowers
+        let maxZPos = placedFlowers.map { $0.zPosition }.max() ?? 0
+        
+        // Set this flower's z-position to be one higher
+        flower.zPosition = maxZPos + 0.1
+        
+        // Haptic Feedback
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+        
+        // Animete button press
+        bringToFrontButton.run(SKAction.sequence([
+            SKAction.scale(to: 0.9, duration: 0.1),
+            SKAction.scale(to: 1.0, duration: 0.1)
+        ]))
+        
+        // Visual feedback on flower
+        // Visual feedback on flower
+        flower.run(SKAction.sequence([
+            SKAction.scale(by: 1.1, duration: 0.1),
+            SKAction.scale(by: 1.0/1.1, duration: 0.1)
+        ]))
+        
+    }
+    
+    private func handleSendToBackButton() {
+        guard let flower = currentlySelectedFlower else { return }
+                
+        // Find the lowest zPosition among placed flowers
+        let minZPos = placedFlowers.map { $0.zPosition }.min() ?? 0
+        
+        // Set this flower's z-position to be one lower
+        flower.zPosition = minZPos - 0.1
+        
+        // Haptic Feedback
+        let generator = UIImpactFeedbackGenerator(style: .medium)
+        generator.impactOccurred()
+        
+        // Animate button press
+        sendToBackButton.run(SKAction.sequence([
+            SKAction.scale(to: 0.9, duration: 0.1),
+            SKAction.scale(to: 1.0, duration: 0.1)
+        ]))
+        
+        // Visual feedback on flower - subtle fade
+        flower.run(SKAction.sequence([
+            SKAction.fadeAlpha(to: 0.7, duration: 0.1),
+            SKAction.fadeAlpha(to: 1.0, duration: 0.1)
+        ]))
     }
 
 //    private func showMirrorButtons(for flower: FlowerNode) {
@@ -941,6 +1219,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 if let flower = currentlySelectedFlower {
                     initialFlowerRotation = flower.zRotation
                 }
+                return
+            } else if node.name == "mirrorButton" {
+                handleMirrorButton()
+                return
+            } else if node.name == "bringToFrontButton" {
+                handleBringToFrontButton()
+                return
+            } else if node.name == "sendToBackButton" {
+                handleSendToBackButton()
                 return
             } else if node.name == "resetButton" {
                 handleResetButton()
@@ -1103,10 +1390,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                     let worldPos = flower.parent!.convert(flower.position, to: self)
                     flower.removeFromParent()
                     flower.physicsBody = nil
-                    
                     flower.position = worldPos
                     flower.zPosition = 200
-                    flower.setScale(1.2)
+                    
+                    let direction: CGFloat = flower.xScale < 0 ? -1.0 : 1.0
+                    flower.xScale = 1.2 * direction
+                    flower.yScale = 1.2
                     addChild(flower)
                     draggedFlowerCopy = flower
                     isDraggingBouquetFlower = true
@@ -1340,7 +1629,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             
             // Mark as not in inventory
             draggedFlower.isInInventory = false
-            draggedFlower.setScale(scaleFactor)
+            let direction: CGFloat = draggedFlower.xScale < 0 ? -1.0 : 1.0
+            
+            draggedFlower.xScale = scaleFactor * direction
+            draggedFlower.yScale = scaleFactor
             
             if let texture = draggedFlower.texture {
                 let unscaledSize = CGSize(
