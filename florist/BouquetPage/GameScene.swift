@@ -857,7 +857,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             
             // Calculate size in parent's coordinate space
             // Get the flower's current scale (which varies by position)
-            let currentScale = flower.xScale
+            let currentScale = abs(flower.xScale)
             
             // Calculate the glow size to be consistently 8% larger
             // We divide by currentScale to counteract the parent's scale
@@ -940,9 +940,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         // Cycle through 3 variations: 0 -> 1 -> 2 -> 0
         flower.currentVariation = (flower.currentVariation + 1) % 3
         
-        // Store the current scale magnitude (without sign)
+        // Store the current scale magnitude (always positive)
         let currentScaleMagnitude = abs(flower.xScale)
-        let currentYScale = flower.yScale
+        let currentYScale = abs(flower.yScale)
         
         switch flower.currentVariation {
         case 0:
@@ -953,11 +953,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             
             // Update size to match texture's natural aspect ratio
             let textureSize = perpendicularTexture.size()
-            let targetHeight: CGFloat = 150  // Keep consistent height
+            let targetHeight: CGFloat = 150
             let aspectRatio = textureSize.width / textureSize.height
             flower.size = CGSize(width: targetHeight * aspectRatio, height: targetHeight)
             
-            flower.xScale = currentScaleMagnitude  // Positive scale (facing right)
+            flower.xScale = currentScaleMagnitude  // Always positive
             flower.yScale = currentYScale
             
         case 1:
@@ -968,11 +968,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             
             // Update size to match texture's natural aspect ratio
             let textureSize = slantedTexture.size()
-            let targetHeight: CGFloat = 150  // Keep consistent height
+            let targetHeight: CGFloat = 150
             let aspectRatio = textureSize.width / textureSize.height
             flower.size = CGSize(width: targetHeight * aspectRatio, height: targetHeight)
             
-            flower.xScale = currentScaleMagnitude  // Positive scale (left slant)
+            flower.xScale = currentScaleMagnitude  // Always positive
             flower.yScale = currentYScale
             
         case 2:
@@ -983,11 +983,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             
             // Update size to match texture's natural aspect ratio
             let textureSize = slantedTexture.size()
-            let targetHeight: CGFloat = 150  // Keep consistent height
+            let targetHeight: CGFloat = 150
             let aspectRatio = textureSize.width / textureSize.height
             flower.size = CGSize(width: targetHeight * aspectRatio, height: targetHeight)
             
-            flower.xScale = -currentScaleMagnitude  // Negative scale (mirror to right slant)
+            // KEEP POSITIVE - we'll flip using scaleX on the node itself
+            flower.xScale = -currentScaleMagnitude  // Negative for mirror
             flower.yScale = currentYScale
             
         default:
@@ -995,7 +996,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         }
         
         // Update physics body with new texture and size
+        // IMPORTANT: Create physics body while scale is positive to avoid flipping
         if let texture = flower.texture {
+            // Store current scale
+            let savedXScale = flower.xScale
+            
+            // Temporarily set to positive for physics body creation
+            flower.xScale = abs(flower.xScale)
+            
             flower.physicsBody = SKPhysicsBody(
                 texture: texture,
                 alphaThreshold: 0.6,
@@ -1004,6 +1012,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             flower.physicsBody?.isDynamic = false
             flower.physicsBody?.categoryBitMask = 0x4
             flower.physicsBody?.collisionBitMask = 0
+            
+            // Restore the scale (which may be negative)
+            flower.xScale = savedXScale
         }
         
         // Update the selection indicator (glow) to match new texture
@@ -1024,6 +1035,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             glowSprite.alpha = 0.7
             glowSprite.isUserInteractionEnabled = false
             
+            // Don't set any scale - let it inherit from parent naturally
+            // The glow will automatically match the flower's orientation
+            
             flower.addChild(glowSprite)
         }
         
@@ -1037,12 +1051,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             SKAction.scale(to: 1.0, duration: 0.1)
         ]))
         
-        // Visual feedback on flower - quick rotation animation
+        // Visual feedback on flower
         flower.run(SKAction.sequence([
             SKAction.rotate(byAngle: 0.1, duration: 0.1),
             SKAction.rotate(byAngle: -0.1, duration: 0.1)
         ]))
     }
+
 
     
     private func handleBringToFrontButton() {
@@ -1636,8 +1651,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             
             if let texture = draggedFlower.texture {
                 let unscaledSize = CGSize(
-                    width: draggedFlower.size.width / draggedFlower.xScale,
-                    height: draggedFlower.size.height / draggedFlower.yScale
+                    width: draggedFlower.size.width / abs(draggedFlower.xScale),
+                    height: draggedFlower.size.height / abs(draggedFlower.yScale)
                 )
                 draggedFlower.physicsBody = SKPhysicsBody(
                     texture: texture,
