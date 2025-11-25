@@ -194,6 +194,39 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         }
     }
     
+    private func showZIndexLabel(for flower: FlowerNode) {
+        // Remove existing z-index label
+        flower.childNode(withName: "zIndexLabel")?.removeFromParent()
+        
+        // Create a label showing z-position
+        let label = SKLabelNode(text: String(format: "z: %.2f", flower.zPosition))
+        label.name = "zIndexLabel"
+        label.fontSize = 20
+        label.fontColor = .white
+        label.fontName = "Courier-Bold"
+        label.position = CGPoint(x: 0, y: flower.size.height / 2 + 30)
+        label.zPosition = 200  // Always on top
+        
+        // Add black background for readability
+        let bgWidth: CGFloat = 80
+        let bgHeight: CGFloat = 30
+        let labelBg = SKShapeNode(rect: CGRect(
+            x: -bgWidth/2,
+            y: -bgHeight/2,
+            width: bgWidth,
+            height: bgHeight
+        ), cornerRadius: 5)
+        labelBg.fillColor = .black
+        labelBg.alpha = 0.8
+        labelBg.strokeColor = .yellow
+        labelBg.lineWidth = 2
+        labelBg.position = CGPoint(x: 0, y: 5)
+        labelBg.zPosition = -1
+        
+        label.addChild(labelBg)
+        flower.addChild(label)
+    }
+    
     private func showDebugHitboxes(for flower: FlowerNode) {
         // Remove existing debug hitbox
         flower.childNode(withName: "debugHitbox")?.removeFromParent()
@@ -840,6 +873,49 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
 //        let generator = UIImpactFeedbackGenerator(style: .light)
 //        generator.impactOccurred()
 //    }
+    
+    private func isTouchVisible(at location: CGPoint) -> Bool {
+        // -----------------------------------------------------------------------
+        // CHECK 1: The Bouquet Wrapper (Bottom) - Use Precise Physics
+        // -----------------------------------------------------------------------
+        // Instead of checking the square mask frame, we check if the touch hits
+        // the precise physics shape of the bouquet wrapper (Category 0x1).
+        var isTouchingWrapper = false
+        physicsWorld.enumerateBodies(at: location) { body, stop in
+            // Check for bouquetPlacementArea (Category 0x1)
+            if body.categoryBitMask == 0x1 {
+                isTouchingWrapper = true
+                stop.pointee = true
+            }
+        }
+        if isTouchingWrapper { return true }
+        
+        // -----------------------------------------------------------------------
+        // CHECK 2: The Openings (Top/Right) - Use Mask Geometry
+        // -----------------------------------------------------------------------
+        guard let cropNode = bouquetFlowersContainer.parent as? SKCropNode,
+              let maskNode = cropNode.maskNode else {
+            return true
+        }
+        
+        let localPoint = cropNode.convert(location, from: self)
+        
+        for child in maskNode.children {
+            // IGNORE the bottom texture mask
+            // We identify it because it has a texture (the others are colored rects)
+            if let sprite = child as? SKSpriteNode, sprite.texture != nil {
+                continue
+            }
+            
+            // For the Top/Right extensions (which are simple Rects), use basic contains
+            if child.contains(localPoint) {
+                return true
+            }
+        }
+        
+        return false
+    }
+    
 
     // MARK: - Touch Handling
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -852,6 +928,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 return
             }
         }
+        
+        // Getting all nodes at touch location
         let touchedNodes = nodes(at: location)
         
         // Check if touching a button
@@ -923,32 +1001,56 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             return
         }
         
-        // check if we touched a placed flower in the bouquet
-        // get touch location in bouquet container coordinates
-        let sceneLocation = touch.location(in: self)
+        // Get all nodes at the touch location (sorted by visual order: Top -> Bottom)
+        let nodesAtPoint = nodes(at: location)
         
-        for (index, flower) in placedFlowers.enumerated().reversed() {
-            if let physicsBody = flower.physicsBody {
-                // Check if the touch point is within the flower's physics body
-                if physicsWorld.body(at: sceneLocation) == physicsBody {
+        // Iterate to find the top-most visual flower
+        for node in nodesAtPoint {
+            // Check if the node is a FlowerNode (or child of one)
+            if let flower = node as? FlowerNode ?? node.parent as? FlowerNode {
+                
+                // Ensure this flower is in "placed" list
+                if let index = placedFlowers.firstIndex(of: flower) {
                     
-                    // Store touch info but don't start dragging yet
-                    selectedFlower = flower
-                    isDraggingFromInventory = false
-                    isDraggingBouquetFlower = false
-                    dragStartLocation = location
-                    originalFlowerIndex = index
-                    
-                    // Haptic feedback
-                    let generator = UIImpactFeedbackGenerator(style: .light)
-                    generator.impactOccurred()
-                    
-                    return
+                    guard isTouchVisible(at: location) else { continue }
+                    // PRECISE HIT TEST: Check if the point is inside THIS specific flower's physics body
+                    if let targetBody = flower.physicsBody {
+                        
+                        var isTouchingBody = false
+                        
+                        // Ask the physics world: "List all bodies at this point."
+                        // Strictly check if our specific flower's body is in that list.
+                        physicsWorld.enumerateBodies(at: location) { (body, stop) in
+                            if body == targetBody {
+                                isTouchingBody = true
+                                stop.pointee = true // Stop searching, we found it
+                            }
+                        }
+                        
+                        if isTouchingBody {
+                            // Found the target!
+                            selectedFlower = flower
+                            
+                            // Reset flags
+                            isDraggingFromInventory = false
+                            isDraggingBouquetFlower = false
+                            draggedFlowerCopy = nil
+                            
+                            dragStartLocation = location
+                            originalFlowerIndex = index
+                            
+                            // Visual feedback
+                            showRotationControl(for: flower)
+                            let generator = UIImpactFeedbackGenerator(style: .light)
+                            generator.impactOccurred()
+                            
+                            // Stop looking immediately - we found the top-most valid flower
+                            return
+                        }
+                    }
                 }
             }
         }
-
-        // If touched elsewhere (not on buttons or flowers), hide rotation buttons
         hideRotationControl()
     }
     
@@ -1232,26 +1334,32 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             // Scale based on distance from center for depth effect
             let distanceFromCenter = hypot(containerLocation.x, containerLocation.y)
             let scaleFactor = 0.7 + (1 - min(distanceFromCenter / 150, 1)) * 0.3
-            draggedFlower.setScale(scaleFactor)
             
             bouquetFlowersContainer.addChild(draggedFlower)
             placedFlowers.append(draggedFlower)
             
             // Mark as not in inventory
             draggedFlower.isInInventory = false
+            draggedFlower.setScale(scaleFactor)
             
             if let texture = draggedFlower.texture {
+                let unscaledSize = CGSize(
+                    width: draggedFlower.size.width / draggedFlower.xScale,
+                    height: draggedFlower.size.height / draggedFlower.yScale
+                )
                 draggedFlower.physicsBody = SKPhysicsBody(
                     texture: texture,
-                    alphaThreshold: 0.01,
-                    size: draggedFlower.size)
+                    alphaThreshold: 0.6,
+                    size: unscaledSize
+                )
                 draggedFlower.physicsBody?.isDynamic = false
                 draggedFlower.physicsBody?.categoryBitMask = 0x4
                 draggedFlower.physicsBody?.collisionBitMask = 0
             }
             
-            // MARK: - Debug show hitbox
-//            showDebugHitboxes(for: draggedFlower)
+            
+            // MARK: - Debug show z-index
+//            showZIndexLabel(for: draggedFlower)
             
             // Show Rotation buttons for the newly placed flower
             showRotationControl(for: draggedFlower)
