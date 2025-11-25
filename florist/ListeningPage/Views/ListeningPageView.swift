@@ -84,7 +84,7 @@ struct ListeningPageView: View {
                 // Layer 2: Character Sprite (centered) (skip for prologue)
                 if let scene = controller.currentScene {
                     // Character Sprite - hide for prologue
-                    if let sprite = scene.characterSprite, scene.backgroundImage != "BackgroundPrologue" {
+                    if let sprite = scene.characterSprite/*, scene.backgroundImage != "BackgroundPrologue"*/ {
                         CharacterSpriteView(
                             spriteName: getCharacterAssetName(from: sprite),
                             position: .center
