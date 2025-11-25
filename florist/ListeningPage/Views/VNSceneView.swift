@@ -44,20 +44,27 @@ struct VNSceneView: View {
                 // Layer 2: Character Sprite and Floating Dialogue
                 if let scene = controller.currentScene {
                     ZStack {
-                        // Character Sprite (positioned on left, clipped to screen height)
+                        // Character Sprite (positioned based on spritePosition)
                         if let sprite = scene.characterSprite {
-                            HStack {
-                                CharacterSpriteView(
-                                    spriteName: sprite,
-                                    position: scene.spritePosition ?? .center
-                                )
-                                .frame(width: geometry.size.width * 0.4, height: geometry.size.height * 1.2)
-                                .position(x: geometry.size.width * 0.2, y: geometry.size.height * 0.6)
-                                Spacer()
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: geometry.size.height, alignment: .bottom)
-                            .clipped()
-                            .padding(.leading, 20)
+                            let position = scene.spritePosition ?? .center
+                            let xPosition: CGFloat = {
+                                switch position {
+                                case .left:
+                                    return geometry.size.width * 0.25
+                                case .center:
+                                    return geometry.size.width * 0.5
+                                case .right:
+                                    return geometry.size.width * 0.75
+                                }
+                            }()
+
+                            CharacterSpriteView(
+                                spriteName: sprite,
+                                position: position
+                            )
+                            .frame(width: geometry.size.width * 0.35)
+                            .scaledToFit()
+                            .position(x: xPosition, y: geometry.size.height * 0.55)
                         }
                         
                         // Floating Dialogue Box (positioned on right)
