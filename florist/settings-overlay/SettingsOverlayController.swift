@@ -79,7 +79,12 @@ class SettingsOverlayController {
         settingsManager.isVibrationEnabled = isOn
         settingsManager.triggerVibration()
     }
-    
+
+    func handleTextSizeChange(_ textSize: TextSize) {
+        TextSizeManager.shared.currentTextSize = textSize
+        settingsManager.triggerVibration(style: .light)
+    }
+
     // MARK: - Action Button Handlers
     
     func handleHomeButtonTap() {

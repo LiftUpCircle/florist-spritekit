@@ -173,6 +173,7 @@ struct CharacterTabButton: View {
 struct MemoriesBookContentView: View {
     let character: CharacterMemory
     @ObservedObject var controller: MemoriesViewController
+    @EnvironmentObject private var textSizeManager: TextSizeManager
 
     // Get memories for the selected character
     private var characterMemories: [MemoriesModel.Memory] {
@@ -202,7 +203,7 @@ struct MemoriesBookContentView: View {
             // Right page - Bouquet list (slide animation)
             VStack(alignment: .leading, spacing: 6) {
                 Text("Bouquets")
-                    .font(.bodyGaegu)
+                    .font(.gaeguFont(size: 17, weight: "Bold"))
                     .foregroundColor(.black)
                     .padding(.bottom, 2)
 
@@ -237,12 +238,13 @@ struct MemoriesBookContentView: View {
 // MARK: - Bouquet Memory Row
 struct BouquetMemoryRow: View {
     let memory: MemoriesModel.Memory
+    @EnvironmentObject private var textSizeManager: TextSizeManager
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             // Title
             Text(memory.title)
-                .font(.custom("Gaegu-Bold", size: 14))
+                .font(.gaeguFont(size: 14, weight: "Bold"))
                 .foregroundColor(.black)
                 .lineLimit(1)
 
@@ -266,12 +268,12 @@ struct BouquetMemoryRow: View {
                 // Show description
                 VStack(alignment: .leading, spacing: 2) {
                     Text(memory.description)
-                        .font(.custom("Gaegu-Regular", size: 12))
+                        .font(.gaeguFont(size: 12, weight: "Regular"))
                         .foregroundColor(.gray)
 
                     if let savedBouquet = memory.savedBouquet {
                         Text("Created: \(formattedDate(savedBouquet.dateCreated))")
-                            .font(.custom("Gaegu-Light", size: 10))
+                            .font(.gaeguFont(size: 10, weight: "Regular"))
                             .foregroundColor(.gray)
                     }
                 }
