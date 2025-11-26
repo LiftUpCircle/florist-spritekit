@@ -23,7 +23,7 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
     private var soundsToggle: ModernToggle!
     private var musicToggle: ModernToggle!
     private var vibrationToggle: ModernToggle!
-    private var textSizeDropdown: TextSizeDropdown!
+    private var textSizeButtons: [String: TextSizeButton] = [:] // Store buttons by size name
     
     // Action buttons
     private var homeButton: SKNode!
@@ -231,7 +231,7 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
         separator3.zPosition = 1002
         addChild(separator3)
 
-        // Text Size Dropdown
+        // Text Size Label (moved to left side for group label)
         let textSizeLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
         textSizeLabel.text = "Text Size"
         textSizeLabel.fontSize = labelFontSize
@@ -241,11 +241,8 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
         textSizeLabel.zPosition = 1002
         addChild(textSizeLabel)
 
-        textSizeDropdown = TextSizeDropdown(fontSize: labelFontSize * 0.8, backgroundColor: lightPinkColor, textColor: darkGrayColor)
-        textSizeDropdown.position = CGPoint(x: toggleX, y: startY - rowSpacing * 3)
-        textSizeDropdown.zPosition = 1002
-        textSizeDropdown.name = "textSizeDropdown"
-        addChild(textSizeDropdown)
+        // Text Size Selection Buttons
+        setupTextSizeButtons(startY: startY - rowSpacing * 3, labelX: toggleX, labelFontSize: labelFontSize)
 
         // Final separator line
         let separator4Y = startY - rowSpacing * 3.5
@@ -255,22 +252,84 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
         separator4.zPosition = 1002
         addChild(separator4)
     }
-    
-    
+
+    private func setupTextSizeButtons(startY: CGFloat, labelX: CGFloat, labelFontSize: CGFloat) {
+        let buttonWidth: CGFloat = 50
+        let buttonHeight: CGFloat = 28
+        let buttonSpacing: CGFloat = 12
+        let currentSize = TextSizeManager.shared.currentTextSize
+
+        let buttonX1 = labelX - buttonSpacing / 2 - buttonWidth - buttonSpacing / 2
+        let buttonX2 = labelX + buttonSpacing / 2
+        let buttonX3 = labelX + buttonSpacing / 2 + buttonWidth + buttonSpacing / 2
+
+        // Normal button
+        let normalButton = TextSizeButton(
+            text: "N",
+            size: .normal,
+            isSelected: currentSize == .normal,
+            width: buttonWidth,
+            height: buttonHeight,
+            fontSize: labelFontSize * 0.7,
+            selectedColor: redToggleColor,
+            unselectedColor: lightPinkColor
+        )
+        normalButton.position = CGPoint(x: buttonX1, y: startY)
+        normalButton.zPosition = 1002
+        normalButton.name = "textSizeNormal"
+        addChild(normalButton)
+        textSizeButtons["normal"] = normalButton
+
+        // Large button
+        let largeButton = TextSizeButton(
+            text: "L",
+            size: .large,
+            isSelected: currentSize == .large,
+            width: buttonWidth,
+            height: buttonHeight,
+            fontSize: labelFontSize * 0.7,
+            selectedColor: redToggleColor,
+            unselectedColor: lightPinkColor
+        )
+        largeButton.position = CGPoint(x: labelX, y: startY)
+        largeButton.zPosition = 1002
+        largeButton.name = "textSizeLarge"
+        addChild(largeButton)
+        textSizeButtons["large"] = largeButton
+
+        // Extra Large button
+        let xlButton = TextSizeButton(
+            text: "XL",
+            size: .extraLarge,
+            isSelected: currentSize == .extraLarge,
+            width: buttonWidth,
+            height: buttonHeight,
+            fontSize: labelFontSize * 0.7,
+            selectedColor: redToggleColor,
+            unselectedColor: lightPinkColor
+        )
+        xlButton.position = CGPoint(x: buttonX3, y: startY)
+        xlButton.zPosition = 1002
+        xlButton.name = "textSizeXL"
+        addChild(xlButton)
+        textSizeButtons["extraLarge"] = xlButton
+    }
+
     private func setupActionButtons() {
         let overlayWidth = sceneSize.width * 0.70
         let overlayHeight = sceneSize.height * 0.75
         let buttonHeight = max(40, min(overlayHeight * 0.08, 48))
         let buttonFontSize = max(16, min(overlayWidth * 0.024, 20))
         let buttonCornerRadius: CGFloat = 8
-        
+
         let spacingAfterSeparator = overlayHeight * 0.08
-        let separator3Y = overlayHeight * 0.20 - overlayHeight * 0.12 * 2.5
-        let topButtonY = separator3Y - spacingAfterSeparator
+        // Updated to account for 4 separators now (text size was added)
+        let separator4Y = overlayHeight * 0.20 - overlayHeight * 0.12 * 3.5
+        let topButtonY = separator4Y - spacingAfterSeparator
         // Use 100% of available width (with some padding)
         let totalAvailableWidth = overlayWidth * 0.80
         let buttonWidth = totalAvailableWidth
-        
+
         if isFromMainMenu {
             // Only show Reset Game button (full width)
             resetGameButton = createActionButton(text: "Reset Game", width: buttonWidth, height: buttonHeight,
@@ -343,14 +402,26 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
             return resetConfirmationDialog.handleTouch(at: location)
         }
 
-        // Check text size dropdown
-        if textSizeDropdown.handleTouch(at: location) {
-            controller.handleTextSizeChange(textSizeDropdown.selectedTextSize)
-            return true
+        // Check if touch is on text size buttons
+        var node: SKNode? = touchedNode
+        while node != nil && node != self {
+            for (_, button) in textSizeButtons {
+                if node === button || node?.parent === button {
+                    button.select()
+                    // Update all buttons state
+                    for (_, btn) in textSizeButtons {
+                        btn.isSelected = (btn === button)
+                    }
+                    TextSizeManager.shared.currentTextSize = button.textSize
+                    controller.handleTextSizeChange(button.textSize)
+                    return true
+                }
+            }
+            node = node?.parent
         }
 
         // Check toggles
-        var node: SKNode? = touchedNode
+        node = touchedNode
         while node != nil && node != self {
             if let toggle = node as? ModernToggle {
                 toggle.toggle()
@@ -780,149 +851,64 @@ class ModernToggle: SKNode {
     }
 }
 
-// MARK: - Text Size Dropdown
+// MARK: - Text Size Button
 
-class TextSizeDropdown: SKNode {
-    private var buttonNode: SKShapeNode!
-    private var buttonLabel: SKLabelNode!
-    private var dropdownMenu: SKNode?
-    private var isExpanded = false
+class TextSizeButton: SKNode {
+    private var backgroundNode: SKShapeNode!
+    private var labelNode: SKLabelNode!
 
-    private let fontSize: CGFloat
-    private let backgroundColor: SKColor
-    private let textColor: SKColor
+    let textSize: TextSize
+    var isSelected: Bool = false {
+        didSet {
+            updateAppearance()
+        }
+    }
+
+    private let selectedColor: SKColor
+    private let unselectedColor: SKColor
+    private let textColor = SKColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
     private let borderColor = SKColor(red: 0.7, green: 0.7, blue: 0.7, alpha: 1.0)
-    private let dropdownBackgroundColor = SKColor.white
 
-    var selectedTextSize: TextSize = TextSizeManager.shared.currentTextSize
-
-    init(fontSize: CGFloat, backgroundColor: SKColor, textColor: SKColor) {
-        self.fontSize = fontSize
-        self.backgroundColor = backgroundColor
-        self.textColor = textColor
+    init(text: String, size: TextSize, isSelected: Bool, width: CGFloat, height: CGFloat, fontSize: CGFloat, selectedColor: SKColor, unselectedColor: SKColor) {
+        self.textSize = size
+        self.isSelected = isSelected
+        self.selectedColor = selectedColor
+        self.unselectedColor = unselectedColor
         super.init()
-        setupDropdown()
+
+        setupButton(text: text, width: width, height: height, fontSize: fontSize)
     }
 
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    private func setupDropdown() {
-        selectedTextSize = TextSizeManager.shared.currentTextSize
+    private func setupButton(text: String, width: CGFloat, height: CGFloat, fontSize: CGFloat) {
+        // Background
+        backgroundNode = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 4)
+        backgroundNode.strokeColor = borderColor
+        backgroundNode.lineWidth = 1
+        backgroundNode.zPosition = 0
+        addChild(backgroundNode)
 
-        // Button background
-        let buttonWidth: CGFloat = 100
-        let buttonHeight: CGFloat = 35
+        // Label
+        labelNode = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
+        labelNode.text = text
+        labelNode.fontSize = fontSize
+        labelNode.fontColor = textColor
+        labelNode.verticalAlignmentMode = .center
+        labelNode.horizontalAlignmentMode = .center
+        labelNode.zPosition = 1
+        addChild(labelNode)
 
-        buttonNode = SKShapeNode(rectOf: CGSize(width: buttonWidth, height: buttonHeight), cornerRadius: 5)
-        buttonNode.fillColor = backgroundColor
-        buttonNode.strokeColor = borderColor
-        buttonNode.lineWidth = 1
-        buttonNode.zPosition = 0
-        buttonNode.name = "textSizeButton"
-        addChild(buttonNode)
-
-        // Button label
-        buttonLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
-        buttonLabel.text = selectedTextSize.rawValue
-        buttonLabel.fontSize = fontSize
-        buttonLabel.fontColor = textColor
-        buttonLabel.verticalAlignmentMode = .center
-        buttonLabel.horizontalAlignmentMode = .center
-        buttonLabel.zPosition = 1
-        addChild(buttonLabel)
+        updateAppearance()
     }
 
-    func handleTouch(at location: CGPoint) -> Bool {
-        let touchedNode = atPoint(location)
-
-        // Check if tapped on button
-        if touchedNode == buttonNode || touchedNode.parent == self {
-            toggleMenu()
-            return true
-        }
-
-        // Check if menu is expanded and a menu item was tapped
-        if isExpanded, let menu = dropdownMenu {
-            for child in menu.children {
-                if child.contains(location) {
-                    if let label = child.children.first(where: { $0 is SKLabelNode }) as? SKLabelNode,
-                       let text = label.text,
-                       let newSize = TextSize(rawValue: text) {
-                        selectTextSize(newSize)
-                        closeMenu()
-                        return true
-                    }
-                }
-            }
-            // Close menu if tapped elsewhere
-            closeMenu()
-            return true
-        }
-
-        return false
+    private func updateAppearance() {
+        backgroundNode.fillColor = isSelected ? selectedColor : unselectedColor
     }
 
-    private func toggleMenu() {
-        if isExpanded {
-            closeMenu()
-        } else {
-            openMenu()
-        }
-    }
-
-    private func openMenu() {
-        isExpanded = true
-
-        let dropdownMenu = SKNode()
-        dropdownMenu.name = "textSizeMenu"
-        dropdownMenu.zPosition = 10
-
-        let buttonWidth: CGFloat = 100
-        let itemHeight: CGFloat = 32
-
-        var yOffset: CGFloat = -itemHeight * 0.5
-
-        for (index, textSize) in TextSize.allCases.enumerated() {
-            let itemY = -itemHeight * CGFloat(index) - itemHeight * 0.5
-
-            // Item background
-            let itemBg = SKShapeNode(rectOf: CGSize(width: buttonWidth - 4, height: itemHeight - 4), cornerRadius: 3)
-            itemBg.fillColor = dropdownBackgroundColor
-            itemBg.strokeColor = borderColor
-            itemBg.lineWidth = 0.5
-            itemBg.position = CGPoint(x: 0, y: itemY)
-            itemBg.zPosition = 0
-            itemBg.name = "menuItem_\(index)"
-            dropdownMenu.addChild(itemBg)
-
-            // Item label
-            let itemLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
-            itemLabel.text = textSize.rawValue
-            itemLabel.fontSize = fontSize * 0.9
-            itemLabel.fontColor = textColor
-            itemLabel.verticalAlignmentMode = .center
-            itemLabel.horizontalAlignmentMode = .center
-            itemLabel.position = CGPoint(x: 0, y: itemY)
-            itemLabel.zPosition = 1
-            dropdownMenu.addChild(itemLabel)
-        }
-
-        dropdownMenu.position = CGPoint(x: 0, y: -itemHeight * CGFloat(TextSize.allCases.count) * 0.5)
-        addChild(dropdownMenu)
-        self.dropdownMenu = dropdownMenu
-    }
-
-    private func closeMenu() {
-        isExpanded = false
-        dropdownMenu?.removeFromParent()
-        dropdownMenu = nil
-    }
-
-    private func selectTextSize(_ textSize: TextSize) {
-        selectedTextSize = textSize
-        TextSizeManager.shared.currentTextSize = textSize
-        buttonLabel.text = textSize.rawValue
+    func select() {
+        isSelected = true
     }
 }
