@@ -18,7 +18,7 @@
       "characterSprite": "robert",
       "characterName": "Maria",
       "dialogue": "Some things don’t need to change.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "robert_003_2",
@@ -34,7 +34,7 @@
       "characterSprite": "robert",
       "characterName": "Robert",
       "dialogue": "You’re still saying that, huh?",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "robert_005_2",
@@ -42,7 +42,7 @@
       "characterSprite": "robert",
       "characterName": "Robert",
       "dialogue": "Guess that’s why people keep coming back here.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "robert_006_2",
@@ -50,7 +50,7 @@
       "characterSprite": "robert",
       "characterName": "Robert",
       "dialogue": "Then I’ll come by again tomorrow.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "robert_007_2",
@@ -58,7 +58,7 @@
       "characterSprite": "robert",
       "characterName": "Robert",
       "dialogue": "Even if the shop isn’t here anymore.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     }
   ]
 }

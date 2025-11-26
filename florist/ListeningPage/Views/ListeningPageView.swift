@@ -38,6 +38,18 @@ struct ListeningPageView: View {
         return spriteName
     }
 
+    /// Calculate sprite X position based on position enum
+    private func spriteXPosition(for position: StoryScene.SpritePosition, in geometry: GeometryProxy) -> CGFloat {
+        switch position {
+        case .left:
+            return geometry.size.width * 0.25
+        case .center:
+            return geometry.size.width * 0.5
+        case .right:
+            return geometry.size.width * 0.75
+        }
+    }
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -81,18 +93,19 @@ struct ListeningPageView: View {
                     }
                 }
 
-                // Layer 2: Character Sprite (centered) (skip for prologue)
-                if let scene = controller.currentScene {
-                    // Character Sprite - hide for prologue
-                    if let sprite = scene.characterSprite, scene.backgroundImage != "BackgroundPrologue" {
-                        CharacterSpriteView(
-                            spriteName: getCharacterAssetName(from: sprite),
-                            position: .center
-                        )
-                        .frame(height: geometry.size.height * 1.8)
-                        .position(x: geometry.size.width / 2, y: geometry.size.height * 0.9)
-                        .clipped()
-                    }
+                // Layer 2: Character Sprite (positioned based on spritePosition)
+                if let scene = controller.currentScene,
+                   let sprite = scene.characterSprite {
+                    let position = scene.spritePosition ?? .center
+                    let xPosition = spriteXPosition(for: position, in: geometry)
+
+                    CharacterSpriteView(
+                        spriteName: getCharacterAssetName(from: sprite),
+                        position: position
+                    )
+                    .frame(height: geometry.size.height * 1.8)
+                    .position(x: xPosition, y: geometry.size.height * 0.9)
+                    .clipped()
                 }
 
                 // Layer 2.5: BackgroundTable (in front of character) (skip for prologue)

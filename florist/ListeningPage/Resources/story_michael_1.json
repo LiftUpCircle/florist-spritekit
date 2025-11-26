@@ -18,7 +18,7 @@
       "characterSprite": "michael",
       "characterName": "Michael",
       "dialogue": "Mama said it's okay!",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "michael_003",
@@ -34,7 +34,7 @@
       "characterSprite": "michael",
       "characterName": "Michael",
       "dialogue": "I wanna buy a flower!",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "michael_005",
@@ -50,7 +50,7 @@
       "characterSprite": "michael",
       "characterName": "Michael",
       "dialogue": "For you!",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "michael_007",
@@ -58,7 +58,7 @@
       "characterSprite": "michael",
       "characterName": "Michael",
       "dialogue": "Mama said your shop's gonna be gone soon… so I wanna give you a flower before it goes away.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "michael_008",
@@ -66,7 +66,7 @@
       "characterSprite": "michael",
       "characterName": "Michael",
       "dialogue": "So I wanna give you a flower before it goes away...",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "michael_009",
@@ -82,7 +82,7 @@
       "characterSprite": "michael",
       "characterName": "Michael",
       "dialogue": "But I want to!",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "michael_011",
@@ -90,14 +90,14 @@
       "characterSprite": "michael",
       "characterName": "Michael",
       "dialogue": "You always make flowers for everyone else — nobody ever makes one for you.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "michael_012",
       "backgroundImage": "BackgroundNew",
       "characterSprite": "michael",
       "characterName": "Maria",
-      "dialogue": "All right. Then how about we make one together?",
+      "dialogue": "All center. Then how about we make one together?",
       "spritePosition": "center"
     },
     {
@@ -106,7 +106,7 @@
       "characterSprite": "michael",
       "characterName": "Michael",
       "dialogue": "Really? Yay!",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "michael_014",
@@ -114,7 +114,7 @@
       "characterSprite": "michael",
       "characterName": "Michael",
       "dialogue": "Can we make something yellow? \nYellow's happy. \nSo you don't forget to smile.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "michael_015",

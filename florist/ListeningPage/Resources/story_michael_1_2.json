@@ -18,7 +18,7 @@
       "characterSprite": "michael",
       "characterName": "Michael",
       "dialogue": "You promise you'll visit me and Mama after this?",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "michael_003_2",
@@ -34,7 +34,7 @@
       "characterSprite": "michael",
       "characterName": "Michael",
       "dialogue": "Okay! Bye, Grandma Maria!",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "michael_005_2",
