@@ -164,7 +164,7 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
 
         // Sounds Toggle
         let soundsLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
-        soundsLabel.text = "Sounds"
+        soundsLabel.text = "SFX"
         soundsLabel.fontSize = labelFontSize
         soundsLabel.fontColor = darkGrayColor
         soundsLabel.horizontalAlignmentMode = .left
@@ -258,61 +258,33 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
         let buttonHeight: CGFloat = 28
         let buttonSpacing: CGFloat = 12
         let currentSize = TextSizeManager.shared.currentTextSize
+        let fontSize = labelFontSize * 0.7
 
-        let buttonX1 = labelX - buttonSpacing / 2 - buttonWidth - buttonSpacing / 2
-        let buttonX2 = labelX + buttonSpacing / 2
-        let buttonX3 = labelX + buttonSpacing / 2 + buttonWidth + buttonSpacing / 2
+        // Button configuration data - cleaner and more maintainable
+        let buttonConfigs: [(text: String, size: TextSize, key: String, xOffset: CGFloat)] = [
+            ("N", .normal, "normal", -buttonWidth - buttonSpacing),
+            ("L", .large, "large", 0),
+            ("XL", .extraLarge, "extraLarge", buttonWidth + buttonSpacing)
+        ]
 
-        // Normal button
-        let normalButton = TextSizeButton(
-            text: "N",
-            size: .normal,
-            isSelected: currentSize == .normal,
-            width: buttonWidth,
-            height: buttonHeight,
-            fontSize: labelFontSize * 0.7,
-            selectedColor: redToggleColor,
-            unselectedColor: lightPinkColor
-        )
-        normalButton.position = CGPoint(x: buttonX1, y: startY)
-        normalButton.zPosition = 1002
-        normalButton.name = "textSizeNormal"
-        addChild(normalButton)
-        textSizeButtons["normal"] = normalButton
-
-        // Large button
-        let largeButton = TextSizeButton(
-            text: "L",
-            size: .large,
-            isSelected: currentSize == .large,
-            width: buttonWidth,
-            height: buttonHeight,
-            fontSize: labelFontSize * 0.7,
-            selectedColor: redToggleColor,
-            unselectedColor: lightPinkColor
-        )
-        largeButton.position = CGPoint(x: labelX, y: startY)
-        largeButton.zPosition = 1002
-        largeButton.name = "textSizeLarge"
-        addChild(largeButton)
-        textSizeButtons["large"] = largeButton
-
-        // Extra Large button
-        let xlButton = TextSizeButton(
-            text: "XL",
-            size: .extraLarge,
-            isSelected: currentSize == .extraLarge,
-            width: buttonWidth,
-            height: buttonHeight,
-            fontSize: labelFontSize * 0.7,
-            selectedColor: redToggleColor,
-            unselectedColor: lightPinkColor
-        )
-        xlButton.position = CGPoint(x: buttonX3, y: startY)
-        xlButton.zPosition = 1002
-        xlButton.name = "textSizeXL"
-        addChild(xlButton)
-        textSizeButtons["extraLarge"] = xlButton
+        // Create buttons using configuration - reduces code duplication
+        for config in buttonConfigs {
+            let button = TextSizeButton(
+                text: config.text,
+                size: config.size,
+                isSelected: currentSize == config.size,
+                width: buttonWidth,
+                height: buttonHeight,
+                fontSize: fontSize,
+                selectedColor: redToggleColor,
+                unselectedColor: lightPinkColor
+            )
+            button.position = CGPoint(x: labelX + config.xOffset, y: startY)
+            button.zPosition = 1002
+            button.name = "textSize\(config.key)"
+            addChild(button)
+            textSizeButtons[config.key] = button
+        }
     }
 
     private func setupActionButtons() {
@@ -402,20 +374,19 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
             return resetConfirmationDialog.handleTouch(at: location)
         }
 
-        // Check if touch is on text size buttons
+        // Check if touch is on text size buttons - optimized with early exit
         var node: SKNode? = touchedNode
         while node != nil && node != self {
-            for (_, button) in textSizeButtons {
-                if node === button || node?.parent === button {
-                    button.select()
-                    // Update all buttons state
-                    for (_, btn) in textSizeButtons {
-                        btn.isSelected = (btn === button)
-                    }
+            // Check if this node or its parent is a text size button
+            if let button = node as? TextSizeButton ?? node?.parent as? TextSizeButton {
+                if !button.isSelected { // Only update if selecting a different button
+                    // Deselect all buttons and select the tapped one
+                    textSizeButtons.values.forEach { $0.isSelected = false }
+                    button.isSelected = true
                     TextSizeManager.shared.currentTextSize = button.textSize
                     controller.handleTextSizeChange(button.textSize)
-                    return true
                 }
+                return true
             }
             node = node?.parent
         }
