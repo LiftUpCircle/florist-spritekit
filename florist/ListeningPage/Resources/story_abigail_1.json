@@ -18,7 +18,7 @@
       "characterSprite": "abigail",
       "characterName": "Abigail",
       "dialogue": "Maybe it has.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "abigail_003",
@@ -34,7 +34,7 @@
       "characterSprite": "abigail",
       "characterName": "Maria",
       "dialogue": "Of couse. Is it her birthday?",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "abigail_005",
@@ -42,7 +42,7 @@
       "characterSprite": "abigail",
       "characterName": "Abigail",
       "dialogue": "No...\nNot this time.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "abigail_006",
@@ -58,7 +58,7 @@
       "characterSprite": "abigail",
       "characterName": "Abigail",
       "dialogue": "They want to clear the old blocks.\nIncluding this street.\nIncluding... your shop.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "abigail_008",
@@ -66,7 +66,7 @@
       "characterSprite": "abigail",
       "characterName": "Maria",
       "dialogue": "Ah.. i see..",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "abigail_009",
@@ -82,7 +82,7 @@
       "characterSprite": "abigail",
       "characterName": "Abigail",
       "dialogue": "He only really listens to my mom.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "abigail_011",
@@ -90,7 +90,7 @@
       "characterSprite": "abigail",
       "characterName": "Abigail",
       "dialogue": "So I thought...\nMaybe if i bring her something beautiful, she'll understand how much this place matters,\nhow much you matter,\nand how much this shop still holds people together.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "abigail_012",
@@ -121,7 +121,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
       "characterName": "Maria",
-      "dialogue": "Then let's make something that speaks gently, but shines brightly.",
+      "dialogue": "Then let's make something that speaks gently, but shines bcenterly.",
       "spritePosition": "center"
     }
   ]

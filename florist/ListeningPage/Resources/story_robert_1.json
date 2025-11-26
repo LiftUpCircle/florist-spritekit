@@ -18,7 +18,7 @@
       "characterSprite": "robert",
       "characterName": "Robert",
       "dialogue": "I figured I'd come before you get busy. \nDidn't want you closing shop without me picking up one last bouquet.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "robert_003",
@@ -34,7 +34,7 @@
       "characterSprite": "robert",
       "characterName": "Robert",
       "dialogue": "Not really. \nI still put them by the window every week.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "robert_005",
@@ -42,7 +42,7 @@
       "characterSprite": "robert",
       "characterName": "Robert",
       "dialogue": "The same kind I used to give my wife.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "robert_006",
@@ -50,7 +50,7 @@
       "characterSprite": "robert",
       "characterName": "Robert",
       "dialogue": "She's been gone for a few years now, but… \nI guess old habits never die.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "robert_007",
@@ -58,7 +58,7 @@
       "characterSprite": "robert",
       "characterName": "Robert",
       "dialogue": "Or maybe I just miss her...",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "robert_008",
@@ -82,7 +82,7 @@
       "characterSprite": "robert",
       "characterName": "Robert",
       "dialogue": "Yeah… she always said the scent followed me home.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "robert_011",
@@ -90,7 +90,7 @@
       "characterSprite": "robert",
       "characterName": "Robert",
       "dialogue": "Sometimes, when I pass this street, I swear I still catch it.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "robert_012",
@@ -106,7 +106,7 @@
       "characterSprite": "robert",
       "characterName": "Robert",
       "dialogue": "Maybe. I just thought… one more bouquet couldn't hurt.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "robert_014",
@@ -114,7 +114,7 @@
       "characterSprite": "robert",
       "characterName": "Robert",
       "dialogue": "Something that feels like the way mornings used to.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "robert_015",

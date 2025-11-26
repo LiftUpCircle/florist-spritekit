@@ -18,7 +18,7 @@
       "characterSprite": "abigail",
       "characterName": "Abigail",
       "dialogue": "And maybe... maybe my dad will too.\nOr at least... he'll pause long enough to think.",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "abigail_003_2",
@@ -34,7 +34,7 @@
       "characterSprite": "abigail",
       "characterName": "Abigail",
       "dialogue": "You always find a way to make everything feel lighter",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "abigail_005_2",
@@ -42,7 +42,7 @@
       "characterSprite": "abigail",
       "characterName": "Maria",
       "dialogue": "Maybe that's just what flowers do.\nOr maybe... it's what you needed to hear",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "abigail_006_2",
