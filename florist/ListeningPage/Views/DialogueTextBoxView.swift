@@ -78,7 +78,7 @@ struct DialogueTextboxView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            .fixedSize(horizontal: true, vertical: true)
+            .fixedSize(horizontal: false, vertical: true)
             .padding(16)
             .padding(.trailing, 40)
             .background(
@@ -105,6 +105,7 @@ struct DialogueTextboxView: View {
             }
         }
         .contentShape(Rectangle())
+        .frame(maxWidth: maxWidth)
         .simultaneousGesture(
             TapGesture()
                 .onEnded { _ in

@@ -130,6 +130,7 @@ struct ListeningPageView: View {
                             dialogue: scene.dialogue,
                             typingSpeed: controller.typingSpeed,
                             shouldCompleteTyping: controller.shouldCompleteTyping,
+                            //mark this shit
                             maxWidth: geometry.size.width * 0.7,
                             onTypingComplete: { controller.onTypingComplete() },
                             onTap: { controller.handleDialogueTap() }
@@ -294,6 +295,6 @@ struct ListeningPageView: View {
 }
 
 
-#Preview {
-    ListeningPageView(storyId: "story", flowCoordinator: GameFlowCoordinator())
-}
+//#Preview {
+//    ListeningPageView(storyId: "story", flowCoordinator: GameFlowCoordinator())
+//}
