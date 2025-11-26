@@ -11,6 +11,7 @@ struct MemoriesBookView: View {
     var onDismiss: () -> Void
     @StateObject private var controller = MemoriesViewController()
     @State private var selectedCharacterIndex = 0
+    @State private var isAnimating = false
 
     // Character data
     private let characters = [
@@ -39,22 +40,22 @@ struct MemoriesBookView: View {
                                height: min(geometry.size.height * 0.90, 900))
 
                     // Book content with independent transitions for each page
-                    MemoriesBookContentView(
-                        character: characters[selectedCharacterIndex],
-                        controller: controller
-                    )
-                    .frame(width: min(geometry.size.width * 0.75, 750),
-                           height: min(geometry.size.height * 0.90, 900))
+                    if characters.indices.contains(selectedCharacterIndex) {
+                        MemoriesBookContentView(
+                            character: characters[selectedCharacterIndex],
+                            controller: controller
+                        )
+                        .frame(width: min(geometry.size.width * 0.75, 750),
+                               height: min(geometry.size.height * 0.90, 900))
+                    }
 
                     // Navigation arrows
                     HStack {
                         // Previous Button (Left Arrow)
                         if selectedCharacterIndex > 0 {
                             Button(action: {
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    selectedCharacterIndex -= 1
-                                }
-                                playFlippingSound()
+                                guard !isAnimating else { return }
+                                goToPrevious()
                             }) {
                                 Image(systemName: "chevron.left")
                                     .font(.system(size: 24, weight: .bold))
@@ -65,6 +66,7 @@ struct MemoriesBookView: View {
                                             .frame(width: 44, height: 44)
                                     )
                             }
+                            .disabled(isAnimating)
                             .padding(.leading, 11)
                         }
 
@@ -73,10 +75,8 @@ struct MemoriesBookView: View {
                         // Next Button (Right Arrow)
                         if selectedCharacterIndex < characters.count - 1 {
                             Button(action: {
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    selectedCharacterIndex += 1
-                                }
-                                playFlippingSound()
+                                guard !isAnimating else { return }
+                                goToNext()
                             }) {
                                 Image(systemName: "chevron.right")
                                     .font(.system(size: 24, weight: .bold))
@@ -87,6 +87,7 @@ struct MemoriesBookView: View {
                                             .frame(width: 44, height: 44)
                                     )
                             }
+                            .disabled(isAnimating)
                             .padding(.trailing, 15)
                         }
                     }
@@ -101,6 +102,36 @@ struct MemoriesBookView: View {
             SettingsManager.shared.preloadSound(named: "flippingbook")
         }
         .statusBar(hidden: true)
+    }
+
+    // Helper function to go to previous character
+    private func goToPrevious() {
+        guard selectedCharacterIndex > 0 else { return }
+        isAnimating = true
+        playFlippingSound()
+
+        withAnimation(.easeInOut(duration: 0.3)) {
+            selectedCharacterIndex -= 1
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            isAnimating = false
+        }
+    }
+
+    // Helper function to go to next character
+    private func goToNext() {
+        guard selectedCharacterIndex < characters.count - 1 else { return }
+        isAnimating = true
+        playFlippingSound()
+
+        withAnimation(.easeInOut(duration: 0.3)) {
+            selectedCharacterIndex += 1
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            isAnimating = false
+        }
     }
 
     // Helper function to play flipping sound
