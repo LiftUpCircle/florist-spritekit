@@ -79,7 +79,7 @@
     {
       "id": "robert_010",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "robert",
+      "characterSprite": "robertSmile",
       "characterName": "Robert",
       "dialogue": "Yeah… she always said the scent followed me home.",
       "spritePosition": "center"

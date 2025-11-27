@@ -35,6 +35,9 @@ struct StoryIndexEntry: Codable {
 
     // Field to identify second part stories
     let isSecondPart: Bool?
+    
+    // Field to identify closing story (shows "To Be Continued" screen)
+    let isClosingStory: Bool?
 }
 
 /// Represents a flower requirement from story.json

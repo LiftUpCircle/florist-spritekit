@@ -15,7 +15,7 @@
     {
       "id": "michael_002",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "michael",
+      "characterSprite": "michaelSmile",
       "characterName": "Michael",
       "dialogue": "Mama said it's okay!",
       "spritePosition": "center"
@@ -31,7 +31,7 @@
     {
       "id": "michael_004",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "michael",
+      "characterSprite": "michaelSmile",
       "characterName": "Michael",
       "dialogue": "I wanna buy a flower!",
       "spritePosition": "center"
@@ -47,7 +47,7 @@
     {
       "id": "michael_006",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "michael",
+      "characterSprite": "michaelSmile",
       "characterName": "Michael",
       "dialogue": "For you!",
       "spritePosition": "center"
@@ -79,7 +79,7 @@
     {
       "id": "michael_010",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "michael",
+      "characterSprite": "michaelSmile",
       "characterName": "Michael",
       "dialogue": "But I want to!",
       "spritePosition": "center"
@@ -103,7 +103,7 @@
     {
       "id": "michael_013",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "michael",
+      "characterSprite": "michaelSmile",
       "characterName": "Michael",
       "dialogue": "Really? Yay!",
       "spritePosition": "center"
@@ -111,7 +111,7 @@
     {
       "id": "michael_014",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "michael",
+      "characterSprite": "michaelSmile",
       "characterName": "Michael",
       "dialogue": "Can we make something yellow? \nYellow's happy. \nSo you don't forget to smile.",
       "spritePosition": "center"
