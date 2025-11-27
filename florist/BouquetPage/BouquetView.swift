@@ -51,9 +51,9 @@ struct BouquetView: View {
                             maxWidth: min(400, geometry.size.width - 200),
                             isMinimized: $isHintMinimized
                         )
-                        .padding(.trailing, geometry.size.width * 0.08)
+                        .padding(.trailing, geometry.size.width * 0.05)
                     }
-                    .padding(.top, geometry.size.height * 0.07)
+                    .padding(.top, geometry.size.height * 0.03)
 
                     Spacer()
                 }

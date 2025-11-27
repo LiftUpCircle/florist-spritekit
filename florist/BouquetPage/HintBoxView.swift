@@ -65,17 +65,20 @@ struct HintBoxView: View {
 
     @ViewBuilder
     private func expandedHintBox() -> some View {
-        ZStack(alignment: .topTrailing) {
-            DialogueTextboxView(
-                characterName: characterName,
-                dialogue: dialogue,
-                typingSpeed: 0.03,
-                shouldCompleteTyping: false,
-                maxWidth: maxWidth,
-                showTriangleIndicator: false,
-                onTypingComplete: {},
-                onTap: {}
-            )
+        HStack(alignment: .top, spacing: 0) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(characterName)
+                    .font(.bodyGaegu)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+
+                Text(dialogue)
+                    .font(.bodyGaegu)
+                    .foregroundColor(.primary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 8)
 
             Button(action: {
                 withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
@@ -85,15 +88,16 @@ struct HintBoxView: View {
                 Image(systemName: "minus.circle.fill")
                     .font(.system(size: 22))
                     .foregroundColor(Color("DialogueTextboxBorder"))
-                    .background(
-                        Circle()
-                            .fill(Color("DialogueTextbox"))
-                            .frame(width: 26, height: 26)
-                    )
             }
             .buttonStyle(PlainButtonStyle())
-            .offset(x: -10, y: 10)
         }
+        .padding(16)
+        .frame(maxWidth: maxWidth, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color("DialogueTextbox"))
+                .stroke(Color("DialogueTextboxBorder"), lineWidth: 5)
+        )
         .transition(.asymmetric(
             insertion: .scale.combined(with: .opacity),
             removal: .scale.combined(with: .opacity)
