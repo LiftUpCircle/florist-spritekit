@@ -7,7 +7,7 @@
     {
       "id": "robert_001_2",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "robert",
+      "characterSprite": "robertSmile",
       "characterName": "Robert",
       "dialogue": "Yes... that's it. Feels just like before.",
       "spritePosition": "center"
@@ -17,7 +17,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "robert",
       "characterName": "Maria",
-      "dialogue": "Some things don’t need to change.",
+      "dialogue": "Some things don't need to change.",
       "spritePosition": "center"
     },
     {
@@ -31,17 +31,17 @@
     {
       "id": "robert_004_2",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "robert",
+      "characterSprite": "robertSmile",
       "characterName": "Robert",
-      "dialogue": "You’re still saying that, huh?",
+      "dialogue": "You're still saying that, huh?",
       "spritePosition": "center"
     },
     {
       "id": "robert_005_2",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "robert",
+      "characterSprite": "robertSmile",
       "characterName": "Robert",
-      "dialogue": "Guess that’s why people keep coming back here.",
+      "dialogue": "Guess that's why people keep coming back here.",
       "spritePosition": "center"
     },
     {
@@ -49,7 +49,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "robert",
       "characterName": "Robert",
-      "dialogue": "Then I’ll come by again tomorrow.",
+      "dialogue": "Then I'll come by again tomorrow.",
       "spritePosition": "center"
     },
     {
@@ -57,7 +57,7 @@
       "backgroundImage": "BackgroundNew",
       "characterSprite": "robert",
       "characterName": "Robert",
-      "dialogue": "Even if the shop isn’t here anymore.",
+      "dialogue": "Even if the shop isn't here anymore.",
       "spritePosition": "center"
     }
   ]

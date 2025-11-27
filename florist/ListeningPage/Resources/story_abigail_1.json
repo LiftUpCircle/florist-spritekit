@@ -101,7 +101,7 @@
       "spritePosition": "center"
     },
     {
-      "id": "abigail_012",
+      "id": "abigail_013",
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
       "characterName": "Maria",
@@ -109,19 +109,19 @@
       "spritePosition": "center"
     },
     {
-      "id": "abigail_012",
+      "id": "abigail_014",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "abigail",
+      "characterSprite": "abigailSmile",
       "characterName": "Abigail",
       "dialogue": "She likes the ones that look like they're glowing...\nSimple, but impossible to ignore.\nThe kind that makes a room feel warmer.",
       "spritePosition": "center"
     },
     {
-      "id": "abigail_012",
+      "id": "abigail_015",
       "backgroundImage": "BackgroundNew",
       "characterSprite": "abigail",
       "characterName": "Maria",
-      "dialogue": "Then let's make something that speaks gently, but shines bcenterly.",
+      "dialogue": "Then let's make something that speaks gently, but shines brightly.",
       "spritePosition": "center"
     }
   ]

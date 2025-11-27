@@ -19,6 +19,20 @@ struct ListeningPageView: View {
 
     /// Map character sprite name to real asset name based on current scene's character
     private func getCharacterAssetName(from spriteName: String) -> String {
+        // Check the sprite name for smile variants
+        let lowerSprite = spriteName.lowercased()
+
+        if lowerSprite.contains("smile") {
+            // Return the smile variant directly
+            if lowerSprite.contains("robert") {
+                return "robertSmile"
+            } else if lowerSprite.contains("abigail") {
+                return "abigailSmile"
+            } else if lowerSprite.contains("michael") {
+                return "michaelSmile"
+            }
+        }
+
         // Check the characterName from the scene to determine which asset to use
         guard let scene = controller.currentScene else {
             return spriteName

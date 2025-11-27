@@ -7,7 +7,7 @@
     {
       "id": "abigail_001_2",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "abigail",
+      "characterSprite": "abigailSmile",
       "characterName": "Abigail",
       "dialogue": "It's... beautiful.\nShe'll understand this. I know she will.",
       "spritePosition": "center"
@@ -15,7 +15,7 @@
     {
       "id": "abigail_002_2",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "abigail",
+      "characterSprite": "abigailSmile",
       "characterName": "Abigail",
       "dialogue": "And maybe... maybe my dad will too.\nOr at least... he'll pause long enough to think.",
       "spritePosition": "center"
@@ -31,7 +31,7 @@
     {
       "id": "abigail_004_2",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "abigail",
+      "characterSprite": "abigailSmile",
       "characterName": "Abigail",
       "dialogue": "You always find a way to make everything feel lighter",
       "spritePosition": "center"
@@ -47,7 +47,7 @@
     {
       "id": "abigail_006_2",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "abigail",
+      "characterSprite": "abigailSmile",
       "characterName": "Abigail",
       "dialogue": "Thank you, Maria.\nI'll bring these to her today, before anything begins.",
       "spritePosition": "center"

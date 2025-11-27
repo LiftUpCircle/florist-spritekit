@@ -7,7 +7,7 @@
     {
       "id": "michael_001_2",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "michael",
+      "characterSprite": "michaelSmile",
       "characterName": "Michael",
       "dialogue": "It's so pretty!\nI think it looks like sunshine.",
       "spritePosition": "center"
@@ -31,7 +31,7 @@
     {
       "id": "michael_004_2",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "michael",
+      "characterSprite": "michaelSmile",
       "characterName": "Michael",
       "dialogue": "Okay! Bye, Grandma Maria!",
       "spritePosition": "center"
@@ -39,7 +39,7 @@
     {
       "id": "michael_005_2",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "michael",
+      "characterSprite": "michaelSmile",
       "characterName": "Maria",
       "dialogue": "Good bye and thank you Michael!",
       "spritePosition": "center"
