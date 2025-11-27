@@ -92,7 +92,7 @@ struct HintBoxView: View {
                     )
             }
             .buttonStyle(PlainButtonStyle())
-            .offset(x: -10, y: 10)
+            .offset(x: -18, y: 18)
         }
         .transition(.asymmetric(
             insertion: .scale.combined(with: .opacity),
