@@ -13,6 +13,7 @@ struct HintBoxView: View {
     let maxWidth: CGFloat
     @Binding var isMinimized: Bool
     @State private var isPulsing: Bool = false
+    @EnvironmentObject private var textSizeManager: TextSizeManager
 
     var body: some View {
         if isMinimized {
@@ -32,12 +33,12 @@ struct HintBoxView: View {
         }) {
             HStack(spacing: 8) {
                 Image(systemName: "lightbulb.fill")
-                    .font(.bodyGaegu)
+                    .font(.gaeguFont(size: 17, weight: "Bold"))
                     .fontWeight(.bold)
                     .foregroundColor(Color("DialogueTextboxBorder"))
 
                 Text("Hint")
-                    .font(.bodyGaegu)
+                    .font(.gaeguFont(size: 17, weight: "Bold"))
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
             }

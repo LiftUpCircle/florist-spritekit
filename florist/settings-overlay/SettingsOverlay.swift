@@ -23,6 +23,7 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
     private var soundsToggle: ModernToggle!
     private var musicToggle: ModernToggle!
     private var vibrationToggle: ModernToggle!
+    private var textSizeButtons: [String: TextSizeButton] = [:] // Store buttons by size name
     
     // Action buttons
     private var homeButton: SKNode!
@@ -151,39 +152,39 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
         let overlayWidth = sceneSize.width * 0.70
         let overlayHeight = sceneSize.height * 0.75
         let labelFontSize = max(20, min(overlayWidth * 0.028, 28))
-        
+
         // Minimized spacing - tighter rows
         let startY = overlayHeight * 0.20
         let rowSpacing = overlayHeight * 0.12
         let labelX = -overlayWidth * 0.30
         let toggleX = overlayWidth * 0.30
-        
+
         // Separator lines
         let separatorWidth = overlayWidth * 0.85
-        
+
         // Sounds Toggle
         let soundsLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
-        soundsLabel.text = "Sounds"
+        soundsLabel.text = "SFX"
         soundsLabel.fontSize = labelFontSize
         soundsLabel.fontColor = darkGrayColor
         soundsLabel.horizontalAlignmentMode = .left
         soundsLabel.position = CGPoint(x: labelX, y: startY)
         soundsLabel.zPosition = 1002
         addChild(soundsLabel)
-        
+
         soundsToggle = ModernToggle(initialValue: SettingsManager.shared.sfxVolume > 0.0, toggleColor: redToggleColor)
         soundsToggle.position = CGPoint(x: toggleX, y: startY)
         soundsToggle.zPosition = 1002
         soundsToggle.name = "soundsToggle"
         addChild(soundsToggle)
-        
+
         // Separator line after Sounds
         let separator1 = SKShapeNode(rectOf: CGSize(width: separatorWidth, height: 1))
         separator1.fillColor = separatorColor
         separator1.position = CGPoint(x: 0, y: startY - rowSpacing * 0.5)
         separator1.zPosition = 1002
         addChild(separator1)
-        
+
         // Music Toggle
         let musicLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
         musicLabel.text = "Music"
@@ -193,20 +194,20 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
         musicLabel.position = CGPoint(x: labelX, y: startY - rowSpacing)
         musicLabel.zPosition = 1002
         addChild(musicLabel)
-        
+
         musicToggle = ModernToggle(initialValue: SettingsManager.shared.musicVolume > 0.0, toggleColor: redToggleColor)
         musicToggle.position = CGPoint(x: toggleX, y: startY - rowSpacing)
         musicToggle.zPosition = 1002
         musicToggle.name = "musicToggle"
         addChild(musicToggle)
-        
+
         // Separator line after Music
         let separator2 = SKShapeNode(rectOf: CGSize(width: separatorWidth, height: 1))
         separator2.fillColor = separatorColor
         separator2.position = CGPoint(x: 0, y: startY - rowSpacing * 1.5)
         separator2.zPosition = 1002
         addChild(separator2)
-        
+
         // Vibration Toggle
         let vibrationLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
         vibrationLabel.text = "Vibration"
@@ -216,37 +217,91 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
         vibrationLabel.position = CGPoint(x: labelX, y: startY - rowSpacing * 2)
         vibrationLabel.zPosition = 1002
         addChild(vibrationLabel)
-        
+
         vibrationToggle = ModernToggle(initialValue: SettingsManager.shared.isVibrationEnabled, toggleColor: redToggleColor)
         vibrationToggle.position = CGPoint(x: toggleX, y: startY - rowSpacing * 2)
         vibrationToggle.zPosition = 1002
         vibrationToggle.name = "vibrationToggle"
         addChild(vibrationToggle)
-        
-        // Final separator line
-        let separator3Y = startY - rowSpacing * 2.5
+
+        // Separator line after Vibration
         let separator3 = SKShapeNode(rectOf: CGSize(width: separatorWidth, height: 1))
         separator3.fillColor = separatorColor
-        separator3.position = CGPoint(x: 0, y: separator3Y)
+        separator3.position = CGPoint(x: 0, y: startY - rowSpacing * 2.5)
         separator3.zPosition = 1002
         addChild(separator3)
+
+        // Text Size Label (moved to left side for group label)
+        let textSizeLabel = SKLabelNode(fontNamed: GaeguTypography.regularFontName)
+        textSizeLabel.text = "Text Size"
+        textSizeLabel.fontSize = labelFontSize
+        textSizeLabel.fontColor = darkGrayColor
+        textSizeLabel.horizontalAlignmentMode = .left
+        textSizeLabel.position = CGPoint(x: labelX, y: startY - rowSpacing * 3)
+        textSizeLabel.zPosition = 1002
+        addChild(textSizeLabel)
+
+        // Text Size Selection Buttons
+        setupTextSizeButtons(startY: startY - rowSpacing * 3, labelX: toggleX, labelFontSize: labelFontSize)
+
+        // Final separator line
+        let separator4Y = startY - rowSpacing * 3.5
+        let separator4 = SKShapeNode(rectOf: CGSize(width: separatorWidth, height: 1))
+        separator4.fillColor = separatorColor
+        separator4.position = CGPoint(x: 0, y: separator4Y)
+        separator4.zPosition = 1002
+        addChild(separator4)
     }
-    
-    
+
+    private func setupTextSizeButtons(startY: CGFloat, labelX: CGFloat, labelFontSize: CGFloat) {
+        let buttonWidth: CGFloat = 50
+        let buttonHeight: CGFloat = 28
+        let buttonSpacing: CGFloat = 12
+        let currentSize = TextSizeManager.shared.currentTextSize
+        let fontSize = labelFontSize * 0.7
+
+        // Button configuration data - cleaner and more maintainable
+        let buttonConfigs: [(text: String, size: TextSize, key: String, xOffset: CGFloat)] = [
+            ("N", .normal, "normal", -buttonWidth - buttonSpacing),
+            ("L", .large, "large", 0),
+            ("XL", .extraLarge, "extraLarge", buttonWidth + buttonSpacing)
+        ]
+
+        // Create buttons using configuration - reduces code duplication
+        for config in buttonConfigs {
+            let button = TextSizeButton(
+                text: config.text,
+                size: config.size,
+                isSelected: currentSize == config.size,
+                width: buttonWidth,
+                height: buttonHeight,
+                fontSize: fontSize,
+                selectedColor: redToggleColor,
+                unselectedColor: lightPinkColor
+            )
+            button.position = CGPoint(x: labelX + config.xOffset, y: startY)
+            button.zPosition = 1002
+            button.name = "textSize\(config.key)"
+            addChild(button)
+            textSizeButtons[config.key] = button
+        }
+    }
+
     private func setupActionButtons() {
         let overlayWidth = sceneSize.width * 0.70
         let overlayHeight = sceneSize.height * 0.75
         let buttonHeight = max(40, min(overlayHeight * 0.08, 48))
         let buttonFontSize = max(16, min(overlayWidth * 0.024, 20))
         let buttonCornerRadius: CGFloat = 8
-        
+
         let spacingAfterSeparator = overlayHeight * 0.08
-        let separator3Y = overlayHeight * 0.20 - overlayHeight * 0.12 * 2.5
-        let topButtonY = separator3Y - spacingAfterSeparator
+        // Updated to account for 4 separators now (text size was added)
+        let separator4Y = overlayHeight * 0.20 - overlayHeight * 0.12 * 3.5
+        let topButtonY = separator4Y - spacingAfterSeparator
         // Use 100% of available width (with some padding)
         let totalAvailableWidth = overlayWidth * 0.80
         let buttonWidth = totalAvailableWidth
-        
+
         if isFromMainMenu {
             // Only show Reset Game button (full width)
             resetGameButton = createActionButton(text: "Reset Game", width: buttonWidth, height: buttonHeight,
@@ -313,18 +368,35 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
     
     func handleTouch(at location: CGPoint, controller: SettingsOverlayController) -> Bool {
         let touchedNode = atPoint(location)
-        
+
         // If confirmation dialog is visible, let it handle the touch
         if resetConfirmationDialog.isVisible {
             return resetConfirmationDialog.handleTouch(at: location)
         }
-        
-        // Check toggles
+
+        // Check if touch is on text size buttons - optimized with early exit
         var node: SKNode? = touchedNode
+        while node != nil && node != self {
+            // Check if this node or its parent is a text size button
+            if let button = node as? TextSizeButton ?? node?.parent as? TextSizeButton {
+                if !button.isSelected { // Only update if selecting a different button
+                    // Deselect all buttons and select the tapped one
+                    textSizeButtons.values.forEach { $0.isSelected = false }
+                    button.isSelected = true
+                    TextSizeManager.shared.currentTextSize = button.textSize
+                    controller.handleTextSizeChange(button.textSize)
+                }
+                return true
+            }
+            node = node?.parent
+        }
+
+        // Check toggles
+        node = touchedNode
         while node != nil && node != self {
             if let toggle = node as? ModernToggle {
                 toggle.toggle()
-                
+
                 // Delegate to controller
                 if toggle == soundsToggle {
                     controller.handleSoundsToggle(toggle.isOn)
@@ -747,5 +819,67 @@ class ModernToggle: SKNode {
         let moveAction = SKAction.moveTo(x: knobX, duration: 0.2)
         moveAction.timingMode = .easeInEaseOut
         knobNode.run(moveAction)
+    }
+}
+
+// MARK: - Text Size Button
+
+class TextSizeButton: SKNode {
+    private var backgroundNode: SKShapeNode!
+    private var labelNode: SKLabelNode!
+
+    let textSize: TextSize
+    var isSelected: Bool = false {
+        didSet {
+            updateAppearance()
+        }
+    }
+
+    private let selectedColor: SKColor
+    private let unselectedColor: SKColor
+    private let textColor = SKColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
+    private let borderColor = SKColor(red: 0.7, green: 0.7, blue: 0.7, alpha: 1.0)
+
+    init(text: String, size: TextSize, isSelected: Bool, width: CGFloat, height: CGFloat, fontSize: CGFloat, selectedColor: SKColor, unselectedColor: SKColor) {
+        self.textSize = size
+        self.isSelected = isSelected
+        self.selectedColor = selectedColor
+        self.unselectedColor = unselectedColor
+        super.init()
+
+        setupButton(text: text, width: width, height: height, fontSize: fontSize)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    private func setupButton(text: String, width: CGFloat, height: CGFloat, fontSize: CGFloat) {
+        // Background
+        backgroundNode = SKShapeNode(rectOf: CGSize(width: width, height: height), cornerRadius: 4)
+        backgroundNode.strokeColor = borderColor
+        backgroundNode.lineWidth = 1
+        backgroundNode.zPosition = 0
+        addChild(backgroundNode)
+
+        // Label
+        labelNode = SKLabelNode(fontNamed: GaeguTypography.boldFontName)
+        labelNode.text = text
+        labelNode.fontSize = fontSize
+        labelNode.fontColor = textColor
+        labelNode.verticalAlignmentMode = .center
+        labelNode.horizontalAlignmentMode = .center
+        labelNode.zPosition = 1
+        addChild(labelNode)
+
+        updateAppearance()
+    }
+
+    private func updateAppearance() {
+        backgroundNode.fillColor = isSelected ? selectedColor : unselectedColor
+    }
+
+    func select() {
+        isSelected = true
     }
 }

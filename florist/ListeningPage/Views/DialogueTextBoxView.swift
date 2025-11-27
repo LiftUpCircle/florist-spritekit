@@ -35,10 +35,11 @@ struct DialogueTextboxView: View {
         self.onTypingComplete = onTypingComplete
         self.onTap = onTap
     }
-    
+
     @StateObject private var typewriter = TypewriterViewModel()
     @State private var processedDialogue: String = ""
     @State private var showTriangle = false
+    @EnvironmentObject private var textSizeManager: TextSizeManager
 
     // Display name with "(you)" indicator for Maria
     private var displayName: String {
@@ -77,7 +78,7 @@ struct DialogueTextboxView: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
             }
-            .fixedSize(horizontal: true, vertical: true)
+            .fixedSize(horizontal: false, vertical: true)
             .padding(16)
             .padding(.trailing, 40)
             .background(
@@ -104,6 +105,7 @@ struct DialogueTextboxView: View {
             }
         }
         .contentShape(Rectangle())
+        .frame(maxWidth: maxWidth)
         .simultaneousGesture(
             TapGesture()
                 .onEnded { _ in
