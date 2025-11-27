@@ -269,12 +269,12 @@ struct BouquetMemoryRow: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(memory.description)
                         .font(.gaeguFont(size: 12, weight: "Regular"))
-                        .foregroundColor(.gray)
+                        .foregroundColor(Color(red: 0.3, green: 0.2, blue: 0.2))
 
                     if let savedBouquet = memory.savedBouquet {
                         Text("Created: \(formattedDate(savedBouquet.dateCreated))")
                             .font(.gaeguFont(size: 10, weight: "Regular"))
-                            .foregroundColor(.gray)
+                            .foregroundColor(Color(red: 0.3, green: 0.2, blue: 0.2))
                     }
                 }
                 .padding(8)
