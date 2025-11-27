@@ -73,13 +73,13 @@ struct MainMenuView: View {
                     }) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 35)
-                                .fill(Color("PlayButton"))
+                                .fill(Color("NewPlayButtonColor"))
                                 .frame(width: 168, height: 56)
                                 .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 3)
                             
                             Text("Tap to Play")
                                 .font(.title3Gaegu)
-                                .foregroundColor(Color("TextPlayButton"))
+                                .foregroundColor(Color("NewTextPlayButtonColor"))
                         }
                     }
                     
