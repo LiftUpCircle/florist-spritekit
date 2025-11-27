@@ -254,7 +254,7 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
     }
 
     private func setupTextSizeButtons(startY: CGFloat, labelX: CGFloat, labelFontSize: CGFloat) {
-        let buttonWidth: CGFloat = 50
+        let buttonWidth: CGFloat = 55
         let buttonHeight: CGFloat = 28
         let buttonSpacing: CGFloat = 12
         let currentSize = TextSizeManager.shared.currentTextSize
@@ -262,9 +262,9 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
 
         // Button configuration data - cleaner and more maintainable
         let buttonConfigs: [(text: String, size: TextSize, key: String, xOffset: CGFloat)] = [
-            ("N", .normal, "normal", -buttonWidth - buttonSpacing),
-            ("L", .large, "large", 0),
-            ("XL", .extraLarge, "extraLarge", buttonWidth + buttonSpacing)
+            ("Normal", .normal, "normal", -buttonWidth - buttonSpacing),
+            ("Large", .large, "large", 0),
+            ("X-Large", .extraLarge, "extraLarge", buttonWidth + buttonSpacing)
         ]
 
         // Create buttons using configuration - reduces code duplication
