@@ -111,7 +111,27 @@ class GameFlowCoordinator: ObservableObject {
     }
 
     func navigateToToBeContinued() {
-        navigationPath.append(GamePage.toBeContinued)
+        print("🔄 navigateToToBeContinued called")
+
+        // Show loading screen with animation
+        withAnimation(.easeIn(duration: 0.3)) {
+            showLoadingScreen = true
+            print("✅ Loading screen set to true")
+        }
+
+        // Wait for loading screen to be fully visible, then navigate
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            print("⏱️ Navigating to To Be Continued page...")
+            self?.navigationPath.append(GamePage.toBeContinued)
+
+            // Hide loading screen after all 6 flowers are shown (3 seconds) plus view load time
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    self?.showLoadingScreen = false
+                    print("❌ Loading screen set to false")
+                }
+            }
+        }
     }
 
     // Called when a story completes without needing a bouquet (e.g., prologue, second parts)

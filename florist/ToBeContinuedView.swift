@@ -2,7 +2,7 @@
 //  ToBeContinuedView.swift
 //  florist
 //
-//  Created by AI Assistant
+//  Created by reynaldo
 //
 
 import SwiftUI
@@ -43,24 +43,10 @@ struct ToBeContinuedView: View {
                         Button(action: {
                             flowCoordinator.returnToMainMenu()
                         }) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "house.fill")
-                                    .font(.system(size: 18, weight: .semibold))
-                                
-                                Text("Back to Home")
-                                    .font(.custom("Gaegu-Bold", size: 18))
-                            }
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 20)
-                            .padding(.vertical, 12)
-                            .background(
-                                Capsule()
-                                    .fill(Color.white.opacity(0.2))
-                                    .overlay(
-                                        Capsule()
-                                            .stroke(Color.white.opacity(0.5), lineWidth: 1)
-                                    )
-                            )
+                            Image("BackToHomeButton")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(height: 50)
                         }
                         .opacity(buttonOpacity)
                         .padding(.trailing, 40)
