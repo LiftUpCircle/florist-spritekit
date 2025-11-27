@@ -94,6 +94,17 @@
       "order": 6,
       "isSecondPart": true,
       "skipBouquet": true
+    },
+    "maria_closing": {
+      "id": "story_maria_closing",
+      "file": "story_maria_closing.json",
+      "characterId": "maria",
+      "characterName": "Maria",
+      "title": "Closing",
+      "unlocked": false,
+      "order": 7,
+      "skipBouquet": true,
+      "isClosingStory": true
     }
   }
 }

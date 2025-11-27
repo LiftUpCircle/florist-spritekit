@@ -169,8 +169,10 @@ struct MainMenuView: View {
                     EmptyView() // Options now handled as overlay
                 case .mainMenu:
                     EmptyView() // This shouldn't be reached
-                default:
-                    EmptyView()
+                case .storyComplete:
+                    EmptyView() // Story complete dialog handled elsewhere
+                case .toBeContinued:
+                    ToBeContinuedView(flowCoordinator: flowCoordinator)
                 }
             }
             .task {

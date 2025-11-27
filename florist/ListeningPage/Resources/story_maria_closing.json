@@ -1,0 +1,30 @@
+{
+  "id": "story_maria_closing",
+  "title": "Maria's Closing",
+  "scenes": [
+    {
+      "id": "maria_closing_001",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "maria",
+      "characterName": "Maria",
+      "dialogue": "After all these years, I didn't think good bye would feel like this.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "maria_closing_002",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "maria",
+      "characterName": "Maria",
+      "dialogue": "I wonder if Abigail will manage to change her father's mind...",
+      "spritePosition": "center"
+    },
+    {
+      "id": "maria_closing_003",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "maria",
+      "characterName": "Maria",
+      "dialogue": "Though, at my age, I've learned not to hope for too much, only enough to keep the door open.",
+      "spritePosition": "center"
+    }
+  ]
+}

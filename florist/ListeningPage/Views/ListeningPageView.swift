@@ -278,15 +278,27 @@ struct ListeningPageView: View {
                 // Check if this story should skip bouquet (e.g., prologue)
                 do {
                     let storyIndex = try StoryManager.shared.loadStoryIndex()
-                    if let storyEntry = storyIndex.stories[storyId],
-                       storyEntry.skipBouquet == true {
-                        // Skip bouquet, go directly to next story
-                        // Pass the storyId so we know which story just completed
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            flowCoordinator.onStoryCompleteNoBouquet(for: storyId)
+                    if let storyEntry = storyIndex.stories[storyId] {
+                        // Check if this is the closing story
+                        if storyEntry.isClosingStory == true {
+                            // Show "To Be Continued" screen
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                flowCoordinator.navigateToToBeContinued()
+                            }
+                        } else if storyEntry.skipBouquet == true {
+                            // Skip bouquet, go directly to next story
+                            // Pass the storyId so we know which story just completed
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                flowCoordinator.onStoryCompleteNoBouquet(for: storyId)
+                            }
+                        } else {
+                            // Normal flow - go to bouquet
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                flowCoordinator.navigateToBouquet(storyId: storyId)
+                            }
                         }
                     } else {
-                        // Normal flow - go to bouquet
+                        // Default to normal flow if story not found
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             flowCoordinator.navigateToBouquet(storyId: storyId)
                         }

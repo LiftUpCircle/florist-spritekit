@@ -17,6 +17,7 @@ class GameFlowCoordinator: ObservableObject {
         case memories
         case options
         case storyComplete(storyId: String) // New: show completion dialog
+        case toBeContinued // New: show "To Be Continued" screen
     }
 
     @Published var navigationPath = NavigationPath()
@@ -107,6 +108,10 @@ class GameFlowCoordinator: ObservableObject {
 
     func navigateToOptions() {
         navigationPath.append(GamePage.options)
+    }
+
+    func navigateToToBeContinued() {
+        navigationPath.append(GamePage.toBeContinued)
     }
 
     // Called when a story completes without needing a bouquet (e.g., prologue, second parts)
