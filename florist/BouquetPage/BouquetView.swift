@@ -53,7 +53,7 @@ struct BouquetView: View {
                         )
                         .padding(.trailing, geometry.size.width * 0.05)
                     }
-                    .padding(.top, geometry.size.height * 0.03)
+                    .padding(.top, geometry.size.height * 0.08)
 
                     Spacer()
                 }

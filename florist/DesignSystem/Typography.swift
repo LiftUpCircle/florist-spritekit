@@ -7,84 +7,72 @@
 
 import SwiftUI
 
-// MARK: - Typography Design System
+// MARK: - Typography Design System (with Apple Dynamic Type)
 
 extension Font {
 
-    // MARK: - Gaegu Font Family (with Text Size Multiplier Support)
+    // MARK: - Gaegu Font Family (with Dynamic Type Support)
 
-    /// Large Title: Bold / 37px
+    /// Large Title: Bold - scales with Dynamic Type
     static var largeTitleGaegu: Font {
-        let size = 37 * TextSizeManager.shared.textSizeMultiplier
-        return Font.custom("Gaegu-Bold", size: size)
+        .custom("Gaegu-Bold", size: 37, relativeTo: .largeTitle)
     }
 
-    /// Title 1: Bold / 31px
+    /// Title 1: Bold - scales with Dynamic Type
     static var title1Gaegu: Font {
-        let size = 31 * TextSizeManager.shared.textSizeMultiplier
-        return Font.custom("Gaegu-Bold", size: size)
+        .custom("Gaegu-Bold", size: 31, relativeTo: .title)
     }
 
-    /// Title 2: Bold / 29px
+    /// Title 2: Bold - scales with Dynamic Type
     static var title2Gaegu: Font {
-        let size = 29 * TextSizeManager.shared.textSizeMultiplier
-        return Font.custom("Gaegu-Bold", size: size)
+        .custom("Gaegu-Bold", size: 29, relativeTo: .title2)
     }
 
-    /// Title 3: Bold / 21px
+    /// Title 3: Bold - scales with Dynamic Type
     static var title3Gaegu: Font {
-        let size = 21 * TextSizeManager.shared.textSizeMultiplier
-        return Font.custom("Gaegu-Bold", size: size)
+        .custom("Gaegu-Bold", size: 21, relativeTo: .title3)
     }
 
-    /// Headline: Bold / 19px
+    /// Headline: Bold - scales with Dynamic Type
     static var headlineGaegu: Font {
-        let size = 19 * TextSizeManager.shared.textSizeMultiplier
-        return Font.custom("Gaegu-Bold", size: size)
+        .custom("Gaegu-Bold", size: 19, relativeTo: .headline)
     }
 
-    /// Body: Regular / 17px
+    /// Body: Regular - scales with Dynamic Type
     static var bodyGaegu: Font {
-        let size = 17 * TextSizeManager.shared.textSizeMultiplier
-        return Font.custom("Gaegu-Regular", size: size)
+        .custom("Gaegu-Regular", size: 17, relativeTo: .body)
     }
 
-    /// Callout: Regular / 17px
+    /// Callout: Regular - scales with Dynamic Type
     static var calloutGaegu: Font {
-        let size = 17 * TextSizeManager.shared.textSizeMultiplier
-        return Font.custom("Gaegu-Regular", size: size)
+        .custom("Gaegu-Regular", size: 17, relativeTo: .callout)
     }
 
-    /// Subhead: Regular / 15px
+    /// Subhead: Regular - scales with Dynamic Type
     static var subheadGaegu: Font {
-        let size = 15 * TextSizeManager.shared.textSizeMultiplier
-        return Font.custom("Gaegu-Regular", size: size)
+        .custom("Gaegu-Regular", size: 15, relativeTo: .subheadline)
     }
 
-    /// Footnote: Regular / 15px
+    /// Footnote: Regular - scales with Dynamic Type
     static var footnoteGaegu: Font {
-        let size = 15 * TextSizeManager.shared.textSizeMultiplier
-        return Font.custom("Gaegu-Regular", size: size)
+        .custom("Gaegu-Regular", size: 15, relativeTo: .footnote)
     }
 
-    /// Caption 1: Regular / 13px
+    /// Caption 1: Regular - scales with Dynamic Type
     static var caption1Gaegu: Font {
-        let size = 13 * TextSizeManager.shared.textSizeMultiplier
-        return Font.custom("Gaegu-Regular", size: size)
+        .custom("Gaegu-Regular", size: 13, relativeTo: .caption)
     }
 
-    /// Caption 2: Regular / 13px
+    /// Caption 2: Regular - scales with Dynamic Type
     static var caption2Gaegu: Font {
-        let size = 13 * TextSizeManager.shared.textSizeMultiplier
-        return Font.custom("Gaegu-Regular", size: size)
+        .custom("Gaegu-Regular", size: 13, relativeTo: .caption2)
     }
 
     // MARK: - Helper function for dynamic sizing
 
-    static func gaeguFont(size: CGFloat, weight: String = "Regular") -> Font {
-        let scaledSize = size * TextSizeManager.shared.textSizeMultiplier
+    static func gaeguFont(size: CGFloat, weight: String = "Regular", relativeTo textStyle: Font.TextStyle = .body) -> Font {
         let fontName = weight == "Bold" ? "Gaegu-Bold" : "Gaegu-Regular"
-        return Font.custom(fontName, size: scaledSize)
+        return .custom(fontName, size: size, relativeTo: textStyle)
     }
 }
 
@@ -92,91 +80,81 @@ extension Font {
 
 struct GaeguTypography {
 
-    // MARK: - UIFont for SpriteKit/UIKit (with Text Size Multiplier Support)
+    // MARK: - UIFont for SpriteKit/UIKit (with Dynamic Type Support)
 
-    /// Large Title: Bold / 37pt
+    /// Large Title: Bold
     static var largeTitle: UIFont {
-        let size = 37 * TextSizeManager.shared.textSizeMultiplier
-        return UIFont(name: "Gaegu-Bold", size: size) ?? UIFont.boldSystemFont(ofSize: size)
+        scaledFont(name: "Gaegu-Bold", size: 37, textStyle: .largeTitle)
     }
 
-    /// Title 1: Bold / 31pt
+    /// Title 1: Bold
     static var title1: UIFont {
-        let size = 31 * TextSizeManager.shared.textSizeMultiplier
-        return UIFont(name: "Gaegu-Bold", size: size) ?? UIFont.boldSystemFont(ofSize: size)
+        scaledFont(name: "Gaegu-Bold", size: 31, textStyle: .title1)
     }
 
-    /// Title 2: Bold / 29pt
+    /// Title 2: Bold
     static var title2: UIFont {
-        let size = 29 * TextSizeManager.shared.textSizeMultiplier
-        return UIFont(name: "Gaegu-Bold", size: size) ?? UIFont.boldSystemFont(ofSize: size)
+        scaledFont(name: "Gaegu-Bold", size: 29, textStyle: .title2)
     }
 
-    /// Title 3: Bold / 21pt
+    /// Title 3: Bold
     static var title3: UIFont {
-        let size = 21 * TextSizeManager.shared.textSizeMultiplier
-        return UIFont(name: "Gaegu-Bold", size: size) ?? UIFont.boldSystemFont(ofSize: size)
+        scaledFont(name: "Gaegu-Bold", size: 21, textStyle: .title3)
     }
 
-    /// Headline: Bold / 19pt
+    /// Headline: Bold
     static var headline: UIFont {
-        let size = 19 * TextSizeManager.shared.textSizeMultiplier
-        return UIFont(name: "Gaegu-Bold", size: size) ?? UIFont.boldSystemFont(ofSize: size)
+        scaledFont(name: "Gaegu-Bold", size: 19, textStyle: .headline)
     }
 
-    /// Body: Regular / 17pt
+    /// Body: Regular
     static var body: UIFont {
-        let size = 17 * TextSizeManager.shared.textSizeMultiplier
-        return UIFont(name: "Gaegu-Regular", size: size) ?? UIFont.systemFont(ofSize: size)
+        scaledFont(name: "Gaegu-Regular", size: 17, textStyle: .body)
     }
 
-    /// Callout: Regular / 17pt
+    /// Callout: Regular
     static var callout: UIFont {
-        let size = 17 * TextSizeManager.shared.textSizeMultiplier
-        return UIFont(name: "Gaegu-Regular", size: size) ?? UIFont.systemFont(ofSize: size)
+        scaledFont(name: "Gaegu-Regular", size: 17, textStyle: .callout)
     }
 
-    /// Subhead: Regular / 15pt
+    /// Subhead: Regular
     static var subhead: UIFont {
-        let size = 15 * TextSizeManager.shared.textSizeMultiplier
-        return UIFont(name: "Gaegu-Regular", size: size) ?? UIFont.systemFont(ofSize: size)
+        scaledFont(name: "Gaegu-Regular", size: 15, textStyle: .subheadline)
     }
 
-    /// Footnote: Regular / 15pt
+    /// Footnote: Regular
     static var footnote: UIFont {
-        let size = 15 * TextSizeManager.shared.textSizeMultiplier
-        return UIFont(name: "Gaegu-Regular", size: size) ?? UIFont.systemFont(ofSize: size)
+        scaledFont(name: "Gaegu-Regular", size: 15, textStyle: .footnote)
     }
 
-    /// Caption 1: Regular / 13pt
+    /// Caption 1: Regular
     static var caption1: UIFont {
-        let size = 13 * TextSizeManager.shared.textSizeMultiplier
-        return UIFont(name: "Gaegu-Regular", size: size) ?? UIFont.systemFont(ofSize: size)
+        scaledFont(name: "Gaegu-Regular", size: 13, textStyle: .caption1)
     }
 
-    /// Caption 2: Regular / 13pt
+    /// Caption 2: Regular
     static var caption2: UIFont {
-        let size = 13 * TextSizeManager.shared.textSizeMultiplier
-        return UIFont(name: "Gaegu-Regular", size: size) ?? UIFont.systemFont(ofSize: size)
+        scaledFont(name: "Gaegu-Regular", size: 13, textStyle: .caption2)
     }
 
     // MARK: - Font Name Strings (for SKLabelNode)
 
-    /// Bold font name
     static let boldFontName = "Gaegu-Bold"
-
-    /// Regular font name
     static let regularFontName = "Gaegu-Regular"
-
-    /// Light font name
     static let lightFontName = "Gaegu-Light"
 
-    // MARK: - Helper function for dynamic sizing
+    // MARK: - Helper function for Dynamic Type scaling
 
-    static func font(size: CGFloat, weight: String = "Regular") -> UIFont {
-        let scaledSize = size * TextSizeManager.shared.textSizeMultiplier
+    static func scaledFont(name: String, size: CGFloat, textStyle: UIFont.TextStyle) -> UIFont {
+        guard let font = UIFont(name: name, size: size) else {
+            return UIFontMetrics(forTextStyle: textStyle).scaledFont(for: UIFont.systemFont(ofSize: size))
+        }
+        return UIFontMetrics(forTextStyle: textStyle).scaledFont(for: font)
+    }
+
+    static func font(size: CGFloat, weight: String = "Regular", textStyle: UIFont.TextStyle = .body) -> UIFont {
         let fontName = weight == "Bold" ? "Gaegu-Bold" : "Gaegu-Regular"
-        return UIFont(name: fontName, size: scaledSize) ?? UIFont.systemFont(ofSize: scaledSize)
+        return scaledFont(name: fontName, size: size, textStyle: textStyle)
     }
 }
 

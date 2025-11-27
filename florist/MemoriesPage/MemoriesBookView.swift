@@ -173,7 +173,6 @@ struct CharacterTabButton: View {
 struct MemoriesBookContentView: View {
     let character: CharacterMemory
     @ObservedObject var controller: MemoriesViewController
-    @EnvironmentObject private var textSizeManager: TextSizeManager
 
     // Get memories for the selected character
     private var characterMemories: [MemoriesModel.Memory] {
@@ -238,7 +237,6 @@ struct MemoriesBookContentView: View {
 // MARK: - Bouquet Memory Row
 struct BouquetMemoryRow: View {
     let memory: MemoriesModel.Memory
-    @EnvironmentObject private var textSizeManager: TextSizeManager
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {

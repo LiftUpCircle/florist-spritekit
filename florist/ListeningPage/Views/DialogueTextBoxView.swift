@@ -39,7 +39,6 @@ struct DialogueTextboxView: View {
     @StateObject private var typewriter = TypewriterViewModel()
     @State private var processedDialogue: String = ""
     @State private var showTriangle = false
-    @EnvironmentObject private var textSizeManager: TextSizeManager
 
     // Display name with "(you)" indicator for Maria
     private var displayName: String {
