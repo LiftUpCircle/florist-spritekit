@@ -55,7 +55,7 @@
     {
       "id": "abigail_007_2",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "null",
+      "characterSprite": "maria",
       "characterName": "Maria",
       "dialogue": "After all these years, I didn't think good bye would feel like this.",
       "spritePosition": "center"
@@ -63,7 +63,7 @@
     {
       "id": "abigail_008_2",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "null",
+      "characterSprite": "maria",
       "characterName": "Maria",
       "dialogue": "I wonder if Abigail will manage to change her father's mind...",
       "spritePosition": "center"
@@ -71,7 +71,7 @@
     {
       "id": "abigail_009_2",
       "backgroundImage": "BackgroundNew",
-      "characterSprite": "null",
+      "characterSprite": "maria",
       "characterName": "Maria",
       "dialogue": "Though, at my age, I've learned not to hope for too much, only enough to keep the door open.",
       "spritePosition": "center"
