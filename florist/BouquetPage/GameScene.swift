@@ -2025,6 +2025,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(hapticType)
 
+        // Add ribbon background for perfect match and good match
+        var ribbonNode: SKSpriteNode?
+        if case .perfectMatch = result {
+            ribbonNode = addRibbonBackground()
+        } else if case .goodMatch = result {
+            ribbonNode = addRibbonBackground()
+        }
+
         // Add shadow for perfect match and good match
         if case .perfectMatch = result {
             addShadowLabel(message: message, shadowColor: shadowColor)
@@ -2035,7 +2043,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         // Show result label
         let resultLabel = SKLabelNode(text: message)
         resultLabel.fontName = GaeguTypography.boldFontName
-        resultLabel.fontSize = FontSize.largeTitle
+        resultLabel.fontSize = 50
         resultLabel.fontColor = color1  // Start with color1
         resultLabel.position = CGPoint(x: size.width / 2, y: size.height / 2)
         resultLabel.zPosition = 250
@@ -2078,12 +2086,45 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             fadeOut,
             remove
         ]))
+
+        // Animate ribbon in sync with text
+        if let ribbon = ribbonNode {
+            let ribbonFadeIn = SKAction.fadeIn(withDuration: 0.3)
+            let ribbonScale = SKAction.sequence([
+                SKAction.scale(to: 1.2, duration: 0.2),
+                SKAction.scale(to: 1.0, duration: 0.2)
+            ])
+            let ribbonWait = SKAction.wait(forDuration: 2.0)
+            let ribbonFadeOut = SKAction.fadeOut(withDuration: 0.5)
+            let ribbonRemove = SKAction.removeFromParent()
+
+            ribbon.run(SKAction.sequence([
+                SKAction.group([ribbonFadeIn, ribbonScale]),
+                ribbonWait,
+                ribbonFadeOut,
+                ribbonRemove
+            ]))
+        }
+    }
+
+    private func addRibbonBackground() -> SKSpriteNode {
+        let ribbon = SKSpriteNode(imageNamed: "SuccessRibbon")
+        ribbon.position = CGPoint(x: size.width / 2, y: size.height / 2)
+        ribbon.zPosition = 248
+        ribbon.alpha = 0
+
+        let targetWidth = size.width * 0.5
+        let aspectRatio = ribbon.size.height / ribbon.size.width
+        ribbon.size = CGSize(width: targetWidth, height: targetWidth * aspectRatio)
+
+        addChild(ribbon)
+        return ribbon
     }
 
     private func addShadowLabel(message: String, shadowColor: UIColor) {
         let shadowLabel = SKLabelNode(text: message)
         shadowLabel.fontName = GaeguTypography.boldFontName
-        shadowLabel.fontSize = FontSize.largeTitle
+        shadowLabel.fontSize = 50
         shadowLabel.fontColor = shadowColor
         shadowLabel.position = CGPoint(x: size.width / 2 + 3, y: size.height / 2 - 3)
         shadowLabel.zPosition = 249  // Just behind the main text
