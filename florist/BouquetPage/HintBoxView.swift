@@ -32,12 +32,12 @@ struct HintBoxView: View {
         }) {
             HStack(spacing: 8) {
                 Image(systemName: "lightbulb.fill")
-                    .font(.gaeguFont(size: 17, weight: "Bold"))
+                    .font(.custom("Gaegu-Bold", fixedSize: 17))
                     .fontWeight(.bold)
                     .foregroundColor(Color("DialogueTextboxBorder"))
 
                 Text("Hint")
-                    .font(.gaeguFont(size: 17, weight: "Bold"))
+                    .font(.custom("Gaegu-Bold", fixedSize: 17))
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
             }
