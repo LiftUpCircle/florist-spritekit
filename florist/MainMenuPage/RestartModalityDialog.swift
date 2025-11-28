@@ -49,13 +49,15 @@ struct RestartModalityDialog: View {
                         Text("Yes")
                             .font(.bodyGaegu)
                             .fontWeight(.semibold)
-                            .foregroundColor(Color(red: 0.294, green: 0.867, blue: 0.333))
+                            .foregroundColor(Color("DialogueTextbox"))
+//                            .foregroundColor(Color(red: 0.294, green: 0.867, blue: 0.333))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
                     }
+                    .background(Color.green)
 
-                    Divider()
-                        .frame(height: 50)
+//                    Divider()
+//                        .frame(height: 50)
 
                     Button(action: {
                         withAnimation {
@@ -66,10 +68,12 @@ struct RestartModalityDialog: View {
                         Text("No")
                             .font(.bodyGaegu)
                             .fontWeight(.semibold)
-                            .foregroundColor(Color(red: 0.867, green: 0.294, blue: 0.306))
+                            .foregroundColor(Color("DialogueTextbox"))
+//                            .foregroundColor(Color("DialogueTextBox"))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
                     }
+                    .background(Color.red)
                 }
             }
             .background(Color("DialogueTextbox"))
