@@ -23,6 +23,10 @@ struct MainMenuView: View {
                     .aspectRatio(contentMode: .fill)
                     .ignoresSafeArea()
 
+                // Falling petals animation
+                FallingPetalsView()
+                    .ignoresSafeArea()
+
                 // Main content
                 VStack {
                     Spacer()
