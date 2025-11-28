@@ -53,7 +53,7 @@ struct BookContentView: View {
                                 .padding(.vertical, 10)
                                 .background(
                                     RoundedRectangle(cornerRadius: 10)
-                                        .fill(Color(red: 1.0, green: 0.95, blue: 0.9))
+                                        .fill(Color.bookDesc)
                                         .overlay(
                                             RoundedRectangle(cornerRadius: 10)
                                                 .stroke(Color(red: 0.8, green: 0.7, blue: 0.6), lineWidth: 2)
@@ -208,7 +208,7 @@ struct BookContentView: View {
             // Highlight each keyword
             for keyword in keywords {
                 if let range = attributedString.range(of: keyword, options: .caseInsensitive) {
-                    attributedString[range].foregroundColor = Color(red: 0.8, green: 0.5, blue: 0.3)
+                    attributedString[range].foregroundColor = Color(.textPlayButton)
                     attributedString[range].font = .calloutGaegu.bold()
                 }
             }
