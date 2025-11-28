@@ -73,6 +73,11 @@ class GameProgressManager: ObservableObject {
         return currentStoryIndex < allStories.count - 1
     }
 
+    /// Check if the game is finished (all stories completed)
+    var isGameFinished: Bool {
+        return completedCount >= totalStories && totalStories > 0
+    }
+
     /// Get total number of stories
     var totalStories: Int {
         return allStories.count

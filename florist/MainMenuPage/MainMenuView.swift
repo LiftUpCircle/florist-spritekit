@@ -12,6 +12,7 @@ struct MainMenuView: View {
     @StateObject private var flowCoordinator = GameFlowCoordinator()
     @State private var showSettings = false
     @State private var showMemoriesBook = false
+    @State private var showRestartModality = false
     @State private var savedProgress: StoryProgress?
 
     var body: some View {
@@ -69,14 +70,18 @@ struct MainMenuView: View {
                     Spacer()
                     
                     Button(action: {
-                        flowCoordinator.startNewGame()
+                        if GameProgressManager.shared.isGameFinished {
+                            showRestartModality = true
+                        } else {
+                            flowCoordinator.startNewGame()
+                        }
                     }) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 35)
                                 .fill(Color("NewPlayButtonColor"))
                                 .frame(width: 168, height: 56)
                                 .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 3)
-                            
+
                             Text("Tap to Play")
                                 .font(.title3Gaegu)
                                 .foregroundColor(Color("NewTextPlayButtonColor"))
@@ -152,6 +157,22 @@ struct MainMenuView: View {
                             showMemoriesBook = false
                         }
                     }
+                    .transition(.opacity)
+                    .zIndex(100)
+                }
+
+                // Restart modality dialog
+                if showRestartModality {
+                    RestartModalityDialog(
+                        isPresented: $showRestartModality,
+                        onRestart: {
+                            Task {
+                                await resetGame()
+                                flowCoordinator.startNewGame()
+                            }
+                        },
+                        onCancel: {}
+                    )
                     .transition(.opacity)
                     .zIndex(100)
                 }
