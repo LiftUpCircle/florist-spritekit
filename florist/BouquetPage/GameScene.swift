@@ -399,7 +399,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             width: bouquetRect.width * 1.2,  // Wider than bouquet for side petals
             height: bouquetRect.height * 0.9  // Generous height for top flowers
         ))
-        topClipArea.position = CGPoint(x: 0, y: bouquetRect.height * 0.725)  // Position above bouquet center
+        topClipArea.position = CGPoint(
+            x: 0,
+            y: bouquetRect.height * 0.725)  // Position above bouquet center
         compositeMaskNode.addChild(topClipArea)
         
         // Right side zone: Extra clipping area for right-side flowers
@@ -416,32 +418,32 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         
         flowersCropNode.maskNode = compositeMaskNode
 
-//        // DEBUG: Add visual indicator to show where the top clip area is
-//        // This is a separate sprite, not part of the mask
-//        let debugTopClipVisual = SKSpriteNode(color: UIColor.cyan.withAlphaComponent(0.3), size: CGSize(
-//            width: bouquetRect.width * 1.2,
-//            height: bouquetRect.height * 0.9
-//        ))
-//        debugTopClipVisual.position = CGPoint(
-//            x: bouquetRect.midX,
-//            y: bouquetRect.midY + bouquetRect.height * 0.66
-//        )
-//        debugTopClipVisual.zPosition = 14  // Just below the crop node
-//        debugTopClipVisual.name = "debugTopClipArea"
-//        addChild(debugTopClipVisual)
-//
-//        // DEBUG: Add visual indicator for right clip area
-//        let debugRightClipVisual = SKSpriteNode(color: UIColor.green.withAlphaComponent(0.3), size: CGSize(
-//            width: bouquetRect.width * 0.4,
-//            height: bouquetRect.height * 0.2
-//        ))
-//        debugRightClipVisual.position = CGPoint(
-//            x: bouquetRect.midX + bouquetRect.width * 0.45,
-//            y: bouquetRect.midY + bouquetRect.height * 0.285
-//        )
-//        debugRightClipVisual.zPosition = 14
-//        debugRightClipVisual.name = "debugRightClipArea"
-//        addChild(debugRightClipVisual)
+        // DEBUG: Add visual indicator to show where the top clip area is
+        // This is a separate sprite, not part of the mask
+        let debugTopClipVisual = SKSpriteNode(color: UIColor.cyan.withAlphaComponent(0.3), size: CGSize(
+            width: bouquetRect.width * 1.2,
+            height: bouquetRect.height * 0.9
+        ))
+        debugTopClipVisual.position = CGPoint(
+            x: bouquetRect.midX,
+            y: bouquetRect.midY + bouquetRect.height * 0.725
+        )
+        debugTopClipVisual.zPosition = 14  // Just below the crop node
+        debugTopClipVisual.name = "debugTopClipArea"
+        addChild(debugTopClipVisual)
+
+        // DEBUG: Add visual indicator for right clip area
+        let debugRightClipVisual = SKSpriteNode(color: UIColor.green.withAlphaComponent(0.3), size: CGSize(
+            width: bouquetRect.width * 0.4,
+            height: bouquetRect.height * 0.2
+        ))
+        debugRightClipVisual.position = CGPoint(
+            x: bouquetRect.midX + bouquetRect.width * 0.45,
+            y: bouquetRect.midY + bouquetRect.height * 0.34
+        )
+        debugRightClipVisual.zPosition = 14
+        debugRightClipVisual.name = "debugRightClipArea"
+        addChild(debugRightClipVisual)
         
         // Container for flowers (inside the crop node)
         bouquetFlowersContainer = SKNode()
@@ -1498,12 +1500,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         isValidPlacement = false
         placementIndicator.isHidden = true
         
+        var isWithinBouquetArea = false
+        physicsWorld.enumerateBodies(at: location) { body, stop in
+            if body == self.bouquetPlacementArea.physicsBody {
+                isWithinBouquetArea = true
+                stop.pointee = true
+            }
+        }
+        
         // Check if we're over the bouquet area and not exceeding max flowers
-        if placedFlowers.count < maxFlowers || !isDraggingFromInventory {
-            let body = physicsWorld.body(at: location)
-            if body == bouquetPlacementArea.physicsBody ||
-                (body?.node is FlowerNode && bouquetRect.contains(location)) {
-                
+        if placedFlowers.count < maxFlowers {
+            if isWithinBouquetArea {
                 isValidPlacement = true
                 
                 // Show placement indicator
@@ -1533,13 +1540,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                 placementIndicator.position = location
                 placementIndicator.fillColor = UIColor.orange.withAlphaComponent(0.3)
                 placementIndicator.isHidden = false
-            }
-            else {
+            } else {
                 // Outside and Max reached
                 placementIndicator.position = location
                 placementIndicator.fillColor = UIColor.red.withAlphaComponent(0.3)
                 placementIndicator.isHidden = false
-                
             }
         }
     }

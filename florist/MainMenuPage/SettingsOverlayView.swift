@@ -100,53 +100,117 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
 }
 
 // MARK: - SwiftUI View Wrapper
+// MARK: - SwiftUI View Wrapper
 struct SettingsOverlayView: View {
     @Binding var isPresented: Bool
     var onHomeButtonTap: (() -> Void)?
     var onResetGameTap: (() -> Void)?
     var isFromMainMenu: Bool = false
-
+    
     var body: some View {
         GeometryReader { geometry in
-            // Settings overlay with transparent background
-            SpriteView(
-                scene: createSettingsScene(size: geometry.size),
-                options: [.allowsTransparency]
+            SettingsSceneView(
+                isPresented: $isPresented,
+                onHomeButtonTap: onHomeButtonTap,
+                onResetGameTap: onResetGameTap,
+                isFromMainMenu: isFromMainMenu,
+                size: geometry.size
             )
-            .ignoresSafeArea()
-            .allowsHitTesting(true)
-            .background(Color.clear)
         }
     }
+}
 
-    private func createSettingsScene(size: CGSize) -> SettingsScene {
+// MARK: - Scene View (Stable Scene Management)
+private struct SettingsSceneView: UIViewRepresentable {
+    @Binding var isPresented: Bool
+    var onHomeButtonTap: (() -> Void)?
+    var onResetGameTap: (() -> Void)?
+    var isFromMainMenu: Bool
+    var size: CGSize
+    
+    func makeUIView(context: Context) -> SKView {
+        let skView = SKView()
+        skView.allowsTransparency = true
+        skView.backgroundColor = .clear
+        skView.isMultipleTouchEnabled = false
+        
+        // Create scene once
         let scene = SettingsScene(size: size)
         scene.scaleMode = .aspectFill
         scene.isFromMainMenu = isFromMainMenu
         scene.onDismiss = {
-            withAnimation {
+            DispatchQueue.main.async {
                 isPresented = false
             }
         }
         scene.onHomeButtonTap = {
-            // Close settings first
-            withAnimation {
+            DispatchQueue.main.async {
                 isPresented = false
+                onHomeButtonTap?()
             }
-            // Then call the navigation closure
-            onHomeButtonTap?()
         }
         scene.onResetGameTap = {
-            // Close settings first
-            withAnimation {
+            DispatchQueue.main.async {
                 isPresented = false
+                onResetGameTap?()
             }
-            // Then call the reset game closure
-            onResetGameTap?()
         }
-        return scene
+        
+        skView.presentScene(scene)
+        context.coordinator.scene = scene
+        
+        return skView
+    }
+    
+    func updateUIView(_ uiView: SKView, context: Context) {
+        // Update closures when bindings change, but don't recreate scene
+        if let scene = context.coordinator.scene {
+            scene.onDismiss = {
+                DispatchQueue.main.async {
+                    isPresented = false
+                }
+            }
+            scene.onHomeButtonTap = {
+                DispatchQueue.main.async {
+                    isPresented = false
+                    onHomeButtonTap?()
+                }
+            }
+            scene.onResetGameTap = {
+                DispatchQueue.main.async {
+                    isPresented = false
+                    onResetGameTap?()
+                }
+            }
+        }
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+    
+    class Coordinator {
+        var scene: SettingsScene?
+        
+        deinit {
+            // Clean up scene when coordinator is deallocated
+            scene?.removeAllChildren()
+            scene?.removeAllActions()
+            scene = nil
+        }
+    }
+    
+    static func dismantleUIView(_ uiView: SKView, coordinator: Coordinator) {
+        // Proper cleanup when view is removed
+        coordinator.scene?.removeAllChildren()
+        coordinator.scene?.removeAllActions()
+        coordinator.scene = nil
+        uiView.presentScene(nil)
     }
 }
+
+
+
 
 #Preview {
     @Previewable @State var isPresented = true

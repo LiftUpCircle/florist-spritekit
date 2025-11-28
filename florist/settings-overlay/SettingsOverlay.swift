@@ -62,14 +62,14 @@ class SettingsOverlay: SKNode, ResetConfirmationDialogDelegate {
         let overlayHeight = sceneSize.height * 0.75
         let cornerRadius: CGFloat = 25
 
-        // Cream/beige background overlay (similar to screenshot)
-        let creamColor = SKColor(red: 0.96, green: 0.93, blue: 0.88, alpha: 0.85)
-        let screenBg = SKSpriteNode(color: creamColor,
-                                     size: CGSize(width: sceneSize.width * 2, height: sceneSize.height * 2))
-        screenBg.position = CGPoint(x: 0, y: 0)
-        screenBg.zPosition = 1000
-        screenBg.name = "screenBackground"
-        addChild(screenBg)
+//        // Cream/beige background overlay (similar to screenshot)
+//        let creamColor = SKColor(red: 0.96, green: 0.93, blue: 0.88, alpha: 0.85)
+//        let screenBg = SKSpriteNode(color: creamColor,
+//                                     size: CGSize(width: sceneSize.width * 2, height: sceneSize.height * 2))
+//        screenBg.position = CGPoint(x: 0, y: 0)
+//        screenBg.zPosition = 1000
+//        screenBg.name = "screenBackground"
+//        addChild(screenBg)
 
         // White modal with rounded corners
         let backgroundShape = SKShapeNode(rectOf: CGSize(width: overlayWidth, height: overlayHeight), cornerRadius: cornerRadius)
