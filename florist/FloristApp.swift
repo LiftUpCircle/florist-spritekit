@@ -101,6 +101,7 @@ struct FloristApp: App {
                 MainMenuView()
                     .modelContainer(modelContainer)
                     .preferredColorScheme(.light)
+                    .dynamicTypeSize(.medium)
                     .environmentObject(TextSizeManager.shared)
                     .onAppear {
                         // Lock orientation to landscape
