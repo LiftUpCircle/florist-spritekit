@@ -624,6 +624,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         default: return ""
         }
     }
+
+    private func hasSlantedTexture(for flowerName: String) -> Bool {
+        let slantedImageName = getSlantedImageName(for: flowerName)
+        guard !slantedImageName.isEmpty else { return false }
+        return UIImage(named: slantedImageName) != nil
+    }
     
     private func setupButtons() {
         let buttonSize: CGFloat = 60
@@ -936,61 +942,94 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     private func handleMirrorButton() {
         guard let flower = currentlySelectedFlower else { return }
-        
-        // Cycle through 3 variations: 0 -> 1 -> 2 -> 0
-        flower.currentVariation = (flower.currentVariation + 1) % 3
-        
-        // Store the current scale magnitude (always positive)
+
+        // Check if this flower has a slanted texture variant
+        let hasSlanted = hasSlantedTexture(for: flower.flowerData.flowerName)
+
+        // If no slanted texture, only cycle between 2 variations (perpendicular and mirrored perpendicular)
+        // If has slanted texture, cycle through 3 variations (perpendicular, slanted left, slanted right)
+        let maxVariations = hasSlanted ? 3 : 2
+        flower.currentVariation = (flower.currentVariation + 1) % maxVariations
+
+        // For flowers WITH slanted textures: preserve scale magnitude (original behavior)
+        // For flowers WITHOUT slanted textures: preserve visual size (for consistent mirroring)
         let currentScaleMagnitude = abs(flower.xScale)
         let currentYScale = abs(flower.yScale)
-        
+        let currentVisualWidth = abs(flower.size.width * flower.xScale)
+        let currentVisualHeight = abs(flower.size.height * flower.yScale)
+
         switch flower.currentVariation {
         case 0:
             // Perpendicular (straight) - use original texture
             let imageName = getFlowerImageName(for: flower.flowerData.flowerName)
             let perpendicularTexture = SKTexture(imageNamed: imageName)
             flower.texture = perpendicularTexture
-            
+
             // Update size to match texture's natural aspect ratio
             let textureSize = perpendicularTexture.size()
             let targetHeight: CGFloat = 150
             let aspectRatio = textureSize.width / textureSize.height
             flower.size = CGSize(width: targetHeight * aspectRatio, height: targetHeight)
-            
-            flower.xScale = currentScaleMagnitude  // Always positive
-            flower.yScale = currentYScale
-            
+
+            if hasSlanted {
+                // Original behavior for flowers with slanted textures
+                flower.xScale = currentScaleMagnitude
+                flower.yScale = currentYScale
+            } else {
+                // Preserve visual size for flowers without slanted textures
+                flower.xScale = currentVisualWidth / flower.size.width
+                flower.yScale = currentVisualHeight / flower.size.height
+            }
+
         case 1:
-            // Slanted left - use slanted texture
-            let slantedImageName = getSlantedImageName(for: flower.flowerData.flowerName)
-            let slantedTexture = SKTexture(imageNamed: slantedImageName)
-            flower.texture = slantedTexture
-            
-            // Update size to match texture's natural aspect ratio
-            let textureSize = slantedTexture.size()
-            let targetHeight: CGFloat = 150
-            let aspectRatio = textureSize.width / textureSize.height
-            flower.size = CGSize(width: targetHeight * aspectRatio, height: targetHeight)
-            
-            flower.xScale = currentScaleMagnitude  // Always positive
-            flower.yScale = currentYScale
-            
+            if hasSlanted {
+                // Slanted left - use slanted texture
+                let slantedImageName = getSlantedImageName(for: flower.flowerData.flowerName)
+                let slantedTexture = SKTexture(imageNamed: slantedImageName)
+                flower.texture = slantedTexture
+
+                // Update size to match texture's natural aspect ratio
+                let textureSize = slantedTexture.size()
+                let targetHeight: CGFloat = 150
+                let aspectRatio = textureSize.width / textureSize.height
+                flower.size = CGSize(width: targetHeight * aspectRatio, height: targetHeight)
+
+                // Original behavior for flowers with slanted textures
+                flower.xScale = currentScaleMagnitude
+                flower.yScale = currentYScale
+            } else {
+                // No slanted texture - use perpendicular texture mirrored
+                let imageName = getFlowerImageName(for: flower.flowerData.flowerName)
+                let perpendicularTexture = SKTexture(imageNamed: imageName)
+                flower.texture = perpendicularTexture
+
+                // Update size to match texture's natural aspect ratio
+                let textureSize = perpendicularTexture.size()
+                let targetHeight: CGFloat = 150
+                let aspectRatio = textureSize.width / textureSize.height
+                flower.size = CGSize(width: targetHeight * aspectRatio, height: targetHeight)
+
+                // Preserve visual size for Lavender (negative for mirror)
+                flower.xScale = -(currentVisualWidth / flower.size.width)
+                flower.yScale = currentVisualHeight / flower.size.height
+            }
+
         case 2:
-            // Slanted right - use slanted texture but mirrored
+            // Slanted right - use slanted texture but mirrored (only for flowers with slanted textures)
             let slantedImageName = getSlantedImageName(for: flower.flowerData.flowerName)
             let slantedTexture = SKTexture(imageNamed: slantedImageName)
             flower.texture = slantedTexture
-            
+
             // Update size to match texture's natural aspect ratio
             let textureSize = slantedTexture.size()
             let targetHeight: CGFloat = 150
             let aspectRatio = textureSize.width / textureSize.height
             flower.size = CGSize(width: targetHeight * aspectRatio, height: targetHeight)
-            
-            // KEEP POSITIVE - we'll flip using scaleX on the node itself
-            flower.xScale = -currentScaleMagnitude  // Negative for mirror
+
+            // Original behavior for flowers with slanted textures (negative for mirror)
+            flower.xScale = -currentScaleMagnitude
             flower.yScale = currentYScale
-            
+
         default:
             break
         }
