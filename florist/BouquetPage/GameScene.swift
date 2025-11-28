@@ -1686,8 +1686,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             }
 
             // Success feedback
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
+            SettingsManager.shared.triggerNotificationHaptic(.success)
+//            let generator = UINotificationFeedbackGenerator()
+//            generator.notificationOccurred(.success)
             
             // Gentle placement animation
 //            let bounce = SKAction.sequence([
@@ -1720,8 +1721,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             }
             
             // Error feedback
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.error)
+            SettingsManager.shared.triggerNotificationHaptic(.error)
+//            let generator = UINotificationFeedbackGenerator()
+//            generator.notificationOccurred(.error)
         }
         
         // Reset drag state

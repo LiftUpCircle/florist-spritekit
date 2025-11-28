@@ -188,6 +188,14 @@ class SettingsManager {
         generator.impactOccurred()
     }
     
+    func triggerNotificationHaptic(_ type: UINotificationFeedbackGenerator.FeedbackType) {
+        guard isVibrationEnabled else { return }
+        
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(type)
+    }
+
+    
     // MARK: - Subtitles Settings
     
     var isSubtitlesEnabled: Bool {
