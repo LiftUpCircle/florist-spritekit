@@ -61,9 +61,10 @@ class ResetConfirmationDialog: SKNode {
         dialogNode.isHidden = true
         addChild(dialogNode)
         
-        // Semi-transparent background overlay
+        // Semi-transparent background overlay - use very large size to ensure full coverage
+        // even when this dialog is a child of another node that might be offset
         let dialogBg = SKSpriteNode(color: SKColor.black.withAlphaComponent(0.5),
-                                     size: CGSize(width: sceneSize.width * 2, height: sceneSize.height * 2))
+                                     size: CGSize(width: 5000, height: 5000))
         dialogBg.position = CGPoint(x: 0, y: 0)
         dialogBg.zPosition = 0
         dialogBg.name = "confirmationBackground"
