@@ -113,6 +113,9 @@ class GameFlowCoordinator: ObservableObject {
     func navigateToToBeContinued() {
         print("🔄 navigateToToBeContinued called")
 
+        // Mark the closing story as complete
+        progressManager.completeCurrentStory()
+
         // Show loading screen with animation
         withAnimation(.easeIn(duration: 0.3)) {
             showLoadingScreen = true
