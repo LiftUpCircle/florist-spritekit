@@ -2339,7 +2339,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         
         // Calculate the bounds to capture (centered on container)
         // Smaller crop area = larger bouquet in final image
-        let snapshotSize = CGSize(width: 250, height: 250)
+        // Larger crop area = smaller bouquet in final image
+        let snapshotSize = CGSize(width: 400, height: 400)
         let snapshotRect = CGRect(
             x: bouquetCenter.x - snapshotSize.width / 2,
             y: bouquetCenter.y - snapshotSize.height / 2,
