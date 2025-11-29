@@ -23,7 +23,7 @@ struct BookContentView: View {
                     // LEFT SIDE - Flower Image
                     VStack(spacing: 18) {
                         Text("Flower")
-                            .font(.title2Gaegu)
+                            .font(BookContentView.title2GaeguCapped)
                             .foregroundColor(Color(red: 0.3, green: 0.2, blue: 0.2))
                             .frame(maxWidth: .infinity, alignment: .center)
                             .offset(y: -10)
@@ -44,7 +44,7 @@ struct BookContentView: View {
                     VStack(alignment: .leading, spacing: 24) {
                         ForEach(Array(getHighlightedFlowerDescriptions(for: flower.flowerName).enumerated()), id: \.offset) { index, attributedDescription in
                             Text(attributedDescription)
-                                .font(.footnoteGaegu)
+                                .font(BookContentView.footnoteGaeguCapped)
                                 .foregroundColor(Color(red: 0.3, green: 0.2, blue: 0.2))
                                 .lineSpacing(3)
                                 .multilineTextAlignment(.center)
@@ -122,6 +122,10 @@ struct BookContentView: View {
     private func playFlippingSound() {
         print("🎵 Button pressed - attempting to play flipping sound")
         SettingsManager.shared.playPageFlip()
+    }
+    
+    private static var cappedTextSizeMultiplier: CGFloat {
+        min(TextSizeManager.shared.textSizeMultiplier, 1.2)
     }
     
     private func getFlowerImageName(for flowerName: String) -> String? {
@@ -209,12 +213,33 @@ struct BookContentView: View {
             for keyword in keywords {
                 if let range = attributedString.range(of: keyword, options: .caseInsensitive) {
                     attributedString[range].foregroundColor = Color(.textPlayButton)
-                    attributedString[range].font = .calloutGaegu.bold()
+                    attributedString[range].font = BookContentView.calloutGaeguCapped.bold()
                 }
             }
             
             return attributedString
         }
+        
+        
     }
+    // MARK: - Capped Font
+    /// Title 2 Gaegu Capped
+    static var title2GaeguCapped: Font {
+        let size = 29 * cappedTextSizeMultiplier
+        return Font.custom("Gaegu-Bold", size: size)
+    }
+    
+    /// Footnote Gaegu Capped
+    static var footnoteGaeguCapped: Font {
+        let size = 15 * cappedTextSizeMultiplier
+        return Font.custom("Gaegu-Regular", size: size)
+    }
+    
+    /// Callout Gaegu Capped
+    static var calloutGaeguCapped: Font {
+        let size = 17 * cappedTextSizeMultiplier
+        return Font.custom("Gaegu-Regular", size: size)
+    }
+    
 }
 
