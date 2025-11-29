@@ -17,6 +17,7 @@ struct BouquetView: View {
     @State private var showFlowerBook = false
     @State private var dialogueText: String = ""
     @State private var characterName: String = "Hint"
+    @State private var isHintMinimized: Bool = true
 
     init(storyRequirements: StoryFlowerRequirements? = nil, storyId: String? = nil, onBouquetComplete: (() -> Void)? = nil) {
         self.storyRequirements = storyRequirements
@@ -44,18 +45,15 @@ struct BouquetView: View {
                     HStack {
                         Spacer()
 
-                        DialogueTextboxView(
+                        HintBoxView(
                             characterName: characterName,
                             dialogue: dialogueText,
-                            typingSpeed: 0.03,
-                            shouldCompleteTyping: false,
                             maxWidth: min(400, geometry.size.width - 200),
-                            onTypingComplete: {},
-                            onTap: {}
+                            isMinimized: $isHintMinimized
                         )
-                        .padding(.trailing, 100)
+                        .padding(.trailing, geometry.size.width * 0.05)
                     }
-                    .padding(.top, 20)
+                    .padding(.top, geometry.size.height * 0.08)
 
                     Spacer()
                 }
@@ -69,7 +67,7 @@ struct BouquetView: View {
                         }
                     })
                     .transition(.opacity)
-                    .zIndex(1)
+                    .zIndex(999)
                 }
             }
         }

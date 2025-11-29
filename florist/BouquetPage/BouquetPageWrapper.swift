@@ -12,12 +12,22 @@ struct BouquetPageWrapper: View {
     @ObservedObject var flowCoordinator: GameFlowCoordinator
 
     var body: some View {
-        BouquetView(
-            storyRequirements: StoryRequirementsDatabase.shared.getRequirements(for: storyId),
+        let requirements = StoryRequirementsDatabase.shared.getRequirements(for: storyId)
+        print("🎯 BouquetPageWrapper loading requirements for storyId: '\(storyId)'")
+        if let req = requirements {
+            print("   ✓ Found requirements with hint: '\(req.hintText)'")
+            print("   ✓ Requirements count: \(req.requirements.count)")
+        } else {
+            print("   ✗ No requirements found!")
+        }
+
+        return BouquetView(
+            storyRequirements: requirements,
             storyId: storyId, // Pass storyId for saving to memories
             onBouquetComplete: {
                 // Trigger completion (will show toast and auto-continue)
-                flowCoordinator.onBouquetComplete()
+                // Pass the storyId so we know which story just completed
+                flowCoordinator.onBouquetComplete(for: storyId)
             }
         )
         .navigationBarHidden(true)
@@ -27,5 +37,9 @@ struct BouquetPageWrapper: View {
             icon: "book.closed.fill",
             duration: 2.0
         )
+        .onReceive(NotificationCenter.default.publisher(for: .settingsOverlayDidTapHomeButton)) { _ in
+            // Handle notification for navigation to main menu
+            flowCoordinator.returnToMainMenu()
+        }
     }
 }

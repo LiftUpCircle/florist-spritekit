@@ -6,90 +6,122 @@
   "scenes": [
     {
       "id": "michael_001",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michael",
       "characterName": "Maria",
-      "dialogue": "Michael! What a surprise. You came all by yourself?",
+      "dialogue": "Michael! What a surprise. \nYou came all by yourself?",
       "spritePosition": "center"
     },
     {
       "id": "michael_002",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michaelSmile",
       "characterName": "Michael",
-      "dialogue": "Mama said it's okay as long as I don't touch the cactus!",
-      "spritePosition": "right"
+      "dialogue": "Mama said it's okay!",
+      "spritePosition": "center"
     },
     {
       "id": "michael_003",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michael",
       "characterName": "Maria",
-      "dialogue": "That's good advice. The cactus has taught many lessons. So, what brings you here, little one?",
+      "dialogue": "What brings you here, little one?",
       "spritePosition": "center"
     },
     {
       "id": "michael_004",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michaelSmile",
       "characterName": "Michael",
       "dialogue": "I wanna buy a flower!",
-      "spritePosition": "right"
+      "spritePosition": "center"
     },
     {
       "id": "michael_005",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michael",
       "characterName": "Maria",
       "dialogue": "Oh? And who's it for?",
       "spritePosition": "center"
     },
     {
       "id": "michael_006",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michaelSmile",
       "characterName": "Michael",
-      "dialogue": "For you! Mama said your shop's gonna be gone soon… so I wanna give you a flower before it goes away.",
-      "spritePosition": "right"
+      "dialogue": "For you!",
+      "spritePosition": "center"
     },
     {
       "id": "michael_007",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
-      "characterName": "Maria",
-      "dialogue": "That's very sweet of you, dear. But you don't need to buy me anything.",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michael",
+      "characterName": "Michael",
+      "dialogue": "Mama said your shop's gonna be gone soon… so I wanna give you a flower before it goes away.",
       "spritePosition": "center"
     },
     {
       "id": "michael_008",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michael",
       "characterName": "Michael",
-      "dialogue": "But I want to! You always make flowers for everyone else — nobody ever makes one for you.",
-      "spritePosition": "right"
+      "dialogue": "So I wanna give you a flower before it goes away...",
+      "spritePosition": "center"
     },
     {
       "id": "michael_009",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michael",
       "characterName": "Maria",
-      "dialogue": "All right. Then how about we make one together?",
+      "dialogue": "That's very sweet of you, dear. \nBut you don't need to buy me anything.",
       "spritePosition": "center"
     },
     {
       "id": "michael_010",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michaelSmile",
       "characterName": "Michael",
-      "dialogue": "Really? Yay! Can we make something yellow? Yellow's happy. So you don't forget to smile.",
-      "spritePosition": "right"
+      "dialogue": "But I want to!",
+      "spritePosition": "center"
     },
     {
       "id": "michael_011",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michael",
+      "characterName": "Michael",
+      "dialogue": "You always make flowers for everyone else — nobody ever makes one for you.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "michael_012",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michael",
       "characterName": "Maria",
-      "dialogue": "That's a wonderful idea. Let's do that.",
+      "dialogue": "All center. Then how about we make one together?",
+      "spritePosition": "center"
+    },
+    {
+      "id": "michael_013",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michaelSmile",
+      "characterName": "Michael",
+      "dialogue": "Really? Yay!",
+      "spritePosition": "center"
+    },
+    {
+      "id": "michael_014",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michaelSmile",
+      "characterName": "Michael",
+      "dialogue": "Can we make something yellow? \nYellow's happy. \nSo you don't forget to smile.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "michael_015",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "michael",
+      "characterName": "Maria",
+      "dialogue": "That's a wonderful idea. \nLet's do that.",
       "spritePosition": "center"
     }
   ]

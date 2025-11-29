@@ -12,6 +12,9 @@ import SpriteKit
 class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
     private var settingsOverlayController: SettingsOverlayController?
     var onDismiss: (() -> Void)?
+    var onHomeButtonTap: (() -> Void)?
+    var onResetGameTap: (() -> Void)?
+    var isFromMainMenu: Bool = false
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
@@ -24,8 +27,14 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
         view.backgroundColor = .clear
 
         // Show settings overlay immediately
-        settingsOverlayController = SettingsOverlayController(scene: self)
+        settingsOverlayController = SettingsOverlayController(scene: self, isFromMainMenu: isFromMainMenu)
         settingsOverlayController?.delegate = self
+        settingsOverlayController?.onHomeButtonTap = { [weak self] in
+            self?.onHomeButtonTap?()
+        }
+        settingsOverlayController?.onResetGameTap = { [weak self] in
+            self?.onResetGameTap?()
+        }
     }
 
     // MARK: - Touch Handling
@@ -33,7 +42,7 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
         guard let touch = touches.first else { return }
 
         if let controller = settingsOverlayController {
-            controller.handleTouchBegan(touch)
+            _ = controller.handleTouchBegan(touch)
         }
     }
 
@@ -41,7 +50,7 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
         guard let touch = touches.first else { return }
 
         if let controller = settingsOverlayController {
-            controller.handleTouchMoved(touch)
+            _ = controller.handleTouchMoved(touch)
         }
     }
 
@@ -49,13 +58,18 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
         guard let touch = touches.first else { return }
 
         if let controller = settingsOverlayController {
-            controller.handleTouchEnded(touch)
+            _ = controller.handleTouchEnded(touch)
         }
     }
 
     // MARK: - SettingsOverlayControllerDelegate
     func settingsOverlayDidClose() {
         onDismiss?()
+    }
+    
+    func settingsOverlayDidTapHomeButton() {
+        // Call the home button tap closure
+        onHomeButtonTap?()
     }
 
     func settingsOverlayDidTapRateGame() {
@@ -86,35 +100,120 @@ class SettingsScene: SKScene, SettingsOverlayControllerDelegate {
 }
 
 // MARK: - SwiftUI View Wrapper
+// MARK: - SwiftUI View Wrapper
 struct SettingsOverlayView: View {
     @Binding var isPresented: Bool
-
+    var onHomeButtonTap: (() -> Void)?
+    var onResetGameTap: (() -> Void)?
+    var isFromMainMenu: Bool = false
+    
     var body: some View {
         GeometryReader { geometry in
-            // Settings overlay with transparent background
-            SpriteView(
-                scene: createSettingsScene(size: geometry.size),
-                options: [.allowsTransparency]
+            SettingsSceneView(
+                isPresented: $isPresented,
+                onHomeButtonTap: onHomeButtonTap,
+                onResetGameTap: onResetGameTap,
+                isFromMainMenu: isFromMainMenu,
+                size: geometry.size
             )
-            .ignoresSafeArea()
-            .allowsHitTesting(true)
-            .background(Color.clear)
         }
-    }
-
-    private func createSettingsScene(size: CGSize) -> SettingsScene {
-        let scene = SettingsScene(size: size)
-        scene.scaleMode = .aspectFill
-        scene.onDismiss = {
-            withAnimation {
-                isPresented = false
-            }
-        }
-        return scene
+        .ignoresSafeArea()
     }
 }
 
+// MARK: - Scene View (Stable Scene Management)
+private struct SettingsSceneView: UIViewRepresentable {
+    @Binding var isPresented: Bool
+    var onHomeButtonTap: (() -> Void)?
+    var onResetGameTap: (() -> Void)?
+    var isFromMainMenu: Bool
+    var size: CGSize
+    
+    func makeUIView(context: Context) -> SKView {
+        let skView = SKView()
+        skView.allowsTransparency = true
+        skView.backgroundColor = .clear
+        skView.isMultipleTouchEnabled = false
+        
+        // Create scene once
+        let scene = SettingsScene(size: size)
+        scene.scaleMode = .aspectFill
+        scene.isFromMainMenu = isFromMainMenu
+        scene.onDismiss = {
+            DispatchQueue.main.async {
+                isPresented = false
+            }
+        }
+        scene.onHomeButtonTap = {
+            DispatchQueue.main.async {
+                isPresented = false
+                onHomeButtonTap?()
+            }
+        }
+        scene.onResetGameTap = {
+            DispatchQueue.main.async {
+                isPresented = false
+                onResetGameTap?()
+            }
+        }
+        
+        skView.presentScene(scene)
+        context.coordinator.scene = scene
+        
+        return skView
+    }
+    
+    func updateUIView(_ uiView: SKView, context: Context) {
+        // Update closures when bindings change, but don't recreate scene
+        if let scene = context.coordinator.scene {
+            scene.onDismiss = {
+                DispatchQueue.main.async {
+                    isPresented = false
+                }
+            }
+            scene.onHomeButtonTap = {
+                DispatchQueue.main.async {
+                    isPresented = false
+                    onHomeButtonTap?()
+                }
+            }
+            scene.onResetGameTap = {
+                DispatchQueue.main.async {
+                    isPresented = false
+                    onResetGameTap?()
+                }
+            }
+        }
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator()
+    }
+    
+    class Coordinator {
+        var scene: SettingsScene?
+        
+        deinit {
+            // Clean up scene when coordinator is deallocated
+            scene?.removeAllChildren()
+            scene?.removeAllActions()
+            scene = nil
+        }
+    }
+    
+    static func dismantleUIView(_ uiView: SKView, coordinator: Coordinator) {
+        // Proper cleanup when view is removed
+        coordinator.scene?.removeAllChildren()
+        coordinator.scene?.removeAllActions()
+        coordinator.scene = nil
+        uiView.presentScene(nil)
+    }
+}
+
+
+
+
 #Preview {
-    @State var isPresented = true
+    @Previewable @State var isPresented = true
     return SettingsOverlayView(isPresented: $isPresented)
 }

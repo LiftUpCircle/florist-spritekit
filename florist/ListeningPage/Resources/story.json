@@ -1,31 +1,110 @@
 {
   "stories": {
-    "urutan1": {
-      "id": "story_robert",
+    "prologue": {
+      "id": "story_prologue",
+      "file": "story_prologue.json",
+      "characterId": "maria",
+      "characterName": "Maria",
+      "title": "Prologue",
+      "unlocked": true,
+      "order": 0,
+      "isPrologue": true,
+      "skipBouquet": true
+    },
+    "robert_1_1": {
+      "id": "story_robert_1_1",
       "file": "story_robert_1.json",
       "characterId": "robert",
       "characterName": "Robert Adikusuma",
       "title": "Robert's Bouquet",
       "unlocked": true,
-      "order": 1
+      "order": 1,
+      "hintText": "The same kind I used to give her... something that showing love",
+      "requirements": [
+        {
+          "emotion": "Love",
+          "minimumCount": 1,
+          "idealCount": 4
+        }
+      ]
     },
-    "urutan2": {
-      "id": "story_abigail",
-      "file": "story_abigail_1.json",
-      "characterId": "abigail",
-      "characterName": "Abigail Surya Kencana",
-      "title": "Abigail's Hope",
-      "unlocked": true,
-      "order": 2
+    "robert_1_2": {
+      "id": "story_robert_1_2",
+      "file": "story_robert_1_2.json",
+      "characterId": "robert",
+      "characterName": "Robert Adikusuma",
+      "title": "Robert's Bouquet (Part 2)",
+      "unlocked": false,
+      "order": 2,
+      "isSecondPart": true,
+      "skipBouquet": true
     },
-    "urutan3": {
-      "id": "story_michael",
+    "michael_1_1": {
+      "id": "story_michael_1_1",
       "file": "story_michael_1.json",
       "characterId": "michael",
       "characterName": "Michael Kosasih",
       "title": "Michael's Gift",
       "unlocked": true,
-      "order": 3
+      "order": 3,
+      "hintText": "Something yellow... so you don't forget to smile",
+      "requirements": [
+        {
+          "emotion": "Joy",
+          "minimumCount": 1,
+          "idealCount": 3
+        }
+      ]
+    },
+    "michael_1_2": {
+      "id": "story_michael_1_2",
+      "file": "story_michael_1_2.json",
+      "characterId": "michael",
+      "characterName": "Michael Kosasih",
+      "title": "Michael's Gift (Part 2)",
+      "unlocked": false,
+      "order": 4,
+      "isSecondPart": true,
+      "skipBouquet": true
+    },
+    "abigail_1_1": {
+      "id": "story_abigail_1_1",
+      "file": "story_abigail_1.json",
+      "characterId": "abigail",
+      "characterName": "Abigail Surya Kencana",
+      "title": "Abigail's Hope",
+      "unlocked": true,
+      "order": 5,
+      "hintText": "The kind that feels safe... quiet but not sad",
+      "requirements": [
+        {
+          "emotion": "Serenity",
+          "minimumCount": 1,
+          "idealCount": 3
+        }
+      ]
+    },
+    "abigail_1_2": {
+      "id": "story_abigail_1_2",
+      "file": "story_abigail_1_2.json",
+      "characterId": "abigail",
+      "characterName": "Abigail Surya Kencana",
+      "title": "Abigail's Hope (Part 2)",
+      "unlocked": false,
+      "order": 6,
+      "isSecondPart": true,
+      "skipBouquet": true
+    },
+    "maria_closing": {
+      "id": "story_maria_closing",
+      "file": "story_maria_closing.json",
+      "characterId": "maria",
+      "characterName": "Maria",
+      "title": "Closing",
+      "unlocked": false,
+      "order": 7,
+      "skipBouquet": true,
+      "isClosingStory": true
     }
   }
 }

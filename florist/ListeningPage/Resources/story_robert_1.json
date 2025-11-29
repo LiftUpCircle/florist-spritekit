@@ -6,80 +6,120 @@
   "scenes": [
     {
       "id": "robert_001",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
       "characterName": "Maria",
-      "dialogue": "Robert! You're early.",
+      "dialogue": "Robert! \nYou're early.",
       "spritePosition": "center"
     },
     {
       "id": "robert_002",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
       "characterName": "Robert",
-      "dialogue": "I figured I'd come before you get busy. Didn't want you closing shop without me picking up one last bouquet.",
-      "spritePosition": "right"
+      "dialogue": "I figured I'd come before you get busy. \nDidn't want you closing shop without me picking up one last bouquet.",
+      "spritePosition": "center"
     },
     {
       "id": "robert_003",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
       "characterName": "Maria",
       "dialogue": "Still can't live without flowers on your table, huh?",
       "spritePosition": "center"
     },
     {
       "id": "robert_004",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
       "characterName": "Robert",
-      "dialogue": "Not really. I still put them by the window every week. The same kind I used to give my wife.",
-      "spritePosition": "right"
+      "dialogue": "Not really. \nI still put them by the window every week.",
+      "spritePosition": "center"
     },
     {
       "id": "robert_005",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
       "characterName": "Robert",
-      "dialogue": "She's been gone for a few years now, but… I guess old habits never die. Or maybe I just miss her.",
-      "spritePosition": "right"
+      "dialogue": "The same kind I used to give my wife.",
+      "spritePosition": "center"
     },
     {
       "id": "robert_006",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
-      "characterName": "Maria",
-      "dialogue": "She wouldn't want you to be sad, Robert. She used to light up every time you walked in with flowers.",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Robert",
+      "dialogue": "She's been gone for a few years now, but… \nI guess old habits never die.",
       "spritePosition": "center"
     },
     {
       "id": "robert_007",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
       "characterName": "Robert",
-      "dialogue": "Yeah… she always said the scent followed me home. Sometimes, when I pass this street, I swear I still catch it.",
-      "spritePosition": "right"
+      "dialogue": "Or maybe I just miss her...",
+      "spritePosition": "center"
     },
     {
       "id": "robert_008",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Maria",
+      "dialogue": "She wouldn't want you to be sad, Robert.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "robert_009",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Maria",
+      "dialogue": "She used to light up every time you walked in with flowers.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "robert_010",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robertSmile",
+      "characterName": "Robert",
+      "dialogue": "Yeah… she always said the scent followed me home.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "robert_011",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Robert",
+      "dialogue": "Sometimes, when I pass this street, I swear I still catch it.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "robert_012",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
       "characterName": "Maria",
       "dialogue": "That's because you never stopped bringing her along with you.",
       "spritePosition": "center"
     },
     {
-      "id": "robert_009",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "id": "robert_013",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
       "characterName": "Robert",
-      "dialogue": "Maybe. I just thought… one more bouquet couldn't hurt. Something that feels like the way mornings used to.",
-      "spritePosition": "right"
+      "dialogue": "Maybe. I just thought… one more bouquet couldn't hurt.",
+      "spritePosition": "center"
     },
     {
-      "id": "robert_010",
-      "backgroundImage": "background_temp",
-      "characterSprite": "character_temp",
+      "id": "robert_014",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
+      "characterName": "Robert",
+      "dialogue": "Something that feels like the way mornings used to.",
+      "spritePosition": "center"
+    },
+    {
+      "id": "robert_015",
+      "backgroundImage": "BackgroundNew",
+      "characterSprite": "robert",
       "characterName": "Maria",
       "dialogue": "Then let's make something that remembers with you.",
       "spritePosition": "center"

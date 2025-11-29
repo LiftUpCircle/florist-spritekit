@@ -52,6 +52,7 @@ class StoryController: ObservableObject {
     private var storyData: StoryData?
     private var flowCoordinator: GameFlowCoordinator?
     
+    
     // MARK: - Initialization
     
     init() {
@@ -82,6 +83,7 @@ class StoryController: ObservableObject {
             dialogueHistory = []
             isStoryComplete = false
             isTypingComplete = false
+            
 
             addToHistory(firstScene)
 
@@ -117,6 +119,7 @@ class StoryController: ObservableObject {
             dialogueHistory = []
             isStoryComplete = false
             isTypingComplete = false
+            
 
             addToHistory(firstScene)
 
@@ -192,6 +195,11 @@ class StoryController: ObservableObject {
             )
         }
         
+        // Mark all characters that have appeared up to the restored scene
+        for i in 0...currentSceneIndex {
+            let scene = storyData.scenes[i]
+        }
+        
         isTypingComplete = false
         isStoryComplete = false
         
@@ -204,19 +212,14 @@ class StoryController: ObservableObject {
         guard !isStoryComplete else { return }
         guard isTypingComplete else { return }
         
-        currentSceneIndex += 1
-        isTypingComplete = false
+        let nextSceneIndex = currentSceneIndex + 1
         
-        if currentSceneIndex < storyData.scenes.count {
-            currentScene = storyData.scenes[currentSceneIndex]
-            if let scene = currentScene {
-                addToHistory(scene)
-            }
+        if nextSceneIndex < storyData.scenes.count {
+            let nextScene = storyData.scenes[nextSceneIndex]
+            let characterName = nextScene.characterName
             
-            // Save progress after advancing to next scene
-            Task {
-                await saveCurrentProgress()
-            }
+            // Proceed to next scene immediately
+            performSceneChange(to: nextSceneIndex, in: storyData, scene: nextScene)
         } else {
             // Story is complete - mark it as such
             isStoryComplete = true
@@ -227,6 +230,21 @@ class StoryController: ObservableObject {
             }
         }
     }
+    
+    /// Performs the actual scene change
+    private func performSceneChange(to sceneIndex: Int, in storyData: StoryData, scene: StoryScene) {
+        currentSceneIndex = sceneIndex
+        currentScene = scene
+        isTypingComplete = false
+        
+        addToHistory(scene)
+        
+        // Save progress after advancing to next scene
+        Task {
+            await saveCurrentProgress()
+        }
+    }
+    
     
     /// Called when typing animation completes
     func onTypingComplete() {
@@ -271,7 +289,24 @@ class StoryController: ObservableObject {
     func openSettings() {
         showSettings = true
     }
-    
+
+    /// Skips the current story and marks it as complete
+    func skipStory() {
+        guard let storyData = storyData else { return }
+        guard !isStoryComplete else { return }
+
+        // Jump to the last scene index
+        currentSceneIndex = storyData.scenes.count
+
+        // Mark story as complete
+        isStoryComplete = true
+
+        // Mark story as complete in persistence
+        Task {
+            await markCurrentStoryComplete()
+        }
+    }
+
     // MARK: - Persistence Methods
     
     /// Saves the current story progress to persistent storage
@@ -348,6 +383,11 @@ class StoryController: ObservableObject {
                             timestamp: historyEntry.timestamp
                         )
                     }
+                    
+                    // Mark all characters that have appeared up to the restored scene
+                    for i in 0...currentSceneIndex {
+                        let scene = storyData.scenes[i]
+                                }
                     
                     isTypingComplete = false
                     isStoryComplete = false

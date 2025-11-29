@@ -11,27 +11,35 @@ struct MainMenuView: View {
     @StateObject private var controller = MainMenuViewController()
     @StateObject private var flowCoordinator = GameFlowCoordinator()
     @State private var showSettings = false
+    @State private var showMemoriesBook = false
+    @State private var showRestartModality = false
     @State private var savedProgress: StoryProgress?
-    
+
     var body: some View {
         NavigationStack(path: $flowCoordinator.navigationPath) {
             ZStack {
                 // Background image
-                Image("Background")
+                Image("MainMenuBackground")
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .ignoresSafeArea()
-                
+
+                // Falling petals animation
+                FallingPetalsView()
+                    .ignoresSafeArea()
+
                 // Main content
                 VStack {
                     Spacer()
                     // Top area with Memories button
                     HStack {
                         Spacer()
-                        
+
                         // Memories button
                         Button(action: {
-                            flowCoordinator.navigateToMemories()
+                            withAnimation {
+                                showMemoriesBook = true
+                            }
                         }) {
                             Image("MemoriesButton")
                                 .resizable()
@@ -66,17 +74,21 @@ struct MainMenuView: View {
                     Spacer()
                     
                     Button(action: {
-                        flowCoordinator.startNewGame()
+                        if GameProgressManager.shared.isGameFinished {
+                            showRestartModality = true
+                        } else {
+                            flowCoordinator.startNewGame()
+                        }
                     }) {
                         ZStack {
                             RoundedRectangle(cornerRadius: 35)
-                                .fill(Color("PlayButton"))
+                                .fill(Color("NewPlayButtonColor"))
                                 .frame(width: 168, height: 56)
                                 .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 3)
-                            
+
                             Text("Tap to Play")
                                 .font(.title3Gaegu)
-                                .foregroundColor(Color("TextPlayButton"))
+                                .foregroundColor(Color("NewTextPlayButtonColor"))
                         }
                     }
                     
@@ -128,9 +140,45 @@ struct MainMenuView: View {
                 
                 // Settings overlay
                 if showSettings {
-                    SettingsOverlayView(isPresented: $showSettings)
-                        .transition(.opacity)
-                        .zIndex(100)
+                    SettingsOverlayView(
+                        isPresented: $showSettings,
+                        onResetGameTap: {
+                            // Reset game: delete all checkpoints and memories
+                            Task {
+                                await resetGame()
+                            }
+                        },
+                        isFromMainMenu: true
+                    )
+                    .transition(.opacity)
+                    .zIndex(100)
+                }
+
+                // Memories book overlay
+                if showMemoriesBook {
+                    MemoriesBookView {
+                        withAnimation {
+                            showMemoriesBook = false
+                        }
+                    }
+                    .transition(.opacity)
+                    .zIndex(100)
+                }
+
+                // Restart modality dialog
+                if showRestartModality {
+                    RestartModalityDialog(
+                        isPresented: $showRestartModality,
+                        onRestart: {
+                            Task {
+                                await resetGame()
+                                flowCoordinator.startNewGame()
+                            }
+                        },
+                        onCancel: {}
+                    )
+                    .transition(.opacity)
+                    .zIndex(100)
                 }
             }
             .navigationBarHidden(true)
@@ -146,8 +194,10 @@ struct MainMenuView: View {
                     EmptyView() // Options now handled as overlay
                 case .mainMenu:
                     EmptyView() // This shouldn't be reached
-                default:
-                    EmptyView()
+                case .storyComplete:
+                    EmptyView() // Story complete dialog handled elsewhere
+                case .toBeContinued:
+                    ToBeContinuedView(flowCoordinator: flowCoordinator)
                 }
             }
             .task {
@@ -158,8 +208,25 @@ struct MainMenuView: View {
                 // Start main menu BGM
                 SettingsManager.shared.playMusic(named: "mainMenuBGM", loops: -1)
             }
+            .onReceive(NotificationCenter.default.publisher(for: .settingsOverlayDidTapHomeButton)) { _ in
+                // Handle notification for navigation to main menu
+                flowCoordinator.returnToMainMenu()
+                // Close settings if open
+                withAnimation {
+                    showSettings = false
+                }
+            }
             .statusBar(hidden: true)
             .environmentObject(flowCoordinator)
+        }
+        .overlay {
+            // Loading screen overlay - placed outside NavigationStack
+            if flowCoordinator.showLoadingScreen {
+                TransitionLoadingView()
+                    .zIndex(999)
+                    .transition(.opacity)
+                    .animation(.easeInOut(duration: 0.3), value: flowCoordinator.showLoadingScreen)
+            }
         }
     }
     
@@ -194,14 +261,46 @@ struct MainMenuView: View {
     
     private func checkForSavedProgress() async {
         do {
-            // Check for progress for the current story from GameProgressManager
+            // Check for progress for the last played story first, then current story
+            let lastPlayedStoryId = GameProgressManager.shared.lastPlayedStoryId
             let currentStoryId = GameProgressManager.shared.currentStoryId
-            let progress = try await ProgressPersistenceManager.shared.loadProgress(for: currentStoryId)
+            let storyToCheck = lastPlayedStoryId ?? currentStoryId
+
+            let progress = try await ProgressPersistenceManager.shared.loadProgress(for: storyToCheck)
             await MainActor.run {
                 savedProgress = progress
             }
         } catch {
             print("⚠️ Failed to check for saved progress: \(error.localizedDescription)")
+        }
+    }
+    
+    private func resetGame() async {
+        print("🔄 Resetting game: deleting all checkpoints and memories...")
+        
+        do {
+            // Delete all progress/checkpoints
+            let allProgress = try await ProgressPersistenceManager.shared.getAllProgress()
+            for progress in allProgress {
+                try await ProgressPersistenceManager.shared.deleteProgress(for: progress.storyId)
+                print("✅ Deleted progress for story: \(progress.storyId)")
+            }
+            
+            // Reset all memories
+            MemoriesPersistenceManager.shared.resetAllMemories()
+            print("✅ Reset all memories")
+            
+            // Reset GameProgressManager to first story (this also clears lastPlayedStoryId)
+            GameProgressManager.shared.resetAllProgress()
+
+            // Clear saved progress state
+            await MainActor.run {
+                savedProgress = nil
+            }
+            
+            print("✅ Game reset complete")
+        } catch {
+            print("❌ Failed to reset game: \(error.localizedDescription)")
         }
     }
     

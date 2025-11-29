@@ -26,26 +26,24 @@ struct FlowerBookView: View {
                 if !viewModel.flowers.isEmpty, let currentFlower = viewModel.currentFlower {
                     HStack(spacing: 0) {
                         
-                        FlowerSidebarView(
-                            flowers: viewModel.flowers,
-                            currentIndex: viewModel.currentFlowerIndex,
-                            onFlowerSelected: { index in
-                                viewModel.selectFlower(at: index)
-                            }
-                        )
-                        .frame(width: geometry.size.width * 0.18, height: geometry.size.height)
-                        .padding(.leading, geometry.size.width * 0.02)
+//                        FlowerSidebarView(
+//                            flowers: viewModel.flowers,
+//                            currentIndex: viewModel.currentFlowerIndex,
+//                            onFlowerSelected: { index in
+//                                viewModel.selectFlower(at: index)
+//                            }
+//                        )
+//                        .frame(width: geometry.size.width * 0.18, height: geometry.size.height)
+//                        .padding(.leading, geometry.size.width * 0.02)
                         
-                        Spacer()
-                        
-                        
+                        Spacer()           
                         ZStack {
                             
                             Image("FlowerBook")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(width: min(geometry.size.width * 0.65, 650),
-                                       height: min(geometry.size.height * 0.85, 850))
+                                .frame(width: min(geometry.size.width * 1.1 , 650),
+                                       height: min(geometry.size.height * 0.95, 850))
                             
                             
                             BookContentView(

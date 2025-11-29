@@ -17,11 +17,13 @@ class GameFlowCoordinator: ObservableObject {
         case memories
         case options
         case storyComplete(storyId: String) // New: show completion dialog
+        case toBeContinued // New: show "To Be Continued" screen
     }
 
     @Published var navigationPath = NavigationPath()
     @Published var showBouquetSavedToast = false
     @Published var toastMessage = ""
+    @Published var showLoadingScreen = false
 
     private let progressManager = GameProgressManager.shared
 
@@ -34,12 +36,70 @@ class GameFlowCoordinator: ObservableObject {
     }
 
 
-    func navigateToListening(storyId: String) {
-        navigationPath.append(GamePage.listening(storyId: storyId))
+    func navigateToListening(storyId: String, playDoorbell: Bool = false) {
+        print("🔄 navigateToListening called for storyId: \(storyId)")
+
+        // Update last played story and page
+        progressManager.updateLastPlayedStory(storyId)
+        progressManager.updateLastGamePage("listening")
+
+        // Check if doorbell should play for first part stories
+        let shouldPlayDoorbell = playDoorbell && isFirstPartStoryByFilename(storyId: storyId)
+
+        // Show loading screen with animation
+        withAnimation(.easeIn(duration: 0.3)) {
+            showLoadingScreen = true
+            print("✅ Loading screen set to true")
+        }
+
+        // Wait for loading screen to be fully visible, then navigate
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            print("⏱️ Navigating to listening page...")
+            self?.navigationPath.append(GamePage.listening(storyId: storyId))
+
+            // Hide loading screen after all 6 flowers are shown (3 seconds) plus view load time
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    self?.showLoadingScreen = false
+                    print("❌ Loading screen set to false")
+                }
+
+                // Play doorbell sound if needed
+                if shouldPlayDoorbell {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        SettingsManager.shared.playSound(named: "DoorBellAudioClose")
+                    }
+                }
+            }
+        }
     }
 
     func navigateToBouquet(storyId: String) {
-        navigationPath.append(GamePage.bouquet(storyId: storyId))
+        print("🔄 navigateToBouquet called for storyId: \(storyId)")
+
+        // Update last played story and page
+        progressManager.updateLastPlayedStory(storyId)
+        progressManager.updateLastGamePage("bouquet")
+
+        // Show loading screen with animation
+        withAnimation(.easeIn(duration: 0.3)) {
+            showLoadingScreen = true
+            print("✅ Loading screen set to true")
+        }
+
+        // Wait for loading screen to be fully visible, then navigate
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            print("⏱️ Navigating to bouquet page...")
+            self?.navigationPath.append(GamePage.bouquet(storyId: storyId))
+
+            // Hide loading screen after all 6 flowers are shown (3 seconds) plus view load time
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    self?.showLoadingScreen = false
+                    print("❌ Loading screen set to false")
+                }
+            }
+        }
     }
 
     func navigateToMemories() {
@@ -50,30 +110,121 @@ class GameFlowCoordinator: ObservableObject {
         navigationPath.append(GamePage.options)
     }
 
-    // Called when bouquet is successfully wrapped
-    func onBouquetComplete() {
-        // Mark story as complete
+    func navigateToToBeContinued() {
+        print("🔄 navigateToToBeContinued called")
+
+        // Mark the closing story as complete
         progressManager.completeCurrentStory()
 
-        // Get character name from story ID
-        let characterName = getCharacterName(from: currentStoryId)
+        // Show loading screen with animation
+        withAnimation(.easeIn(duration: 0.3)) {
+            showLoadingScreen = true
+            print("✅ Loading screen set to true")
+        }
+
+        // Wait for loading screen to be fully visible, then navigate
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            print("⏱️ Navigating to To Be Continued page...")
+            self?.navigationPath.append(GamePage.toBeContinued)
+
+            // Hide loading screen after all 6 flowers are shown (3 seconds) plus view load time
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    self?.showLoadingScreen = false
+                    print("❌ Loading screen set to false")
+                }
+            }
+        }
+    }
+
+    // Called when a story completes without needing a bouquet (e.g., prologue, second parts)
+    func onStoryCompleteNoBouquet(for storyId: String? = nil) {
+        let completedStory = storyId ?? currentStoryId
+        progressManager.completeCurrentStory()
+
+        // Continue to next story or return to main menu
+        if progressManager.hasMoreStories {
+            progressManager.moveToNextStory()
+            navigateToListening(storyId: currentStoryId, playDoorbell: true)
+        } else {
+            print("🎉 All stories completed!")
+            returnToMainMenu()
+        }
+    }
+
+    // Called when bouquet is successfully wrapped
+    func onBouquetComplete(for storyId: String? = nil) {
+        let currentStory = storyId ?? currentStoryId
+
+        // Clear the bouquet page state since it's been completed
+        progressManager.updateLastGamePage("listening")
 
         // Show toast notification
+        let characterName = getCharacterName(from: currentStory)
         toastMessage = "Bouquet for \(characterName) saved to memories!"
         showBouquetSavedToast = true
 
-        // Automatically continue to next story after delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
-            self?.continueToNextStory()
+        // Check if current story has a second part
+        let secondPartId = getSecondPartId(for: currentStory)
+
+        if let secondPartId = secondPartId {
+            // Second part exists! DON'T mark story complete yet
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                print("📖 Navigating to second part: \(secondPartId)")
+                self?.navigateToListening(storyId: secondPartId)
+            }
+        } else {
+            // No second part, mark complete and continue
+            progressManager.completeCurrentStory()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
+                self?.continueToNextStory()
+            }
+        }
+    }
+
+    // Helper to get second part ID if it exists
+    private func getSecondPartId(for storyId: String) -> String? {
+        guard storyId.hasSuffix("_1") else { return nil }
+
+        let secondPartId = String(storyId.dropLast(2)) + "_2"
+
+        do {
+            let storyIndex = try StoryManager.shared.loadStoryIndex()
+            return storyIndex.stories[secondPartId] != nil ? secondPartId : nil
+        } catch {
+            print("⚠️ Failed to check for second part: \(error)")
+            return nil
         }
     }
 
     // Automatically continue to next story
     private func continueToNextStory() {
         if progressManager.hasMoreStories {
+            print("🔄 continueToNextStory called")
+
+            // Show loading screen with animation
+            withAnimation(.easeIn(duration: 0.3)) {
+                showLoadingScreen = true
+                print("✅ Loading screen set to true for next story")
+            }
+
             // Move to next story
             progressManager.moveToNextStory()
-            navigateToListening(storyId: currentStoryId)
+
+            // Wait for loading screen to be fully visible, then navigate
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                guard let self = self else { return }
+                print("⏱️ Navigating to next listening page...")
+                self.navigationPath.append(GamePage.listening(storyId: self.currentStoryId))
+
+                // Hide loading screen after all 6 flowers are shown (3 seconds) plus view load time
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        self.showLoadingScreen = false
+                        print("❌ Loading screen set to false after next story")
+                    }
+                }
+            }
         } else {
             // All stories complete, return to main menu
             print("🎉 All stories completed!")
@@ -86,10 +237,33 @@ class GameFlowCoordinator: ObservableObject {
         navigationPath.removeLast(navigationPath.count)
     }
 
-    func resetToMainMenu() {
-        navigationPath.removeLast(navigationPath.count)
+    // Helper to check if a story is a first part by checking filename pattern
+    private func isFirstPartStoryByFilename(storyId: String) -> Bool {
+        // Get the filename from the story index to check underscore count
+        // Filenames: "story_abigail_1" (2 underscores) = first part
+        //           "story_abigail_1_2" (3 underscores) = second part
+        do {
+            let storyIndex = try StoryManager.shared.loadStoryIndex()
+            if let storyEntry = storyIndex.stories[storyId] {
+                let filename = storyEntry.file.replacingOccurrences(of: ".json", with: "")
+                let underscoreCount = filename.filter { $0 == "_" }.count
+                // First part stories have exactly 2 underscores in filename (e.g., "story_abigail_1")
+                return underscoreCount == 2
+            }
+        } catch {
+            print("⚠️ Failed to load story index for checking first part: \(error)")
+        }
+        
+        // Fallback: if story ID already looks like a filename with 2 underscores
+        if storyId.hasPrefix("story_") {
+            let underscoreCount = storyId.filter { $0 == "_" }.count
+            return underscoreCount == 2
+        }
+        
+        // Default: not a first part
+        return false
     }
-
+    
     // Helper to get character name from story ID
     private func getCharacterName(from storyId: String) -> String {
         // Load story index to get character name
@@ -105,14 +279,14 @@ class GameFlowCoordinator: ObservableObject {
             print("⚠️ Failed to load story index for character name: \(error)")
         }
 
-        // Fallback for old story IDs or when loading fails
-        if storyId.contains("robert") || storyId == "urutan1" {
-            return "Robert"
-        } else if storyId.contains("abigail") || storyId == "urutan2" {
-            return "Abigail"
-        } else if storyId.contains("michael") || storyId == "urutan3" {
-            return "Michael"
-        }
+//        // Fallback for old story IDs or when loading fails
+//        if storyId.contains("robert") {
+//            return "Robert"
+//        } else if storyId.contains("abigail") {
+//            return "Abigail"
+//        } else if storyId.contains("michael") {
+//            return "Michael"
+//        }
 
         return "this character"
     }
@@ -150,20 +324,45 @@ class GameFlowCoordinator: ObservableObject {
     @MainActor
     private func checkForSavedProgress() async {
         do {
-            // Try to load progress for the current story
-            if let progress = try await ProgressPersistenceManager.shared.loadProgress(for: currentStoryId) {
+            // First check if there's a last played story (including part 2)
+            let storyToLoad = progressManager.lastPlayedStoryId ?? currentStoryId
+            let lastPage = progressManager.lastGamePage
+
+            // Check if user was in bouquet page
+            if lastPage == "bouquet", let lastPlayedStory = progressManager.lastPlayedStoryId {
+                print("🌸 Resuming to bouquet page for story: \(lastPlayedStory)")
+                navigateToBouquet(storyId: lastPlayedStory)
+                return
+            }
+
+            // Try to load progress for the story to load
+            if let progress = try await ProgressPersistenceManager.shared.loadProgress(for: storyToLoad) {
                 // Store the progress for restoration
                 savedProgress = progress
                 shouldRestoreProgress = true
 
-                print("✅ Found saved progress: Scene \(progress.currentSceneIndex)")
+                print("✅ Found saved progress for \(storyToLoad): Scene \(progress.currentSceneIndex)")
 
-                // Navigate to listening page with restoration flag
-                navigateToListening(storyId: currentStoryId)
+                // Navigate to the last played story (which could be part 2)
+                navigateToListening(storyId: storyToLoad)
             } else {
-                // No saved progress, start from beginning
-                print("ℹ️ No saved progress found, starting from beginning")
-                navigateToListening(storyId: currentStoryId)
+                // No saved progress for last played story, check current story
+                if storyToLoad != currentStoryId {
+                    print("ℹ️ No saved progress for last played story \(storyToLoad), checking current story")
+                    if let progress = try await ProgressPersistenceManager.shared.loadProgress(for: currentStoryId) {
+                        savedProgress = progress
+                        shouldRestoreProgress = true
+                        print("✅ Found saved progress for current story: Scene \(progress.currentSceneIndex)")
+                        navigateToListening(storyId: currentStoryId)
+                    } else {
+                        print("ℹ️ No saved progress found, starting from beginning")
+                        navigateToListening(storyId: currentStoryId)
+                    }
+                } else {
+                    // No saved progress, start from beginning
+                    print("ℹ️ No saved progress found, starting from beginning")
+                    navigateToListening(storyId: currentStoryId)
+                }
             }
         } catch {
             // If loading fails, start from beginning

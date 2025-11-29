@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-@main
+@main 
 struct FloristApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @Environment(\.scenePhase) private var scenePhase
@@ -101,6 +101,8 @@ struct FloristApp: App {
                 MainMenuView()
                     .modelContainer(modelContainer)
                     .preferredColorScheme(.light)
+                    .dynamicTypeSize(.medium)
+                    .environmentObject(TextSizeManager.shared)
                     .onAppear {
                         // Lock orientation to landscape
                         AppDelegate.orientationLock = .landscape
