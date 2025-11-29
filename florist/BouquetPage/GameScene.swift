@@ -1083,8 +1083,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         }
         
         // Haptic feedback
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
+        SettingsManager.shared.triggerVibration(style: .medium)
+//        let generator = UIImpactFeedbackGenerator(style: .medium)
+//        generator.impactOccurred()
         
         // Animate button press
         mirrorButton.run(SKAction.sequence([
@@ -1111,8 +1112,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         flower.zPosition = maxZPos + 0.1
         
         // Haptic Feedback
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
+        SettingsManager.shared.triggerVibration(style: .medium)
+//        let generator = UIImpactFeedbackGenerator(style: .medium)
+//        generator.impactOccurred()
         
         // Animete button press
         bringToFrontButton.run(SKAction.sequence([
@@ -1139,8 +1141,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         flower.zPosition = minZPos - 0.1
         
         // Haptic Feedback
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
+        SettingsManager.shared.triggerVibration(style: .medium)
+//        let generator = UIImpactFeedbackGenerator(style: .medium)
+//        generator.impactOccurred()
         
         // Animate button press
         sendToBackButton.run(SKAction.sequence([
@@ -1384,8 +1387,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                             
                             // Visual feedback
                             showRotationControl(for: flower)
-                            let generator = UIImpactFeedbackGenerator(style: .light)
-                            generator.impactOccurred()
+                            SettingsManager.shared.triggerVibration(style: .light)
+//                            let generator = UIImpactFeedbackGenerator(style: .light)
+//                            generator.impactOccurred()
                             
                             // Stop looking immediately - we found the top-most valid flower
                             return
@@ -1507,8 +1511,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                         isDraggingFromInventory = true
                         
                         // Haptic feedback
-                        let generator = UIImpactFeedbackGenerator(style: .light)
-                        generator.impactOccurred()
+                        SettingsManager.shared.triggerVibration(style: .light)
+//                        let generator = UIImpactFeedbackGenerator(style: .light)
+//                        generator.impactOccurred()
                     }
                 }
                 potentialFlowerToDrag = nil
@@ -1615,8 +1620,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             isRotatingFlower = false
             
             // Haptic feedback on rotation end
-            let generator = UIImpactFeedbackGenerator(style: .light)
-            generator.impactOccurred()
+            SettingsManager.shared.triggerVibration(style: .light)
+//            let generator = UIImpactFeedbackGenerator(style: .light)
+//            generator.impactOccurred()
             
             return
         }
@@ -1724,8 +1730,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             }
 
             // Success feedback
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.success)
+            SettingsManager.shared.triggerNotificationHaptic(.success)
+//            let generator = UINotificationFeedbackGenerator()
+//            generator.notificationOccurred(.success)
             
             // Gentle placement animation
 //            let bounce = SKAction.sequence([
@@ -1758,8 +1765,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
             }
             
             // Error feedback
-            let generator = UINotificationFeedbackGenerator()
-            generator.notificationOccurred(.error)
+            SettingsManager.shared.triggerNotificationHaptic(.error)
+//            let generator = UINotificationFeedbackGenerator()
+//            generator.notificationOccurred(.error)
         }
         
         // Reset drag state
@@ -1805,8 +1813,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         hideRotationControl()
 
         // Haptic feedback
-        let generator = UIImpactFeedbackGenerator(style: .medium)
-        generator.impactOccurred()
+        SettingsManager.shared.triggerVibration(style: .medium)
+//        let generator = UIImpactFeedbackGenerator(style: .medium)
+//        generator.impactOccurred()
 
         // Animate button press
         resetButton.run(SKAction.sequence([
@@ -1836,8 +1845,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         hideRotationControl()
 
         // Haptic feedback
-        let generator = UIImpactFeedbackGenerator(style: .heavy)
-        generator.impactOccurred()
+        SettingsManager.shared.triggerVibration(style: .heavy)
+//        let generator = UIImpactFeedbackGenerator(style: .heavy)
+//        generator.impactOccurred()
         
         // Animate button press
         wrapButton.run(SKAction.sequence([
@@ -1896,8 +1906,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         flower.run(flowerPopUp)
         
         // Haptic feedback
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.impactOccurred()
+        SettingsManager.shared.triggerVibration(style: .light)
+//        let generator = UIImpactFeedbackGenerator(style: .light)
+//        generator.impactOccurred()
     }
     
     private func animateCardPress(flower: FlowerNode) {
@@ -1912,8 +1923,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         frame.run(SKAction.group([shrink, dim]))
         
         // Haptic feedback
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.impactOccurred()
+        SettingsManager.shared.triggerVibration(style: .light)
+//        let generator = UIImpactFeedbackGenerator(style: .light)
+//        generator.impactOccurred()
     }
     
     private func animateCardRestore(flower: FlowerNode) {
@@ -1940,8 +1952,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         tutorialManager?.onBookButtonPressed()
 
         // Haptic feedback
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.impactOccurred()
+        SettingsManager.shared.triggerVibration(style: .light)
+//        let generator = UIImpactFeedbackGenerator(style: .light)
+//        generator.impactOccurred()
 
         // Animate button press
         bookButton.run(SKAction.sequence([
@@ -1955,8 +1968,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     private func handleSettingButton() {
         // Haptic feedback
-        let generator = UIImpactFeedbackGenerator(style: .light)
-        generator.impactOccurred()
+        SettingsManager.shared.triggerVibration(style: .light)
+//        let generator = UIImpactFeedbackGenerator(style: .light)
+//        generator.impactOccurred()
         
         // Animate button press
         settingButton.run(SKAction.sequence([
