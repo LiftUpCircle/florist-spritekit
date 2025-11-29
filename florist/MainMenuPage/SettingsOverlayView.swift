@@ -117,6 +117,7 @@ struct SettingsOverlayView: View {
                 size: geometry.size
             )
         }
+        .ignoresSafeArea()
     }
 }
 
