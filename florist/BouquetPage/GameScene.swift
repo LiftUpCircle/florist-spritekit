@@ -166,6 +166,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
     
     // Debug var
     private var debugHitboxesEnabled: Bool = true
+
+    // Magnifier lens for precise placement
+    private var magnifierLens: MagnifierLens!
     
     // MARK: - Scene Setup
     override func didMove(to view: SKView) {
@@ -184,6 +187,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         setupBouquet()
         setupInventory()
         setupButtons()
+        setupMagnifierLens()
 
         // Start gameplay BGM
         SettingsManager.shared.playMusic(named: "gameplayLoopBGM", loops: -1)
@@ -833,9 +837,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         bottomSeparator.position = CGPoint(x: 0, y: -buttonSpacingControl / 2 - 10)
         bottomSeparator.zPosition = 0
         flowerControlMenu.addChild(bottomSeparator)
-            
+
     }
-    
+
+    private func setupMagnifierLens() {
+        magnifierLens = MagnifierLens(size: 120, zoomScale: 2.0)
+        magnifierLens.setTargetScene(self)
+        addChild(magnifierLens)
+    }
+
     private func updateButtonStates() {
         let hasFlowers = !placedFlowers.isEmpty
 
@@ -1459,7 +1469,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                     addChild(flower)
                     draggedFlowerCopy = flower
                     isDraggingBouquetFlower = true
-                    
+
+                    // Show magnifier lens to the right of finger
+                    let magnifierOffset: CGFloat = 80
+                    let magnifierPosition = CGPoint(x: location.x + magnifierOffset, y: location.y + 40)
+                    magnifierLens.show(at: magnifierPosition, focusPoint: location, in: self)
+
                     updateButtonStates()
                 }
             }
@@ -1509,7 +1524,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
                         addChild(draggedFlowerCopy!)
                         
                         isDraggingFromInventory = true
-                        
+
+                        // Show magnifier lens to the right of finger
+                        let magnifierOffset: CGFloat = 80
+                        let magnifierPosition = CGPoint(x: location.x + magnifierOffset, y: location.y + 40)
+                        magnifierLens.show(at: magnifierPosition, focusPoint: location, in: self)
+
                         // Haptic feedback
                         SettingsManager.shared.triggerVibration(style: .light)
 //                        let generator = UIImpactFeedbackGenerator(style: .light)
@@ -1539,7 +1559,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         // Handle dragging flower
         guard let draggedFlower = draggedFlowerCopy else { return }
         draggedFlower.position = location
-        
+
+        // Update magnifier lens position (to the right of finger)
+        let magnifierOffset: CGFloat = 80
+        var magnifierX = location.x + magnifierOffset
+        // Keep magnifier on screen - if too far right, show on left side
+        if magnifierX + 60 > size.width {
+            magnifierX = location.x - magnifierOffset
+        }
+        let magnifierPosition = CGPoint(x: magnifierX, y: location.y + 40)
+        magnifierLens.update(position: magnifierPosition, focusPoint: location, in: self)
+
         // Check if the current position is valid using physics
         isValidPlacement = false
         placementIndicator.isHidden = true
@@ -1770,6 +1800,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
 //            generator.notificationOccurred(.error)
         }
         
+        // Hide magnifier lens
+        magnifierLens.hide()
+
         // Reset drag state
         draggedFlowerCopy = nil
         selectedFlower = nil
@@ -1784,6 +1817,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, SettingsOverlayControllerDel
         longPressTimer?.invalidate()
         longPressTimer = nil
         touchedNode = nil
+
+        // Hide magnifier lens
+        magnifierLens.hide()
 
         draggedFlowerCopy?.removeFromParent()
         draggedFlowerCopy = nil
